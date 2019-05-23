@@ -43,6 +43,9 @@ type config struct {
 	// hostname is automatically assigned when the DD_TRACE_REPORT_HOSTNAME is set to true,
 	// and is added as a special tag to the root span of traces.
 	hostname string
+
+	// accessToken holds the SignalFx access token
+	accessToken string
 }
 
 // StartOption represents a function that can be provided as a parameter to Start.
@@ -60,6 +63,13 @@ func defaults(c *config) {
 		if err != nil {
 			log.Printf("%sunable to look up hostname: %v\n", errorPrefix, err)
 		}
+	}
+}
+
+// WithAccessToken sets the SignalFx access token.
+func WithAccessToken(accessToken string) StartOption {
+	return func(c *config) {
+		c.accessToken = accessToken
 	}
 }
 
