@@ -6,8 +6,8 @@ import (
 	"math"
 	"sync"
 
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 )
 
 // Sampler is the generic interface of any sampler. It must be safe for concurrent use.

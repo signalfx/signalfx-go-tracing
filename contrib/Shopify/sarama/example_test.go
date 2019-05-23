@@ -3,8 +3,8 @@ package sarama_test
 import (
 	"log"
 
-	saramatrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/Shopify/sarama"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	saramatrace "github.com/signalfx/signalfx-go-tracing/contrib/Shopify/sarama"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	sarama "gopkg.in/Shopify/sarama.v1"
 )
 

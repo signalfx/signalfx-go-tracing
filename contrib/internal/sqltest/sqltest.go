@@ -1,4 +1,4 @@
-package sqltest // import "gopkg.in/DataDog/dd-trace-go.v1/contrib/internal/sqltest"
+package sqltest // import "github.com/signalfx/signalfx-go-tracing/contrib/internal/sqltest"
 
 import (
 	"context"
@@ -7,9 +7,9 @@ import (
 	"log"
 	"testing"
 
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/mocktracer"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/mocktracer"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 
 	"github.com/stretchr/testify/assert"
 )

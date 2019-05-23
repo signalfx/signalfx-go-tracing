@@ -16,7 +16,7 @@ import (
 	"text/template"
 
 	"github.com/yosida95/uritemplate"
-	"gopkg.in/DataDog/dd-trace-go.v1/contrib/google.golang.org/api/internal"
+	"github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/api/internal"
 )
 
 type (
@@ -160,7 +160,7 @@ package api
 import (
 	"regexp"
 
-	"gopkg.in/DataDog/dd-trace-go.v1/contrib/google.golang.org/api/internal"
+	"github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/api/internal"
 )
 
 func init() {

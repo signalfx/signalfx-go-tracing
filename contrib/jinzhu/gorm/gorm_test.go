@@ -6,9 +6,9 @@ import (
 	"os"
 	"testing"
 
-	sqltrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/database/sql"
-	"gopkg.in/DataDog/dd-trace-go.v1/contrib/internal/sqltest"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext"
+	sqltrace "github.com/signalfx/signalfx-go-tracing/contrib/database/sql"
+	"github.com/signalfx/signalfx-go-tracing/contrib/internal/sqltest"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/lib/pq"

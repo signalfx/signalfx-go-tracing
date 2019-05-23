@@ -1,13 +1,13 @@
 // Package httprouter provides functions to trace the julienschmidt/httprouter package (https://github.com/julienschmidt/httprouter).
-package httprouter // import "gopkg.in/DataDog/dd-trace-go.v1/contrib/julienschmidt/httprouter"
+package httprouter // import "github.com/signalfx/signalfx-go-tracing/contrib/julienschmidt/httprouter"
 
 import (
 	"net/http"
 	"strings"
 
-	"gopkg.in/DataDog/dd-trace-go.v1/contrib/internal/httputil"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	"github.com/signalfx/signalfx-go-tracing/contrib/internal/httputil"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 
 	"github.com/julienschmidt/httprouter"
 )

@@ -4,7 +4,7 @@ import (
 	"log"
 	"net"
 
-	grpctrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/google.golang.org/grpc.v12"
+	grpctrace "github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/grpc.v12"
 
 	"google.golang.org/grpc"
 )

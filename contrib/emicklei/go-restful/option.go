@@ -1,6 +1,6 @@
 package restful
 
-import "gopkg.in/DataDog/dd-trace-go.v1/internal/globalconfig"
+import "github.com/signalfx/signalfx-go-tracing/internal/globalconfig"
 
 type config struct {
 	serviceName   string

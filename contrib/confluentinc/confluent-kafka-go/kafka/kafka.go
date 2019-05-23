@@ -1,10 +1,10 @@
 // Package kafka provides functions to trace the confluentinc/confluent-kafka-go package (https://github.com/confluentinc/confluent-kafka-go).
-package kafka // import "gopkg.in/DataDog/dd-trace-go.v1/contrib/confluentinc/confluent-kafka-go/kafka"
+package kafka // import "github.com/signalfx/signalfx-go-tracing/contrib/confluentinc/confluent-kafka-go/kafka"
 
 import (
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )

@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"time"
 
-	"gopkg.in/DataDog/dd-trace-go.v1/contrib/database/sql/internal"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	"github.com/signalfx/signalfx-go-tracing/contrib/database/sql/internal"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 )
 
 var _ driver.Driver = (*tracedDriver)(nil)

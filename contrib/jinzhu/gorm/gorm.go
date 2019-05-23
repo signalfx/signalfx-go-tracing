@@ -2,13 +2,13 @@
 package gorm
 
 import (
-	sqltraced "gopkg.in/DataDog/dd-trace-go.v1/contrib/database/sql"
+	sqltraced "github.com/signalfx/signalfx-go-tracing/contrib/database/sql"
 
 	"github.com/jinzhu/gorm"
 )
 
 // Open opens a new (traced) database connection. The used dialect must be formerly registered
-// using (gopkg.in/DataDog/dd-trace-go.v1/contrib/database/sql).Register.
+// using (github.com/signalfx/signalfx-go-tracing/contrib/database/sql).Register.
 func Open(dialect, source string) (*gorm.DB, error) {
 	db, err := sqltraced.Open(dialect, source)
 	if err != nil {

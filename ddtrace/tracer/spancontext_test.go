@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 )
 
 func setupteardown(start, max int) func() {

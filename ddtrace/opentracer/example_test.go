@@ -3,8 +3,8 @@ package opentracer_test
 import (
 	opentracing "github.com/opentracing/opentracing-go"
 
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/opentracer"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/opentracer"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 )
 
 func Example() {

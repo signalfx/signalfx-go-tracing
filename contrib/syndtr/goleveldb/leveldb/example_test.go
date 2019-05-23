@@ -3,8 +3,8 @@ package leveldb_test
 import (
 	"context"
 
-	leveldbtrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/syndtr/goleveldb/leveldb"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	leveldbtrace "github.com/signalfx/signalfx-go-tracing/contrib/syndtr/goleveldb/leveldb"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 )
 
 func Example() {

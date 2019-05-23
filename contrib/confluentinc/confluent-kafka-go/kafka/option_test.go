@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/DataDog/dd-trace-go.v1/internal/globalconfig"
+	"github.com/signalfx/signalfx-go-tracing/internal/globalconfig"
 )
 
 func TestAnalyticsSettings(t *testing.T) {

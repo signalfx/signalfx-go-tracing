@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	redigotrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/garyburd/redigo"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	redigotrace "github.com/signalfx/signalfx-go-tracing/contrib/garyburd/redigo"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 
 	"github.com/garyburd/redigo/redis"
 )

@@ -1,4 +1,4 @@
-package httputil // import "gopkg.in/DataDog/dd-trace-go.v1/contrib/internal/httputil"
+package httputil // import "github.com/signalfx/signalfx-go-tracing/contrib/internal/httputil"
 
 //go:generate sh -c "go run make_responsewriter.go | gofmt > trace_gen.go"
 
@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 )
 
 // TraceAndServe will apply tracing to the given http.Handler using the passed tracer under the given service and resource.

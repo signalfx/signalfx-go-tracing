@@ -1,7 +1,7 @@
-package opentracer // import "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/opentracer"
+package opentracer // import "github.com/signalfx/signalfx-go-tracing/ddtrace/opentracer"
 
 import (
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 
 	opentracing "github.com/opentracing/opentracing-go"
 )

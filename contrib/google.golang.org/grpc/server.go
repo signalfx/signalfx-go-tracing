@@ -3,7 +3,7 @@ package grpc
 import (
 	context "golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 )
 
 type serverStream struct {

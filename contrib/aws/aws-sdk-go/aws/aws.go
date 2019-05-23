@@ -1,5 +1,5 @@
 // Package aws provides functions to trace aws/aws-sdk-go (https://github.com/aws/aws-sdk-go).
-package aws // import "gopkg.in/DataDog/dd-trace-go.v1/contrib/aws/aws-sdk-go/aws"
+package aws // import "github.com/signalfx/signalfx-go-tracing/contrib/aws/aws-sdk-go/aws"
 
 import (
 	"strconv"
@@ -7,9 +7,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/aws/session"
 
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 )
 
 const (
@@ -32,11 +32,11 @@ func WrapSession(s *session.Session, opts ...Option) *session.Session {
 	h := &handlers{cfg: cfg}
 	s = s.Copy()
 	s.Handlers.Send.PushFrontNamed(request.NamedHandler{
-		Name: "gopkg.in/DataDog/dd-trace-go.v1/contrib/aws/aws-sdk-go/aws/handlers.Send",
+		Name: "github.com/signalfx/signalfx-go-tracing/contrib/aws/aws-sdk-go/aws/handlers.Send",
 		Fn:   h.Send,
 	})
 	s.Handlers.Complete.PushBackNamed(request.NamedHandler{
-		Name: "gopkg.in/DataDog/dd-trace-go.v1/contrib/aws/aws-sdk-go/aws/handlers.Complete",
+		Name: "github.com/signalfx/signalfx-go-tracing/contrib/aws/aws-sdk-go/aws/handlers.Complete",
 		Fn:   h.Complete,
 	})
 	return s

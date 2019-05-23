@@ -1,5 +1,5 @@
 // Package elastic provides functions to trace the gopkg.in/olivere/elastic.v{3,5} packages.
-package elastic // import "gopkg.in/DataDog/dd-trace-go.v1/contrib/olivere/elastic"
+package elastic // import "github.com/signalfx/signalfx-go-tracing/contrib/olivere/elastic"
 
 import (
 	"bufio"
@@ -10,9 +10,9 @@ import (
 	"regexp"
 	"strconv"
 
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 )
 
 // NewHTTPClient returns a new http.Client which traces requests under the given service name.

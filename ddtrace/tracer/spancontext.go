@@ -3,8 +3,8 @@ package tracer
 import (
 	"sync"
 
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/internal"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/internal"
 )
 
 var _ ddtrace.SpanContext = (*spanContext)(nil)

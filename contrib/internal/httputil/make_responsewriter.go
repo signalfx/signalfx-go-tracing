@@ -11,7 +11,7 @@ import (
 	"os"
 	"text/template"
 
-	"gopkg.in/DataDog/dd-trace-go.v1/contrib/internal/lists"
+	"github.com/signalfx/signalfx-go-tracing/contrib/internal/lists"
 )
 
 func main() {
@@ -32,7 +32,7 @@ package httputil
 
 import (
 	"net/http"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 )
 
 // wrapResponseWriter wraps an underlying http.ResponseWriter so that it can

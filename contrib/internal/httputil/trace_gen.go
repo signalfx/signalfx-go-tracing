@@ -3,7 +3,7 @@
 package httputil
 
 import (
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"net/http"
 )
 

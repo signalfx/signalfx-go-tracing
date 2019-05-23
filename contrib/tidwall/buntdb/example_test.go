@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	buntdbtrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/tidwall/buntdb"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	buntdbtrace "github.com/signalfx/signalfx-go-tracing/contrib/tidwall/buntdb"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 )
 
 func Example() {

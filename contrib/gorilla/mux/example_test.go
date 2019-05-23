@@ -3,7 +3,7 @@ package mux_test
 import (
 	"net/http"
 
-	muxtrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/gorilla/mux"
+	muxtrace "github.com/signalfx/signalfx-go-tracing/contrib/gorilla/mux"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {

@@ -1,9 +1,9 @@
-package grpcutil // import "gopkg.in/DataDog/dd-trace-go.v1/contrib/google.golang.org/internal/grpcutil"
+package grpcutil // import "github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/internal/grpcutil"
 
 import (
 	"strings"
 
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 
 	"google.golang.org/grpc/metadata"
 )

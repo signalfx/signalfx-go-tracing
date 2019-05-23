@@ -1,4 +1,4 @@
-package ext // import "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext"
+package ext // import "github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 
 // App types determine how to categorize a trace in the Datadog application.
 // For more fine-grained behaviour, use the SpanType* constants.

@@ -1,10 +1,10 @@
-package internal // import "gopkg.in/DataDog/dd-trace-go.v1/contrib/database/sql/internal"
+package internal // import "github.com/signalfx/signalfx-go-tracing/contrib/database/sql/internal"
 
 import (
 	"net"
 	"strings"
 
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 )
 
 // ParseDSN parses various supported DSN types (currently mysql and postgres) into a

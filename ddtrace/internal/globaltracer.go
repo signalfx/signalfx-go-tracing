@@ -1,9 +1,9 @@
-package internal // import "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/internal"
+package internal // import "github.com/signalfx/signalfx-go-tracing/ddtrace/internal"
 
 import (
 	"sync"
 
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 )
 
 var (

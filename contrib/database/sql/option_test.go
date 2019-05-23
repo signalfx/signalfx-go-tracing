@@ -3,7 +3,7 @@ package sql
 import (
 	"testing"
 
-	"gopkg.in/DataDog/dd-trace-go.v1/internal/globalconfig"
+	"github.com/signalfx/signalfx-go-tracing/internal/globalconfig"
 	"gotest.tools/assert"
 )
 

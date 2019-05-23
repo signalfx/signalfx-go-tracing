@@ -6,7 +6,7 @@ import (
 
 	graphql "github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
-	graphqltrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/graph-gophers/graphql-go"
+	graphqltrace "github.com/signalfx/signalfx-go-tracing/contrib/graph-gophers/graphql-go"
 )
 
 type resolver struct{}
