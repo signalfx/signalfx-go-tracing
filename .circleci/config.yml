@@ -2,7 +2,7 @@ version: 2
 
 jobs:
   build:
-    working_directory: /go/src/gopkg.in/DataDog/dd-trace-go.v1
+    working_directory: /go/src/github.com/signalfx/signalfx-go-tracing
     resource_class: xlarge
 
     docker:
@@ -26,11 +26,6 @@ jobs:
     - image: elasticsearch:5
       environment:
         ES_JAVA_OPTS: "-Xms750m -Xmx750m" # https://github.com/10up/wp-local-docker/issues/6
-    - image: datadog/docker-dd-agent
-      environment:
-        DD_APM_ENABLED: "true"
-        DD_BIND_HOST: "0.0.0.0"
-        DD_API_KEY: invalid_key_but_this_is_fine
     - image: circleci/mongo:latest-ram
     - image: memcached:1.5.9
     - image: confluentinc/cp-zookeeper:5.0.0
@@ -104,10 +99,6 @@ jobs:
     - run:
         name: Wait for ElasticSearch (2)
         command: dockerize -wait http://localhost:9201 -timeout 1m
-
-    - run:
-        name: Wait for Datadog Agent
-        command: dockerize -wait tcp://127.0.0.1:8126 -timeout 1m
 
     - run:
         name: Wait for Cassandra
