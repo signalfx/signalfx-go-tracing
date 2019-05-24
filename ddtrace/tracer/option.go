@@ -46,6 +46,9 @@ type config struct {
 
 	// accessToken holds the SignalFx access token
 	accessToken string
+
+	// payload holds the encoder instance
+	payload encoder
 }
 
 // StartOption represents a function that can be provided as a parameter to Start.
@@ -56,6 +59,7 @@ func defaults(c *config) {
 	c.serviceName = filepath.Base(os.Args[0])
 	c.sampler = NewAllSampler()
 	c.agentAddr = defaultAddress
+	c.payload = newPayload()
 
 	if os.Getenv("DD_TRACE_REPORT_HOSTNAME") == "true" {
 		var err error
@@ -70,6 +74,14 @@ func defaults(c *config) {
 func WithAccessToken(accessToken string) StartOption {
 	return func(c *config) {
 		c.accessToken = accessToken
+	}
+}
+
+// WithZipkin uses Zipkin instead of DD encoding and transport.
+func WithZipkin(url string) StartOption {
+	return func(c *config) {
+		c.payload = newZipkinPayload()
+		c.transport = newZipkinTransport(url, defaultRoundTripper)
 	}
 }
 

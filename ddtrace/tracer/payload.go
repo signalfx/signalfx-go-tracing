@@ -1,5 +1,3 @@
-//+build ignore
-
 package tracer
 
 import (
@@ -9,6 +7,14 @@ import (
 
 	"github.com/tinylib/msgp/msgp"
 )
+
+type encoder interface {
+	io.Reader
+	push(t spanList) error
+	itemCount() int
+	size() int
+	reset()
+}
 
 // payload is a wrapper on top of the msgpack encoder which allows constructing an
 // encoded array by pushing its entries sequentially, one at a time. It basically
@@ -41,7 +47,7 @@ type payload struct {
 	buf bytes.Buffer
 }
 
-var _ io.Reader = (*payload)(nil)
+var _ encoder = (*payload)(nil)
 
 // newPayload returns a ready to use payload.
 func newPayload() *payload {

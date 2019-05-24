@@ -12,7 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tinylib/msgp/msgp"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 )
@@ -28,8 +27,8 @@ type (
 
 var (
 	_ ddtrace.Span   = (*span)(nil)
-	_ msgp.Encodable = (*spanList)(nil)
-	_ msgp.Decodable = (*spanLists)(nil)
+	//_ msgp.Encodable = (*spanList)(nil)
+	//_ msgp.Decodable = (*spanLists)(nil)
 )
 
 // errorConfig holds customization options for setting error tags.

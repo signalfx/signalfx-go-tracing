@@ -24,7 +24,7 @@ var _ ddtrace.Tracer = (*tracer)(nil)
 // queues to be processed by the payload encoder.
 type tracer struct {
 	*config
-	*payload
+	payload encoder
 
 	flushAllReq    chan chan<- struct{}
 	flushTracesReq chan struct{}
@@ -124,7 +124,7 @@ func newTracer(opts ...StartOption) *tracer {
 	}
 	t := &tracer{
 		config:           c,
-		payload:          newPayload(),
+		payload:          c.payload,
 		flushAllReq:      make(chan chan<- struct{}),
 		flushTracesReq:   make(chan struct{}, 1),
 		flushErrorsReq:   make(chan struct{}, 1),
