@@ -20,7 +20,6 @@ func newPayload() *payload {
 
 func (p *payload) push(t spanList) error {
 	panic("implement me")
-	return nil
 }
 
 func (p *payload) itemCount() int {
@@ -29,7 +28,6 @@ func (p *payload) itemCount() int {
 
 func (p *payload) size() int {
 	panic("implement me")
-	return -1
 }
 
 func (p *payload) reset() {

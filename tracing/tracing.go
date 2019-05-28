@@ -22,6 +22,7 @@ type config struct {
 	url         string
 }
 
+// StartOption is a function that configures an option for Start
 type StartOption = func(*config)
 
 
@@ -33,24 +34,28 @@ func defaultConfig() *config {
 	}
 }
 
+// WithServiceName changes the reported service name
 func WithServiceName(serviceName string) StartOption {
 	return func(c *config) {
 		c.serviceName = serviceName
 	}
 }
 
+// WithAccessToken configures the SignalFx access token to use when reporting
 func WithAccessToken(accessToken string) StartOption {
 	return func(c *config) {
 		c.accessToken = accessToken
 	}
 }
 
+// WithEndpointURL configures the URL to send traces to
 func WithEndpointURL(url string) StartOption {
 	return func(c *config) {
 		c.url = url
 	}
 }
 
+// Start tracing globally
 func Start(opts ...StartOption) {
 	c := defaultConfig()
 	for _, fn := range opts {
@@ -63,6 +68,7 @@ func Start(opts ...StartOption) {
 		tracer.WithAccessToken(c.accessToken))
 }
 
+// Stop tracing globally
 func Stop() {
 	tracer.Stop()
 }

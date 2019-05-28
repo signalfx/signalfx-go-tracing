@@ -67,3 +67,8 @@ func newTransport(addr string, roundTripper http.RoundTripper) transport {
 	}
 	return newHTTPTransport(addr, roundTripper)
 }
+
+// newDefaultTransport return a default transport for this tracing client
+func newDefaultTransport() transport {
+	return newHTTPTransport(defaultAddress, defaultRoundTripper)
+}
