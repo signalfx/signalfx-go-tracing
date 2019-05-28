@@ -1,9 +1,13 @@
 package tracer
 
-import "io"
+import (
+	sfxtrace "github.com/signalfx/golib/trace"
+	"io"
+)
 
 type payload struct {
 	count int
+	trace sfxtrace.Trace
 }
 
 func (*payload) Read(p []byte) (n int, err error) {
