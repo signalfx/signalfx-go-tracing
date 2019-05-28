@@ -3,11 +3,13 @@ version: 2
 jobs:
   build:
     working_directory: /go/src/github.com/signalfx/signalfx-go-tracing
-    resource_class: xlarge
 
     docker:
     - image: circleci/golang:latest
-    - image: cassandra:3.7
+    - image: circleci/cassandra:3.10
+      environment:
+        MAX_HEAP_SIZE: 512m
+        HEAP_NEWSIZE: 128m
     - image: circleci/mysql:5.7
       environment:
         MYSQL_ROOT_PASSWORD: admin
