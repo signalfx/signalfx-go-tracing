@@ -3,11 +3,13 @@ version: 2
 jobs:
   build:
     working_directory: /go/src/github.com/signalfx/signalfx-go-tracing
-    resource_class: xlarge
 
     docker:
     - image: circleci/golang:latest
-    - image: cassandra:3.7
+    - image: circleci/cassandra:3.10
+      environment:
+        MAX_HEAP_SIZE: 512m
+        HEAP_NEWSIZE: 128m
     - image: circleci/mysql:5.7
       environment:
         MYSQL_ROOT_PASSWORD: admin
@@ -44,22 +46,22 @@ jobs:
 
     - restore_cache:
         keys:
-        - v1-librdkafka-v1.0.0-RC9
+        - v1-librdkafka-0d525ba1252074732aac575f88f04831f2656b8f
     - run:
         name: Install rdkafka
         command: |
-          if [ ! -d /tmp/librdkafka-v1.0.0-RC9 ] ; then
+          if [ ! -d /tmp/librdkafka-0d525ba1252074732aac575f88f04831f2656b8f ] ; then
             echo "building librdkafka"
-            git clone --branch v1.0.0-RC9 https://github.com/edenhill/librdkafka.git /tmp/librdkafka-v1.0.0-RC9
-            (cd /tmp/librdkafka-v1.0.0-RC9 && ./configure && make)
+            git clone -n https://github.com/edenhill/librdkafka.git /tmp/librdkafka-0d525ba1252074732aac575f88f04831f2656b8f
+            (cd /tmp/librdkafka-0d525ba1252074732aac575f88f04831f2656b8f && git checkout -b 0d525ba1252074732aac575f88f04831f2656b8f && ./configure && make)
           fi
           echo "installing librdkafka"
-          (cd /tmp/librdkafka-v1.0.0-RC9 && sudo make install)
+          (cd /tmp/librdkafka-0d525ba1252074732aac575f88f04831f2656b8f && sudo make install)
           sudo ldconfig
     - save_cache:
-        key: v1-librdkafka-v1.0.0-RC9
+        key: v1-librdkafka-0d525ba1252074732aac575f88f04831f2656b8f
         paths:
-        - /tmp/librdkafka-v1.0.0-RC9
+        - /tmp/librdkafka-0d525ba1252074732aac575f88f04831f2656b8f
 
     - run:
         name: Vendor gRPC v1.2.0
@@ -107,7 +109,7 @@ jobs:
     - run:
         name: Linting
         command: |
-          gometalinter --disable-all --vendor --deadline=60s \
+          gometalinter --disable-all --vendor --deadline=5m \
             --enable=golint \
             --enable=vet \
             ./...
