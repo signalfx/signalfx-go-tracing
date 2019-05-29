@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-var errorPrefix = fmt.Sprintf("Datadog Tracer Error (%s): ", tracerVersion)
+var errorPrefix = fmt.Sprintf("SignalFx Tracer Error (%s): ", tracerVersion)
 
 type traceEncodingError struct{ context error }
 

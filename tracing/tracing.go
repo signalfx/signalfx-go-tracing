@@ -25,7 +25,6 @@ type config struct {
 // StartOption is a function that configures an option for Start
 type StartOption = func(*config)
 
-
 func defaultConfig() *config {
 	return &config{
 		serviceName: defaults[signalfxServiceName],

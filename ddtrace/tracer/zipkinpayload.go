@@ -4,11 +4,17 @@ import (
 	"bytes"
 	"errors"
 	"github.com/mailru/easyjson"
-	"github.com/opentracing/opentracing-go/ext"
 	"github.com/signalfx/golib/pointer"
 	sfxtrace "github.com/signalfx/golib/trace"
 	"github.com/signalfx/golib/trace/format"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"strconv"
+)
+
+const (
+	spanKind       = "span.kind"
+	spanKindServer = "server"
+	spanKindClient = "client"
 )
 
 var _ encoder = (*zipkinPayload)(nil)
@@ -75,7 +81,8 @@ func convertSpans(spans spanList) []*traceformat.Span {
 		tags := map[string]string{}
 
 		for key, val := range span.Meta {
-			if key == string(ext.SpanKind) {
+
+			if key == spanKind {
 				continue
 			}
 			tags[key] = val
@@ -100,8 +107,20 @@ func convertSpans(spans spanList) []*traceformat.Span {
 }
 
 func deriveKind(s *span) *string {
-	// TODO
-	return pointer.String("TODO")
+	for k, v := range s.Meta {
+		if k == spanKind {
+			return pointer.String(v)
+		}
+	}
+
+	switch s.Type {
+	case ext.SpanTypeHTTP:
+		return pointer.String(spanKindClient)
+	case ext.SpanTypeWeb:
+		return pointer.String(spanKindServer)
+	}
+
+	return nil
 }
 
 func (p *zipkinPayload) itemCount() int {
