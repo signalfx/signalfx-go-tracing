@@ -63,8 +63,7 @@ func Start(opts ...StartOption) {
 
 	tracer.Start(
 		tracer.WithServiceName(c.serviceName),
-		tracer.WithAccessToken(c.accessToken),
-		tracer.WithZipkin(c.url))
+		tracer.WithZipkin(c.url, c.accessToken))
 }
 
 // Stop tracing globally

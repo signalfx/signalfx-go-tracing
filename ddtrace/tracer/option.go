@@ -44,9 +44,6 @@ type config struct {
 	// and is added as a special tag to the root span of traces.
 	hostname string
 
-	// accessToken holds the SignalFx access token
-	accessToken string
-
 	// payload holds the encoder instance
 	payload encoder
 }
@@ -70,18 +67,11 @@ func defaults(c *config) {
 	}
 }
 
-// WithAccessToken sets the SignalFx access token.
-func WithAccessToken(accessToken string) StartOption {
-	return func(c *config) {
-		c.accessToken = accessToken
-	}
-}
-
 // WithZipkin uses Zipkin instead of DD encoding and transport.
-func WithZipkin(url string) StartOption {
+func WithZipkin(url string, accessToken string) StartOption {
 	return func(c *config) {
 		c.payload = newZipkinPayload()
-		c.transport = newZipkinTransport(url, defaultRoundTripper)
+		c.transport = newZipkinTransport(url, accessToken, defaultRoundTripper)
 	}
 }
 

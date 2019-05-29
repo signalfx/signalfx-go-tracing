@@ -43,10 +43,11 @@ func (t *zipkinHTTPTransport) send(p encoder) (body io.ReadCloser, err error) {
 }
 
 // newHTTPTransport returns an zipkinHTTPTransport for the given endpoint
-func newZipkinTransport(url string, roundTripper http.RoundTripper) *zipkinHTTPTransport {
+func newZipkinTransport(url string, accessToken string, roundTripper http.RoundTripper) *zipkinHTTPTransport {
 	// initialize the default EncoderPool with Encoder headers
 	defaultHeaders := map[string]string{
 		"Content-Type": "application/json",
+		"X-SF-Token": accessToken,
 	}
 	return &zipkinHTTPTransport{
 		traceURL: url,
