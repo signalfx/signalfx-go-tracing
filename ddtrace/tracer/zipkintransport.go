@@ -5,23 +5,23 @@ import (
 	"net/http"
 )
 
-type zhttptransport struct {
+type zipkinHTTPTransport struct {
 	traceURL string            // the delivery URL for traces
 	client   *http.Client      // the HTTP client used in the POST
 	headers  map[string]string // the Transport headers
 }
 
-func (*zhttptransport) send(p *payload) (body io.ReadCloser, err error) {
+func (*zipkinHTTPTransport) send(p *payload) (body io.ReadCloser, err error) {
 	panic("implement me")
 }
 
-// newHTTPTransport returns an zhttptransport for the given endpoint
-func newZipkinHTTPTransport(url string, roundTripper http.RoundTripper) *zhttptransport {
+// newHTTPTransport returns an zipkinHTTPTransport for the given endpoint
+func newZipkinHTTPTransport(url string, roundTripper http.RoundTripper) *zipkinHTTPTransport {
 	// initialize the default EncoderPool with Encoder headers
 	defaultHeaders := map[string]string{
 		"Content-Type":                  "application/json",
 	}
-	return &zhttptransport{
+	return &zipkinHTTPTransport{
 		traceURL: url,
 		client: &http.Client{
 			Transport: roundTripper,
