@@ -136,7 +136,7 @@ jobs:
       - run:
           name: Testing
           command: |
-            INTEGRATION=1 go test -v -race `go list ./... | grep -v -P 'redis|redigo|elastic'`
+            INTEGRATION=1 go test -v -race `go list ./... | grep -v -P 'redis|redigo|elastic|go-chi'`
   test_es:
     working_directory: /go/src/github.com/signalfx/signalfx-go-tracing
     docker:
