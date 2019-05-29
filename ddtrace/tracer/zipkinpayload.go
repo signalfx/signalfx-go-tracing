@@ -47,10 +47,10 @@ func (p *zipkinPayload) push(t spanList) error {
 			p.buf.WriteByte(',')
 		}
 		p.buf.Write(data)
-		p.spanCount += 1
+		p.spanCount++
 	}
 
-	p.traceCount += 1
+	p.traceCount++
 	return nil
 }
 
