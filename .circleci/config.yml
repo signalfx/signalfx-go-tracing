@@ -108,10 +108,10 @@ jobs:
       - image: redis:3.2
       - image: elasticsearch:2
         environment:
-          ES_JAVA_OPTS: "-Xms750m -Xmx750m" # https://github.com/10up/wp-local-docker/issues/6
+          ES_JAVA_OPTS: "-Xms256m -Xmx256m" # https://github.com/10up/wp-local-docker/issues/6
       - image: elasticsearch:5
         environment:
-          ES_JAVA_OPTS: "-Xms750m -Xmx750m" # https://github.com/10up/wp-local-docker/issues/6
+          ES_JAVA_OPTS: "-Xms256m -Xmx256m" # https://github.com/10up/wp-local-docker/issues/6
       - image: circleci/mongo:latest-ram
       - image: memcached:1.5.9
       - image: confluentinc/cp-zookeeper:5.0.0
