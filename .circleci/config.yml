@@ -1,128 +1,200 @@
-version: 2
+version: 2.1
+
+executors:
+  goexecutor:
+    working_directory: /go/src/github.com/signalfx/signalfx-go-tracing
+    docker:
+      - image: circleci/golang:latest
+
+commands:
+  install_rdkafka:
+    description: Install rdkafka
+    parameters:
+      version:
+        description: rdkafka branch, tag, or commit id
+        type: string
+        default: 0d525ba1252074732aac575f88f04831f2656b8f
+      dest:
+        description: git clone destination directory
+        type: string
+        default: /tmp/rdkafka
+    steps:
+      - restore_cache:
+          keys:
+            - v1-rdkafka-<< parameters.version >>
+      - run:
+          name: Install rdkafka
+          command: |
+            if [ ! -d << parameters.dest >> ] ; then
+                echo "building librdkafka"
+                git clone -n https://github.com/edenhill/librdkafka.git << parameters.dest >>
+                cd << parameters.dest >> && git checkout -b << parameters.version >> && ./configure && make
+            fi
+            echo "installing librdkafka"
+            cd << parameters.dest >> && sudo make install
+            sudo ldconfig
+      - save_cache:
+          key: v1-rdkafka-<< parameters.version >>
+          paths:
+            - << parameters.dest >>
+  get_grpc:
+    description: Get gRPC
+    parameters:
+      version:
+        description: gRPC branch or tag
+        type: string
+        default: v1.2.0
+      dest:
+        description: git clone destination directory
+        type: string
+        default: contrib/google.golang.org/grpc.v12/vendor/google.golang.org/grpc
+    steps:
+      - restore_cache:
+          keys:
+            - v1-grpc-<< parameters.version >>
+      - run:
+          name: Vendor gRPC << parameters.version >>
+          command: |
+            if [ ! -d << parameters.dest >> ]; then
+                mkdir -p << parameters.dest >>
+                git clone --branch << parameters.version >> https://github.com/grpc/grpc-go << parameters.dest >>
+            fi
+      - save_cache:
+          key: v1-grpc-<< parameters.version >>
+          paths:
+            - << parameters.dest >>
 
 jobs:
-  build:
-    working_directory: /go/src/github.com/signalfx/signalfx-go-tracing
-
-    docker:
-    - image: circleci/golang:latest
-    - image: circleci/cassandra:3.10
-      environment:
-        MAX_HEAP_SIZE: 512m
-        HEAP_NEWSIZE: 128m
-    - image: circleci/mysql:5.7
-      environment:
-        MYSQL_ROOT_PASSWORD: admin
-        MYSQL_PASSWORD: test
-        MYSQL_USER: test
-        MYSQL_DATABASE: test
-    - image: circleci/postgres:9.5
-      environment:
-        POSTGRES_PASSWORD: postgres
-        POSTGRES_USER: postgres
-        POSTGRES_DB: postgres
-    - image: redis:3.2
-    - image: elasticsearch:2
-      environment:
-        ES_JAVA_OPTS: "-Xms750m -Xmx750m" # https://github.com/10up/wp-local-docker/issues/6
-    - image: elasticsearch:5
-      environment:
-        ES_JAVA_OPTS: "-Xms750m -Xmx750m" # https://github.com/10up/wp-local-docker/issues/6
-    - image: circleci/mongo:latest-ram
-    - image: memcached:1.5.9
-    - image: confluentinc/cp-zookeeper:5.0.0
-      environment:
-        ZOOKEEPER_CLIENT_PORT: "2181"
-    - image: confluentinc/cp-kafka:5.0.0
-      environment:
-        KAFKA_ZOOKEEPER_CONNECT: localhost:2181
-        KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-        KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-        KAFKA_CREATE_TOPICS: gotest:1:1
-        KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
-
+  lint_vet:
+    executor: goexecutor
     steps:
-    - checkout
+      - checkout
+      - install_rdkafka
+      - get_grpc
+      - run:
+          name: Fetching dependencies
+          command: |
+            go get -v -t ./...
+            go get -v -u golang.org/x/lint/golint
+            go get -v -u github.com/alecthomas/gometalinter
+      - run:
+          name: Lint/Vet
+          command: |
+            gometalinter --disable-all --vendor --deadline=5m \
+                --enable=golint \
+                --enable=vet \
+                ./...
 
-    - restore_cache:
-        keys:
-        - v1-librdkafka-0d525ba1252074732aac575f88f04831f2656b8f
-    - run:
-        name: Install rdkafka
-        command: |
-          if [ ! -d /tmp/librdkafka-0d525ba1252074732aac575f88f04831f2656b8f ] ; then
-            echo "building librdkafka"
-            git clone -n https://github.com/edenhill/librdkafka.git /tmp/librdkafka-0d525ba1252074732aac575f88f04831f2656b8f
-            (cd /tmp/librdkafka-0d525ba1252074732aac575f88f04831f2656b8f && git checkout -b 0d525ba1252074732aac575f88f04831f2656b8f && ./configure && make)
-          fi
-          echo "installing librdkafka"
-          (cd /tmp/librdkafka-0d525ba1252074732aac575f88f04831f2656b8f && sudo make install)
-          sudo ldconfig
-    - save_cache:
-        key: v1-librdkafka-0d525ba1252074732aac575f88f04831f2656b8f
-        paths:
-        - /tmp/librdkafka-0d525ba1252074732aac575f88f04831f2656b8f
-
-    - run:
-        name: Vendor gRPC v1.2.0
-        # This step vendors gRPC v1.2.0 inside our gRPC.v12 contrib
-        # to allow running the tests against the correct version of
-        # the gRPC library. The library is not committed into the
-        # repository to avoid conflicts with the user's imports.
+  integration_test:
+    working_directory: /go/src/github.com/signalfx/signalfx-go-tracing
+    docker:
+      - image: circleci/golang:latest
+      - image: cassandra:3.7
         environment:
-          GRPC_DEST: contrib/google.golang.org/grpc.v12/vendor/google.golang.org/grpc
-        command: |
-          mkdir -p $GRPC_DEST
-          git clone --branch v1.2.0 https://github.com/grpc/grpc-go $GRPC_DEST
+          MAX_HEAP_SIZE: 256m
+          HEAP_NEWSIZE: 64m
+      - image: circleci/mysql:5.7
+        environment:
+          MYSQL_ROOT_PASSWORD: admin
+          MYSQL_PASSWORD: test
+          MYSQL_USER: test
+          MYSQL_DATABASE: test
+      - image: circleci/postgres:9.5
+        environment:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+      - image: circleci/mongo:latest-ram
+      - image: memcached:1.5.9
+      - image: confluentinc/cp-zookeeper:5.0.0
+        environment:
+          ZOOKEEPER_CLIENT_PORT: "2181"
+      - image: confluentinc/cp-kafka:5.0.0
+        environment:
+          KAFKA_ZOOKEEPER_CONNECT: localhost:2181
+          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+          KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+          KAFKA_CREATE_TOPICS: gotest:1:1
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+    steps:
+      - checkout
+      - install_rdkafka
+      - get_grpc
+      - run:
+          name: Fetching dependencies
+          command: |
+            go get -v -t ./...
+      - run:
+          name: Wait for MySQL
+          command: dockerize -wait tcp://localhost:3306 -timeout 1m
+      - run:
+          name: Wait for Postgres
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run:
+          name: Wait for Cassandra
+          command: dockerize -wait tcp://localhost:9042 -timeout 2m
+      - run:
+          name: Testing
+          command: |
+            INTEGRATION=1 go test -v -race `go list ./... | grep -v -P 'redis|redigo|elastic'`
+  test_es:
+    working_directory: /go/src/github.com/signalfx/signalfx-go-tracing
+    docker:
+      - image: circleci/golang:latest
+      - image: elasticsearch:2
+        environment:
+          ES_JAVA_OPTS: "-Xms256m -Xmx256m" # https://github.com/10up/wp-local-docker/issues/6
+      - image: elasticsearch:5
+        environment:
+          ES_JAVA_OPTS: "-Xms256m -Xmx256m" # https://github.com/10up/wp-local-docker/issues/6
+    steps:
+      - checkout
+      - install_rdkafka
+      - get_grpc
+      - run:
+          name: Fetching dependencies
+          command: |
+            go get -v -t ./...
+      - run:
+          name: Wait for ElasticSearch:2
+          command: dockerize -wait http://localhost:9200 -timeout 1m
+      - run:
+          name: Wait for ElasticSearch:5
+          command: dockerize -wait http://localhost:9201 -timeout 1m
+      - run:
+          name: Testing elasticsarch
+          command: |
+            INTEGRATION=1 go test -v -race `go list ./... | grep elastic`
 
-    - run:
-        name: Fetching dependencies
-        command: |
-          go get -v -t ./...
-          go get -v -u golang.org/x/lint/golint
-          go get -v -u github.com/alecthomas/gometalinter
+  test_redis:
+    working_directory: /go/src/github.com/signalfx/signalfx-go-tracing
+    docker:
+      - image: circleci/golang:latest
+      - image: redis:3.2
+    steps:
+      - checkout
+      - install_rdkafka
+      - get_grpc
+      - run:
+          name: Fetching dependencies
+          command: |
+            go get -v -t ./...
+      - run:
+          name: Wait for Redis
+          command: dockerize -wait tcp://localhost:6379 -timeout 1m
+      - run:
+          name: Testing redis
+          command: |
+            INTEGRATION=1 go test -v -race `go list ./... | grep -P 'redis|redigo'`
+            (cd $GOPATH/src/github.com/go-redis/redis && git checkout v6.13.2)
+            INTEGRATION=1 go test -v -race ./contrib/go-redis/redis/...
+            (cd $GOPATH/src/github.com/go-redis/redis && git checkout master)
+            INTEGRATION=1 go test -v -race ./contrib/go-redis/redis/...
 
-    - run:
-        name: Wait for MySQL
-        command: dockerize -wait tcp://localhost:3306 -timeout 1m
-
-    - run:
-        name: Wait for Postgres
-        command: dockerize -wait tcp://localhost:5432 -timeout 1m
-
-    - run:
-        name: Wait for Redis
-        command: dockerize -wait tcp://localhost:6379 -timeout 1m
-
-    - run:
-        name: Wait for ElasticSearch (1)
-        command: dockerize -wait http://localhost:9200 -timeout 1m
-
-    - run:
-        name: Wait for ElasticSearch (2)
-        command: dockerize -wait http://localhost:9201 -timeout 1m
-
-    - run:
-        name: Wait for Cassandra
-        command: dockerize -wait tcp://localhost:9042 -timeout 2m
-
-    - run:
-        name: Linting
-        command: |
-          gometalinter --disable-all --vendor --deadline=5m \
-            --enable=golint \
-            --enable=vet \
-            ./...
-
-    - run:
-        name: Testing
-        command: |
-          INTEGRATION=1 go test -v -race `go list ./... | grep -v contrib/go-redis/redis`
-
-    - run:
-        name: Testing contrib/go-redis/redis
-        command: |
-          (cd $GOPATH/src/github.com/go-redis/redis && git checkout v6.13.2)
-          INTEGRATION=1 go test -v -race ./contrib/go-redis/redis/...
-          (cd $GOPATH/src/github.com/go-redis/redis && git checkout master)
-          INTEGRATION=1 go test -v -race ./contrib/go-redis/redis/...
+workflows:
+  build_test:
+    jobs:
+      - lint_vet
+      - integration_test
+      - test_es
+      - test_redis
