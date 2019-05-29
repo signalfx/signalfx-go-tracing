@@ -92,8 +92,8 @@ jobs:
       - image: circleci/golang:latest
       - image: circleci/cassandra:3.10
         environment:
-          MAX_HEAP_SIZE: 512m
-          HEAP_NEWSIZE: 128m
+          MAX_HEAP_SIZE: 256m
+          HEAP_NEWSIZE: 64m
       - image: circleci/mysql:5.7
         environment:
           MYSQL_ROOT_PASSWORD: admin
