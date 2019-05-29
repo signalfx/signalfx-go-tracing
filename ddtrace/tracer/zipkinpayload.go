@@ -134,8 +134,12 @@ func (p *zipkinPayload) itemCount() int {
 }
 
 func (p *zipkinPayload) size() int {
-	// +1 for the closing bracket
-	return p.buf.Len() + 1
+	// Pretty hacky. If reader is non-nil then closing ] has been added. Otherwise it's yet to be added.
+	size := p.buf.Len()
+	if p.reader != nil {
+		return size
+	}
+	return size + 1
 }
 
 func (p *zipkinPayload) reset() {
