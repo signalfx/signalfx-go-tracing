@@ -89,7 +89,7 @@ jobs:
     working_directory: /go/src/github.com/signalfx/signalfx-go-tracing
     docker:
       - image: circleci/golang:latest
-      - image: circleci/cassandra:3.10
+      - image: cassandra:3.7
         environment:
           MAX_HEAP_SIZE: 256m
           HEAP_NEWSIZE: 64m
