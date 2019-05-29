@@ -81,7 +81,6 @@ func convertSpans(spans spanList) []*traceformat.Span {
 		tags := map[string]string{}
 
 		for key, val := range span.Meta {
-
 			if key == spanKind {
 				continue
 			}
@@ -96,11 +95,18 @@ func convertSpans(spans spanList) []*traceformat.Span {
 		sfxSpan.LocalEndpoint = localEndpoint
 		sfxSpan.Timestamp = pointer.Int64(span.Start / 1000)
 		sfxSpan.Duration = pointer.Int64(span.Duration / 1000)
+
+		if span.Resource != "" {
+			tags[ext.ResourceName] = span.Resource
+
+			if sfxSpan.Kind != nil && *sfxSpan.Kind == spanKindServer {
+				sfxSpan.Name = pointer.String(span.Resource)
+			}
+		}
+
 		sfxSpan.Tags = tags
 
 		sfxSpans = append(sfxSpans, &sfxSpan)
-
-		// TODO: resource from tags, maybe others
 	}
 
 	return sfxSpans
