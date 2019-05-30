@@ -2,6 +2,7 @@ package tracing
 
 import (
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
+	"os"
 )
 
 const (
@@ -27,10 +28,18 @@ type StartOption = func(*config)
 
 func defaultConfig() *config {
 	return &config{
-		serviceName: defaults[signalfxServiceName],
-		accessToken: defaults[signalfxAccessToken],
-		url:         defaults[signalfxEndpointURL],
+		serviceName: envOrDefault(signalfxServiceName),
+		accessToken: envOrDefault(signalfxAccessToken),
+		url:         envOrDefault(signalfxEndpointURL),
 	}
+}
+
+// envOrDefault gets the given environment variable if set otherwise a default value.
+func envOrDefault(envVar string) string {
+	if val := os.Getenv(envVar); val != "" {
+		return val
+	}
+	return defaults[envVar]
 }
 
 // WithServiceName changes the reported service name
