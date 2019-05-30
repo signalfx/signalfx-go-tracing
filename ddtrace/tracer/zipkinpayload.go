@@ -3,27 +3,27 @@ package tracer
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"github.com/mailru/easyjson"
 	"github.com/signalfx/golib/pointer"
 	sfxtrace "github.com/signalfx/golib/trace"
 	"github.com/signalfx/golib/trace/format"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
-	"strconv"
 )
 
 const (
 	spanKind       = "span.kind"
-	spanKindServer = "server"
-	spanKindClient = "client"
+	spanKindServer = "SERVER"
+	spanKindClient = "CLIENT"
 )
 
 var _ encoder = (*zipkinPayload)(nil)
 
 type zipkinPayload struct {
-	buf        *bytes.Buffer
-	traceCount int
+	buf        bytes.Buffer
 	spanCount  int
 	reader     *bytes.Reader
+
 }
 
 func (p *zipkinPayload) Read(b []byte) (n int, err error) {
@@ -56,17 +56,15 @@ func (p *zipkinPayload) push(t spanList) error {
 		p.spanCount++
 	}
 
-	p.traceCount++
 	return nil
 }
 
 func idToHex(id uint64) string {
-	return strconv.FormatUint(id, 16)
+	return fmt.Sprintf("%016x", id)
 }
 
 func idToHexPtr(id uint64) *string {
 	if id == 0 {
-		// TODO: not totally sure.
 		return nil
 	}
 	return pointer.String(idToHex(id))
@@ -130,7 +128,7 @@ func deriveKind(s *span) *string {
 }
 
 func (p *zipkinPayload) itemCount() int {
-	return p.traceCount
+	return p.spanCount
 }
 
 func (p *zipkinPayload) size() int {
@@ -143,8 +141,8 @@ func (p *zipkinPayload) size() int {
 }
 
 func (p *zipkinPayload) reset() {
-	p.buf = bytes.NewBufferString("[")
+	p.buf.Reset()
+	p.buf.WriteByte('[')
 	p.reader = nil
-	p.traceCount = 0
 	p.spanCount = 0
 }

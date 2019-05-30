@@ -51,7 +51,7 @@ type tracer struct {
 const (
 	// flushInterval is the interval at which the payload contents will be flushed
 	// to the transport.
-	flushInterval = 2 * time.Second
+	flushInterval = 1 * time.Second
 
 	// payloadMaxLimit is the maximum payload size allowed and should indicate the
 	// maximum size of the package that the agent can receive.

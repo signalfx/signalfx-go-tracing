@@ -44,18 +44,20 @@ func TestZipkinPayloadIntegrity(t *testing.T) {
 			want.Reset()
 
 			var total traceformat.Trace
+			count := 0
 
 			for _, lst := range lists {
 				for _, span := range convertSpans(lst) {
 					s := sfxtrace.Span(*span)
 					total = append(total, &s)
+					count++
 				}
 			}
 
 			_, err := easyjson.MarshalToWriter(total, want)
 			require.NoError(err)
 			require.Equal(want.Len(), p.size())
-			require.Equal(n, p.itemCount())
+			require.Equal(count, p.itemCount())
 
 			got, err := ioutil.ReadAll(p)
 			require.NoError(err)
@@ -91,9 +93,9 @@ func TestZipkinPayloadDecode(t *testing.T) {
 }
 
 func BenchmarkZipkinPayloadThroughput(b *testing.B) {
-	b.Run("10K", benchmarkPayloadThroughput(1))
-	b.Run("100K", benchmarkPayloadThroughput(10))
-	b.Run("1MB", benchmarkPayloadThroughput(100))
+	b.Run("10K", benchmarkZipkinPayloadThroughput(1))
+	b.Run("100K", benchmarkZipkinPayloadThroughput(10))
+	b.Run("1MB", benchmarkZipkinPayloadThroughput(100))
 }
 
 // benchmarkPayloadThroughput benchmarks the throughput of the payload by subsequently
