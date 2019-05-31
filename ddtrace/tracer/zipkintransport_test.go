@@ -42,7 +42,7 @@ func TestZipkinTransportResponse(t *testing.T) {
 		"bad": {
 			status: http.StatusBadRequest,
 			body:   strings.Repeat("X", 1002),
-			err:    fmt.Sprintf("%s (Status: Bad Request)", strings.Repeat("X", 1000)),
+			err:    fmt.Sprintf("%s (Status: Bad Request, URL: http://%%s/v1/trace)", strings.Repeat("X", 1002)),
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -58,7 +58,7 @@ func TestZipkinTransportResponse(t *testing.T) {
 				fmt.Sprintf("http://%s/v1/trace", ln.Addr().String()), "abcd", defaultRoundTripper)
 			rc, err := transport.send(newZipkinPayload())
 			if tt.err != "" {
-				require.Equal(tt.err, err.Error())
+				require.Equal(fmt.Sprintf(tt.err, ln.Addr()), err.Error())
 				return
 			}
 			require.NoError(err)

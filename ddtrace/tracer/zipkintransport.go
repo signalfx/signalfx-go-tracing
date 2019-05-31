@@ -3,6 +3,7 @@ package tracer
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 )
@@ -25,19 +26,16 @@ func (t *zipkinHTTPTransport) send(p encoder) (body io.ReadCloser, err error) {
 	req.Header.Set("Content-Length", strconv.Itoa(p.size()))
 	response, err := t.client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("HTTP request to %s failed: %s", t.traceURL, err)
 	}
 	if code := response.StatusCode; code >= 400 {
-		// error, check the body for context information and
-		// return a nice error.
-		msg := make([]byte, 1000)
-		n, _ := response.Body.Read(msg)
+		msg, err := ioutil.ReadAll(response.Body)
 		_ = response.Body.Close()
 		txt := http.StatusText(code)
-		if n > 0 {
-			return nil, fmt.Errorf("%s (Status: %s)", msg[:n], txt)
+		if err == nil {
+			return nil, fmt.Errorf("%s (Status: %s, URL: %s)", msg, txt, t.traceURL)
 		}
-		return nil, fmt.Errorf("%s", txt)
+		return nil, fmt.Errorf("error reading response body: %s (Status: %s, URL: %s)", err, txt, t.traceURL)
 	}
 	return response.Body, nil
 }
@@ -47,8 +45,12 @@ func newZipkinTransport(url string, accessToken string, roundTripper http.RoundT
 	// initialize the default EncoderPool with Encoder headers
 	defaultHeaders := map[string]string{
 		"Content-Type": "application/json",
-		"X-SF-Token": accessToken,
 	}
+
+	if accessToken != "" {
+		defaultHeaders["X-SF-Token"] = accessToken
+	}
+
 	return &zipkinHTTPTransport{
 		traceURL: url,
 		client: &http.Client{
