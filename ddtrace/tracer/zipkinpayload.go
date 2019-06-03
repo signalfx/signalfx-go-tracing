@@ -9,6 +9,7 @@ import (
 	sfxtrace "github.com/signalfx/golib/trace"
 	"github.com/signalfx/golib/trace/format"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
+	"strings"
 )
 
 const (
@@ -70,6 +71,16 @@ func idToHexPtr(id uint64) *string {
 	return pointer.String(idToHex(id))
 }
 
+func formatTags(tags map[string]string) {
+	if tags["error.type"] != "" || tags["error.msg"] != "" || tags["error.stack"] != "" {
+		tags["error"] = "true"
+	}
+
+	delete(tags, ext.ServiceName)
+	delete(tags, ext.ResourceName)
+	delete(tags, ext.Pid)
+}
+
 func convertSpans(spans spanList) []*traceformat.Span {
 	sfxSpans := make([]*traceformat.Span, 0, len(spans))
 
@@ -94,14 +105,19 @@ func convertSpans(spans spanList) []*traceformat.Span {
 		sfxSpan.Timestamp = pointer.Int64(span.Start / 1000)
 		sfxSpan.Duration = pointer.Int64(span.Duration / 1000)
 
-		if span.Resource != "" {
-			tags[ext.ResourceName] = span.Resource
-
-			if sfxSpan.Kind != nil && *sfxSpan.Kind == spanKindServer {
-				sfxSpan.Name = pointer.String(span.Resource)
-			}
+		if span.Resource != "" && sfxSpan.Kind != nil && *sfxSpan.Kind == spanKindServer {
+			sfxSpan.Name = pointer.String(span.Resource)
 		}
 
+		if tags["component"] == "" && span.Type != "" {
+			tags["component"] = span.Type
+		}
+
+		if sfxSpan.Kind != nil && *sfxSpan.Kind != "" {
+			tags["span.kind"] = strings.ToLower(*sfxSpan.Kind)
+		}
+
+		formatTags(tags)
 		sfxSpan.Tags = tags
 
 		sfxSpans = append(sfxSpans, &sfxSpan)
@@ -111,10 +127,8 @@ func convertSpans(spans spanList) []*traceformat.Span {
 }
 
 func deriveKind(s *span) *string {
-	for k, v := range s.Meta {
-		if k == spanKind {
-			return pointer.String(v)
-		}
+	if kind, ok := s.Meta[spanKind]; ok {
+		return pointer.String(kind)
 	}
 
 	switch s.Type {
