@@ -51,6 +51,9 @@ type mocktracer struct {
 	finishedSpans []Span
 }
 
+func (*mocktracer) ForceFlush() {
+}
+
 // Stop deactivates the mock tracer and sets the active tracer to a no-op.
 func (*mocktracer) Stop() {
 	internal.SetGlobalTracer(&internal.NoopTracer{})

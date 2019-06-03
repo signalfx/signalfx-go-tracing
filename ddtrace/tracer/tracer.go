@@ -77,6 +77,11 @@ func Stop() {
 	internal.SetGlobalTracer(&internal.NoopTracer{})
 }
 
+// ForceFlush pending traces
+func ForceFlush() {
+	internal.GetGlobalTracer().ForceFlush()
+}
+
 // Span is an alias for ddtrace.Span. It is here to allow godoc to group methods returning
 // ddtrace.Span. It is recommended and is considered more correct to refer to this type as
 // ddtrace.Span instead.
@@ -342,10 +347,10 @@ func (t *tracer) flush() {
 	t.flushErrors()
 }
 
-// forceFlush forces a flush of data (traces and services) to the agent.
+// ForceFlush forces a flush of data (traces and services) to the agent.
 // Flushes are done by a background task on a regular basis, so you never
 // need to call this manually, mostly useful for testing and debugging.
-func (t *tracer) forceFlush() {
+func (t *tracer) ForceFlush() {
 	done := make(chan struct{})
 	t.flushAllReq <- done
 	<-done

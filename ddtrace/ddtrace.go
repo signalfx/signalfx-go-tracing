@@ -28,6 +28,9 @@ type Tracer interface {
 	// Stop stops the active tracer and sets the global tracer to a no-op. Calls to
 	// Stop should be idempotent.
 	Stop()
+
+	// ForceFlush pending traces
+	ForceFlush()
 }
 
 // Span represents a chunk of computation time. Spans have names, durations,

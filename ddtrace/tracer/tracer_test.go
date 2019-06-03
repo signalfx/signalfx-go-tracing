@@ -121,7 +121,7 @@ func TestTracerStart(t *testing.T) {
 		Start()
 
 		// ensure at least one worker started and handles requests
-		internal.GetGlobalTracer().(*tracer).forceFlush()
+		internal.GetGlobalTracer().(*tracer).ForceFlush()
 
 		Stop()
 		Stop()
@@ -133,7 +133,7 @@ func TestTracerStart(t *testing.T) {
 		tr, _, stop := startTestTracer()
 		defer stop()
 		go tr.worker()
-		tr.forceFlush() // blocks until worker is started
+		tr.ForceFlush() // blocks until worker is started
 		select {
 		case <-tr.stopped:
 			t.Fatal("stopped channel should be open")
@@ -448,7 +448,7 @@ func TestTracerPrioritySampler(t *testing.T) {
 	assert.EqualValues(s.context.samplingPriority(), s.Metrics[keySamplingPriority])
 	s.Finish()
 
-	tr.forceFlush() // obtain new rates
+	tr.ForceFlush() // obtain new rates
 
 	for i, tt := range []struct {
 		service, env string
@@ -540,7 +540,7 @@ func TestTracerConcurrent(t *testing.T) {
 	}()
 
 	wg.Wait()
-	tracer.forceFlush()
+	tracer.ForceFlush()
 	traces := transport.Traces()
 	assert.Len(traces, 3)
 	assert.Len(traces[0], 1)
@@ -558,7 +558,7 @@ func TestTracerParentFinishBeforeChild(t *testing.T) {
 	parent := tracer.newRootSpan("pylons.request", "pylons", "/")
 	parent.Finish()
 
-	tracer.forceFlush()
+	tracer.ForceFlush()
 	traces := transport.Traces()
 	assert.Len(traces, 1)
 	assert.Len(traces[0], 1)
@@ -567,7 +567,7 @@ func TestTracerParentFinishBeforeChild(t *testing.T) {
 	child := tracer.newChildSpan("redis.command", parent)
 	child.Finish()
 
-	tracer.forceFlush()
+	tracer.ForceFlush()
 
 	traces = transport.Traces()
 	assert.Len(traces, 1)
@@ -601,7 +601,7 @@ func TestTracerConcurrentMultipleSpans(t *testing.T) {
 	}()
 
 	wg.Wait()
-	tracer.forceFlush()
+	tracer.ForceFlush()
 	traces := transport.Traces()
 	assert.Len(traces, 2)
 	assert.Len(traces[0], 2)
@@ -622,13 +622,13 @@ func TestTracerAtomicFlush(t *testing.T) {
 	span1.Finish()
 	span2.Finish()
 
-	tracer.forceFlush()
+	tracer.ForceFlush()
 	traces := transport.Traces()
 	assert.Len(traces, 0, "nothing should be flushed now as span2 is not finished yet")
 
 	root.Finish()
 
-	tracer.forceFlush()
+	tracer.ForceFlush()
 	traces = transport.Traces()
 	assert.Len(traces, 1)
 	assert.Len(traces[0], 4, "all spans should show up at once")
@@ -750,7 +750,7 @@ func TestTracerRace(t *testing.T) {
 
 	wg.Wait()
 
-	tracer.forceFlush()
+	tracer.ForceFlush()
 	traces := transport.Traces()
 	assert.Len(traces, total, "we should have exactly as many traces as expected")
 	for _, trace := range traces {
@@ -785,7 +785,7 @@ func TestTracerRace(t *testing.T) {
 
 // TestWorker is definitely a flaky test, as here we test that the worker
 // background task actually does flush things. Most other tests are and should
-// be using forceFlush() to make sure things are really sent to transport.
+// be using ForceFlush() to make sure things are really sent to transport.
 // Here, we just wait until things show up, as we would do with a real program.
 func TestWorker(t *testing.T) {
 	if testing.Short() {
@@ -917,7 +917,7 @@ func TestTracerFlush(t *testing.T) {
 		root := tracer.StartSpan("root")
 		tracer.StartSpan("child.direct", ChildOf(root.Context())).Finish()
 		root.Finish()
-		tracer.forceFlush()
+		tracer.ForceFlush()
 
 		list := transport.Traces()
 		assert.Len(list, 1)
@@ -938,7 +938,7 @@ func TestTracerFlush(t *testing.T) {
 			t.Fatal(err)
 		}
 		tracer.StartSpan("child.extracted", ChildOf(sctx)).Finish()
-		tracer.forceFlush()
+		tracer.ForceFlush()
 		list := transport.Traces()
 		assert.Len(list, 1)
 		assert.Len(list[0], 1)
