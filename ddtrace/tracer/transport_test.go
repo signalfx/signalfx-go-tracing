@@ -76,6 +76,7 @@ func mockDatadogAPINewServer(t *testing.T) *httptest.Server {
 }
 
 func TestTracesAgentIntegration(t *testing.T) {
+	t.Skip("not yet supported")
 	if !integration {
 		t.Skip("to enable integration test, set the INTEGRATION environment variable")
 	}
