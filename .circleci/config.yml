@@ -195,20 +195,52 @@ commands:
           options: << parameters.options >>
           packages: << parameters.packages >>
 
-  go_test:
-    description: Run go test
+  dockerize_wait:
+    description: Wait for docker service to be ready
     parameters:
+      address:
+        type: string
+        default: ""
+      timeout:
+        type: string
+        default: 1m
+    steps:
+      - run: dockerize -wait << parameters.address >> -timeout << parameters.timeout >>
+
+jobs:
+  go_test:
+    description: Run go tests
+    parameters:
+      executor:
+        type: executor
+        default: go
+      before_deps:
+        type: steps
+        default: []
+      after_deps:
+        type: steps
+        default: []
       options:
         type: string
         default: -v -race
       packages:
         type: string
         default: ./...
+      integration:
+        type: integer
+        default: 1
+    executor: << parameters.executor >>
     steps:
-      - run: |
-          INTEGRATION=1 go test << parameters.options >> << parameters.packages >>
+      - checkout
+      - steps: << parameters.before_deps >>
+      - get_deps:
+          packages: << parameters.packages >>
+      - steps: << parameters.after_deps >>
+      - run:
+          name: Run go tests
+          command: |
+            INTEGRATION=<< parameters.integration >> go test << parameters.options >> << parameters.packages >>
 
-jobs:
   lint_vet:
     executor: go
     steps:
@@ -224,118 +256,70 @@ jobs:
                 --enable=vet \
                 ./...
 
-  test_cassandra:
-    executor: go_cassandra
-    steps:
-      - checkout
-      - get_deps:
-          packages: "`go list ./... | grep 'gocql'`"
-      - run:
-          name: Wait for Cassandra
-          command: dockerize -wait tcp://localhost:9042 -timeout 2m
-      - go_test:
-          packages: "`go list ./... | grep 'gocql'`"
-
-  test_elasticsearch:
-    executor: go_elasticsearch
-    steps:
-      - checkout
-      - get_deps:
-          packages: "`go list ./... | grep 'elastic'`"
-      - run:
-          name: Wait for ElasticSearch:2
-          command: dockerize -wait http://localhost:9200 -timeout 1m
-      - run:
-          name: Wait for ElasticSearch:5
-          command: dockerize -wait http://localhost:9201 -timeout 1m
-      - go_test:
-          packages: "`go list ./... | grep 'elastic'`"
-
-  test_kafka_zookeeper:
-    executor: go_kafka_zookeeper
-    steps:
-      - checkout
-      - get_deps:
-          packages: "`go list ./... | grep -P 'Shopify|kafka'`"
-      - run:
-          name: Wait for zookeeper
-          command: dockerize -wait tcp://localhost:2181 -timeout 1m
-      - run:
-          name: Wait for kafka
-          command: dockerize -wait tcp://localhost:9092 -timeout 1m
-      - go_test:
-          packages: "`go list ./... | grep -P 'Shopify|kafka'`"
-
-  test_memcached:
-    executor: go_memcached
-    steps:
-      - checkout
-      - get_deps:
-          packages: "`go list ./... | grep 'memcache'`"
-      - run:
-          name: Wait for memcached
-          command: dockerize -wait tcp://localhost:11211 -timeout 1m
-      - go_test:
-          packages: "`go list ./... | grep 'memcache'`"
-
-  test_mongo:
-    executor: go_mongo
-    steps:
-      - checkout
-      - get_deps:
-          packages: "`go list ./... | grep -P 'globalsign|mongo'`"
-      - run:
-          name: Wait for Mongo
-          command: dockerize -wait tcp://localhost:27017 -timeout 1m
-      - go_test:
-          packages: "`go list ./... | grep -P 'globalsign|mongo'`"
-
-  test_redis:
-    executor: go_redis
-    steps:
-      - checkout
-      - get_deps:
-          packages: "`go list ./... | grep -P 'redis|redigo'`"
-      - run:
-          name: Wait for Redis
-          command: dockerize -wait tcp://localhost:6379 -timeout 1m
-      - go_test:
-          packages: "`go list ./... | grep -P 'redis|redigo'`"
-
-  test_sql:
-    executor: go_sql
-    steps:
-      - checkout
-      - get_deps:
-          packages: "`go list ./... | grep -P 'sql|gorm'`"
-      - run:
-          name: Wait for MySQL
-          command: dockerize -wait tcp://localhost:3306 -timeout 1m
-      - run:
-          name: Wait for Postgres
-          command: dockerize -wait tcp://localhost:5432 -timeout 1m
-      - go_test:
-          packages: "`go list ./... | grep -P 'sql|gorm'`"
-
-  # Run all remaining tests not included in jobs above
-  integration_test:
-    executor: go
-    steps:
-      - checkout
-      - get_deps:
-          packages: "`go list ./... | grep -v -P 'gocql|elastic|Shopify|kafka|memcache|globalsign|mongo|redis|redigo|sql|gorm'`"
-      - go_test:
-          packages: "`go list ./... | grep -v -P 'gocql|elastic|Shopify|kafka|memcache|globalsign|mongo|redis|redigo|sql|gorm'`"
-
 workflows:
   build_test:
     jobs:
       - lint_vet
-      - test_cassandra
-      - test_elasticsearch
-      - test_kafka_zookeeper
-      - test_memcached
-      - test_mongo
-      - test_redis
-      - test_sql
-      - integration_test
+      - go_test:
+          name: test_cassandra
+          executor: go_cassandra
+          packages: "`go list ./contrib/... | grep 'gocql'`"
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:9042
+                timeout: 2m
+      - go_test:
+          # test all remaining contrib tests not included in the other jobs
+          name: test_contrib
+          packages: "`go list ./contrib/... | grep -v -P 'gocql|elastic|Shopify|kafka|memcache|globalsign|mongo|redis|redigo|sql|gorm'`" 
+      - go_test:
+          name: test_ddtrace
+          packages: "./ddtrace/..."
+      - go_test:
+          name: test_elasticsearch
+          executor: go_elasticsearch
+          packages: "`go list ./contrib/... | grep 'elastic'`"
+          after_deps:
+            - dockerize_wait:
+                address: http://localhost:9200
+            - dockerize_wait:
+                address: http://localhost:9201
+      - go_test:
+          name: test_kafka_zookeeper
+          executor: go_kafka_zookeeper
+          packages: "`go list ./contrib/... | grep -P 'Shopify|kafka'`"
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:2181
+            - dockerize_wait:
+                address: tcp://localhost:9092
+      - go_test:
+          name: test_memcached
+          executor: go_memcached
+          packages: "`go list ./contrib/... | grep 'memcache'`"
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:11211
+      - go_test:
+          name: test_mongo
+          executor: go_mongo
+          packages: "`go list ./contrib/... | grep -P 'globalsign|mongo'`"
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:27017
+      - go_test:
+          name: test_redis
+          executor: go_redis
+          packages: "`go list ./contrib/... | grep -P 'redis|redigo'`"
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:6379
+      - go_test:
+          name: test_sql
+          executor: go_sql
+          packages: "`go list ./contrib/... | grep -P 'sql|gorm'`"
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:3306
+            - dockerize_wait:
+                address: tcp://localhost:5432
