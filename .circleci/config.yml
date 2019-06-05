@@ -142,18 +142,38 @@ commands:
           paths:
             - << parameters.dest >>
 
+  go_get:
+    parameters:
+      options:
+        type: string
+        default: -v -t
+      packages:
+        type: string
+        default: ./...
+      retries:
+        type: integer
+        default: 3
+    steps:
+      - run:
+          name: Fetching dependencies
+          command: |
+            RETRIES=<< parameters.retries >>
+            for (( i=0; i<$RETRIES; i++ )); do
+                go get << parameters.options >> << parameters.packages >> && exit 0
+                sleep 5
+            done
+            exit 1
+
   get_redis:
     parameters:
       version:
         type: string
         default: master
     steps:
+      - go_get:
+          packages: github.com/go-redis/redis
       - run:
-          name: Vendor redis << parameters.version >>
           command: |
-            if [ ! -d $GOPATH/src/github.com/go-redis/redis ]; then
-                go get -v -t github.com/go-redis/redis
-            fi
             cd $GOPATH/src/github.com/go-redis/redis
             git checkout << parameters.version >>
 
@@ -171,10 +191,9 @@ commands:
       - get_grpc
       - get_redis:
           version: v6.15.3  # workaround for https://github.com/go-redis/redis/commit/17480c545e170cdb82762d9b0ea5733ec0c750f6
-      - run:
-          name: Fetching dependencies
-          command: |
-            go get << parameters.options >> << parameters.packages >>
+      - go_get:
+          options: << parameters.options >>
+          packages: << parameters.packages >>
 
   go_test:
     description: Run go test
@@ -195,11 +214,8 @@ jobs:
     steps:
       - checkout
       - get_deps
-      - run:
-          name: Get linter
-          command: |
-            go get -v golang.org/x/lint/golint
-            go get -v github.com/alecthomas/gometalinter
+      - go_get:
+          packages: "golang.org/x/lint/golint github.com/alecthomas/gometalinter"
       - run:
           name: Run linter
           command: |
