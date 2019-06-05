@@ -260,14 +260,14 @@ workflows:
   build_test:
     jobs:
       - lint_vet
-      - go_test:
-          name: test_cassandra
-          executor: go_cassandra
-          packages: "`go list ./contrib/... | grep 'gocql'`"
-          after_deps:
-            - dockerize_wait:
-                address: tcp://localhost:9042
-                timeout: 2m
+      # - go_test:
+      #    name: test_cassandra
+      #    executor: go_cassandra
+      #    packages: "`go list ./contrib/... | grep 'gocql'`"
+      #    after_deps:
+      #      - dockerize_wait:
+      #          address: tcp://localhost:9042
+      #          timeout: 2m
       - go_test:
           # test all remaining contrib tests not included in the other jobs
           name: test_contrib
