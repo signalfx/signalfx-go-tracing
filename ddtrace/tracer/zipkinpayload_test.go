@@ -31,7 +31,7 @@ func TestZipkinPayloadIntegrity(t *testing.T) {
 	require := require.New(t)
 	p := newZipkinPayload()
 	want := new(bytes.Buffer)
-	for _, n := range []int{10, 1 << 10, 1 << 17,
+	for _, n := range []int{10, 1 << 10, 1 << 15,
 	} {
 		t.Run(strconv.Itoa(n), func(t *testing.T) {
 			p.reset()
