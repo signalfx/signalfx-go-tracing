@@ -21,6 +21,7 @@ const (
 var _ encoder = (*zipkinPayload)(nil)
 
 type zipkinPayload struct {
+	service string
 	buf        bytes.Buffer
 	spanCount  int
 	reader     *bytes.Reader
@@ -35,8 +36,8 @@ func (p *zipkinPayload) Read(b []byte) (n int, err error) {
 	return p.reader.Read(b)
 }
 
-func newZipkinPayload() *zipkinPayload {
-	payload := &zipkinPayload{}
+func newZipkinPayload(service string) *zipkinPayload {
+	payload := &zipkinPayload{service: service}
 	payload.reset()
 	return payload
 }
@@ -45,7 +46,7 @@ func (p *zipkinPayload) push(t spanList) error {
 	if p.reader != nil {
 		return errors.New("zipkinPayload must reset before pushing additional traces")
 	}
-	for _, span := range convertSpans(t) {
+	for _, span := range p.convertSpans(t) {
 		data, err := easyjson.Marshal(span)
 		if err != nil {
 			return err
@@ -81,12 +82,12 @@ func formatTags(tags map[string]string) {
 	delete(tags, ext.Pid)
 }
 
-func convertSpans(spans spanList) []*traceformat.Span {
+func (p *zipkinPayload)  convertSpans(spans spanList) []*traceformat.Span {
 	sfxSpans := make([]*traceformat.Span, 0, len(spans))
 
 	for _, span := range spans {
 		sfxSpan := traceformat.Span{}
-		localEndpoint := &sfxtrace.Endpoint{ServiceName: pointer.String(span.Service)}
+		localEndpoint := &sfxtrace.Endpoint{ServiceName: pointer.String(p.service)}
 		tags := map[string]string{}
 
 		for key, val := range span.Meta {

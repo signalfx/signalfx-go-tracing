@@ -56,7 +56,7 @@ func TestZipkinTransportResponse(t *testing.T) {
 			defer ln.Close()
 			transport := newZipkinTransport(
 				fmt.Sprintf("http://%s/v1/trace", ln.Addr().String()), "abcd", defaultRoundTripper)
-			rc, err := transport.send(newZipkinPayload())
+			rc, err := transport.send(newZipkinPayload("test-service"))
 			if tt.err != "" {
 				require.Equal(fmt.Sprintf(tt.err, ln.Addr()), err.Error())
 				return

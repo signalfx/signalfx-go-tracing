@@ -14,7 +14,7 @@ import (
 )
 
 func encodeZipkin(traces [][]*span) (*zipkinPayload, error) {
-	p := newZipkinPayload()
+	p := newZipkinPayload("test-service")
 	for _, trace := range traces {
 		if err := p.push(trace); err != nil {
 			return nil, err
@@ -29,7 +29,7 @@ func encodeZipkin(traces [][]*span) (*zipkinPayload, error) {
 // the codec.
 func TestZipkinPayloadIntegrity(t *testing.T) {
 	require := require.New(t)
-	p := newZipkinPayload()
+	p := newZipkinPayload("test-service")
 	want := new(bytes.Buffer)
 	for _, n := range []int{10, 1 << 10, 1 << 15,
 	} {
@@ -47,7 +47,7 @@ func TestZipkinPayloadIntegrity(t *testing.T) {
 			count := 0
 
 			for _, lst := range lists {
-				for _, span := range convertSpans(lst) {
+				for _, span := range p.convertSpans(lst) {
 					s := sfxtrace.Span(*span)
 					total = append(total, &s)
 					count++
@@ -68,7 +68,7 @@ func TestZipkinPayloadIntegrity(t *testing.T) {
 
 func TestEmptyZipkinPayload(t *testing.T) {
 	require := require.New(t)
-	p := newZipkinPayload()
+	p := newZipkinPayload("test-service")
 	data, err := ioutil.ReadAll(p)
 	require.NoError(err)
 	require.Equal("[]", string(data))
@@ -78,7 +78,7 @@ func TestEmptyZipkinPayload(t *testing.T) {
 // be decoded by the codec.
 func TestZipkinPayloadDecode(t *testing.T) {
 	require := require.New(t)
-	p := newZipkinPayload()
+	p := newZipkinPayload("test-service")
 	for _, n := range []int{10, 1 << 10} {
 		t.Run(strconv.Itoa(n), func(t *testing.T) {
 			p.reset()
@@ -103,7 +103,7 @@ func BenchmarkZipkinPayloadThroughput(b *testing.B) {
 func benchmarkZipkinPayloadThroughput(count int) func(*testing.B) {
 	return func(b *testing.B) {
 		require := require.New(b)
-		p := newZipkinPayload()
+		p := newZipkinPayload("test-service")
 		s := newBasicSpan("X")
 		s.Meta["key"] = strings.Repeat("X", 10*1024)
 		trace := make(spanList, count)
