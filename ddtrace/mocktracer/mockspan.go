@@ -99,6 +99,10 @@ type mockspan struct {
 	tracer    *mocktracer
 }
 
+// AddLog to span
+func (s *mockspan) AddLog(key string, value interface{}, time time.Time) {
+}
+
 // SetTag sets a given tag on the span.
 func (s *mockspan) SetTag(key string, value interface{}) {
 	s.Lock()

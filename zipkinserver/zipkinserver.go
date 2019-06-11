@@ -16,7 +16,7 @@ type ZipkinServer struct {
 
 // URL of the Zipkin server
 func (z *ZipkinServer) URL() string {
-	return z.server.URL+"/v1/trace"
+	return z.server.URL + "/v1/trace"
 }
 
 // Stop the embedded Zipkin server
@@ -33,34 +33,34 @@ func (z *ZipkinServer) Reset() {
 func Start() *ZipkinServer {
 	zipkin := &ZipkinServer{}
 	zipkin.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/v1/trace" {
-			if r.Method != http.MethodPost {
-				w.WriteHeader(http.StatusMethodNotAllowed)
-				return
-			}
-			if r.Header.Get("content-type") != "application/json" {
-				w.WriteHeader(http.StatusNotAcceptable)
-				return
-			}
-
-			var trace traceformat.Trace
-
-			if err := easyjson.UnmarshalFromReader(r.Body, &trace); err != nil {
-				_, err = io.WriteString(w, err.Error())
-				if err != nil {
-					// Probably can't successfully write the err to the response so just
-					// panic since this is used for testing.
-					panic(err)
-				}
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-
-			zipkin.Spans = append(zipkin.Spans, trace...)
+		if r.URL.Path != "/v1/trace" {
+			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 
-		w.WriteHeader(http.StatusNotFound)
+		if r.Method != http.MethodPost {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		if r.Header.Get("content-type") != "application/json" {
+			w.WriteHeader(http.StatusNotAcceptable)
+			return
+		}
+
+		var trace traceformat.Trace
+
+		if err := easyjson.UnmarshalFromReader(r.Body, &trace); err != nil {
+			_, err = io.WriteString(w, err.Error())
+			if err != nil {
+				// Probably can't successfully write the err to the response so just
+				// panic since this is used for testing.
+				panic(err)
+			}
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		zipkin.Spans = append(zipkin.Spans, trace...)
 	}))
 	return zipkin
 }

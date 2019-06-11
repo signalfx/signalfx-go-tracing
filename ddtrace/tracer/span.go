@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tinylib/msgp/msgp"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
+	"github.com/tinylib/msgp/msgp"
 )
 
 type (
@@ -39,6 +39,12 @@ type errorConfig struct {
 	stackSkip    uint
 }
 
+type logField struct {
+	key   string
+	value interface{}
+	time  time.Time
+}
+
 // span represents a computation. Callers must call Finish when a span is
 // complete to ensure it's submitted.
 type span struct {
@@ -56,9 +62,15 @@ type span struct {
 	TraceID  uint64             `msg:"trace_id"`          // identifier of the root span
 	ParentID uint64             `msg:"parent_id"`         // identifier of the span's direct parent
 	Error    int32              `msg:"error"`             // error status of the span; 0 means no errors
+	Logs     []logField
 
 	finished bool         `msg:"-"` // true if the span has been submitted to a tracer.
 	context  *spanContext `msg:"-"` // span propagation context
+}
+
+// AddLog field to span
+func (z *span) AddLog(key string, value interface{}, time time.Time) {
+	z.Logs = append(z.Logs, logField{key: key, value: value, time: time})
 }
 
 // Context yields the SpanContext for this Span. Note that the return
@@ -89,11 +101,11 @@ func (s *span) SetTag(key string, value interface{}) {
 	if s.finished {
 		return
 	}
-	switch key {
-	case ext.Error:
-		s.setTagError(value, &errorConfig{})
-		return
-	}
+	//switch key {
+	//case ext.Error:
+	//	s.setTagError(value, &errorConfig{})
+	//	return
+	//}
 	if v, ok := value.(bool); ok {
 		s.setTagBool(key, v)
 		return
@@ -245,15 +257,15 @@ func (s *span) Finish(opts ...ddtrace.FinishOption) {
 	} else {
 		t = cfg.FinishTime.UnixNano()
 	}
-	if cfg.Error != nil {
-		s.Lock()
-		s.setTagError(cfg.Error, &errorConfig{
-			noDebugStack: cfg.NoDebugStack,
-			stackFrames:  cfg.StackFrames,
-			stackSkip:    cfg.SkipStackFrames,
-		})
-		s.Unlock()
-	}
+	//if cfg.Error != nil {
+	//	s.Lock()
+	//	s.setTagError(cfg.Error, &errorConfig{
+	//		noDebugStack: cfg.NoDebugStack,
+	//		stackFrames:  cfg.StackFrames,
+	//		stackSkip:    cfg.SkipStackFrames,
+	//	})
+	//	s.Unlock()
+	//}
 	s.finish(t)
 }
 

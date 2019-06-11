@@ -40,6 +40,9 @@ type Span interface {
 	// SetTag sets a key/value pair as metadata on the span.
 	SetTag(key string, value interface{})
 
+	// AddLog adds a log field.
+	AddLog(key string, value interface{}, time time.Time)
+
 	// SetOperationName sets the operation name for this span. An operation name should be
 	// a representative name for a group of spans (e.g. "grpc.server" or "http.request").
 	SetOperationName(operationName string)
