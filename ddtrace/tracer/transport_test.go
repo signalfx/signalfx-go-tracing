@@ -76,6 +76,7 @@ func mockDatadogAPINewServer(t *testing.T) *httptest.Server {
 }
 
 func TestTracesAgentIntegration(t *testing.T) {
+	t.Skip("not yet supported")
 	if !integration {
 		t.Skip("to enable integration test, set the INTEGRATION environment variable")
 	}
@@ -152,7 +153,7 @@ func TestTransportResponse(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			ln, err := net.Listen("tcp4", ":0")
+			ln, err := net.Listen("tcp4", "localhost:0")
 			assert.Nil(err)
 			go http.Serve(ln, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(tt.status)

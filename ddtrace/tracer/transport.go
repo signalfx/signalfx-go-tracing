@@ -15,7 +15,7 @@ import (
 var (
 	// TODO(gbbr): find a more effective way to keep this up to date,
 	// e.g. via `go generate`
-	tracerVersion = "v1.13.1"
+	tracerVersion = "v0.1.0"
 
 	// We copy the transport to avoid using the default one, as it might be
 	// augmented with tracing and we don't want these calls to be recorded.
@@ -46,7 +46,7 @@ const (
 type transport interface {
 	// send sends the payload p to the agent using the transport set up.
 	// It returns a non-nil response body when no error occurred.
-	send(p *payload) (body io.ReadCloser, err error)
+	send(p encoder) (body io.ReadCloser, err error)
 }
 
 // newTransport returns a new Transport implementation that sends traces to a
@@ -97,7 +97,7 @@ func newHTTPTransport(addr string, roundTripper http.RoundTripper) *httpTranspor
 	}
 }
 
-func (t *httpTransport) send(p *payload) (body io.ReadCloser, err error) {
+func (t *httpTransport) send(p encoder) (body io.ReadCloser, err error) {
 	// prepare the client and send the payload
 	req, err := http.NewRequest("POST", t.traceURL, p)
 	if err != nil {

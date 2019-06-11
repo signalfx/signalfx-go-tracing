@@ -49,7 +49,7 @@ func TestMain(m *testing.M) {
 	session.Query("CREATE TABLE if not exists trace.person (name text PRIMARY KEY, age int, description text)").Exec()
 	session.Query("INSERT INTO trace.person (name, age, description) VALUES ('Cassandra', 100, 'A cruel mistress')").Exec()
 
-	m.Run()
+	os.Exit(m.Run())
 }
 
 func TestErrorWrapper(t *testing.T) {

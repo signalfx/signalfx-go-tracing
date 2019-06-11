@@ -1041,7 +1041,7 @@ func newDummyTransport() *dummyTransport {
 	return &dummyTransport{traces: spanLists{}}
 }
 
-func (t *dummyTransport) send(p *payload) (io.ReadCloser, error) {
+func (t *dummyTransport) send(p encoder) (io.ReadCloser, error) {
 	traces, err := decode(p)
 	if err != nil {
 		return nil, err
@@ -1053,7 +1053,7 @@ func (t *dummyTransport) send(p *payload) (io.ReadCloser, error) {
 	return ok, nil
 }
 
-func decode(p *payload) (spanLists, error) {
+func decode(p encoder) (spanLists, error) {
 	var traces spanLists
 	err := msgp.Decode(p, &traces)
 	return traces, err

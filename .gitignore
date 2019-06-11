@@ -11,4 +11,7 @@ bin/
 *.lock
 *.swp
 
+# IntelliJ
+.idea
+
 /contrib/google.golang.org/grpc.v12/vendor/
