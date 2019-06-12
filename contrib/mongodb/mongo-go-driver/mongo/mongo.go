@@ -1,5 +1,4 @@
-// Package mongo provides functions to trace the mongodb/mongo-go-driver package (https://github.com/mongodb/mongo-go-driver).
-// It support v0.2.0 of github.com/mongodb/mongo-go-driver
+// Package mongo provides functions to trace the mongodb/mongo-go-driver package (https://go.mongodb.org/mongo-driver).
 //
 // `NewMonitor` will return an event.CommandMonitor which is used to trace requests.
 package mongo
