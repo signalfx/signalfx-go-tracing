@@ -246,15 +246,11 @@ jobs:
     steps:
       - checkout
       - get_deps
-      - go_get:
-          packages: "golang.org/x/lint/golint github.com/alecthomas/gometalinter"
       - run:
           name: Run linter
           command: |
-            gometalinter --disable-all --vendor --deadline=5m \
-                --enable=golint \
-                --enable=vet \
-                ./...
+            curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sudo sh -s -- -b $(go env GOPATH)/bin v1.17.0
+            GOGC=40 golangci-lint run --deadline 5m
 
 workflows:
   build_test:
