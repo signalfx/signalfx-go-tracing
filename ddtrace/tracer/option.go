@@ -68,9 +68,9 @@ func defaults(c *config) {
 }
 
 // WithZipkin uses Zipkin instead of DD encoding and transport.
-func WithZipkin(url string, accessToken string) StartOption {
+func WithZipkin(service string, url string, accessToken string) StartOption {
 	return func(c *config) {
-		c.payload = newZipkinPayload()
+		c.payload = newZipkinPayload(service)
 		c.transport = newZipkinTransport(url, accessToken, defaultRoundTripper)
 	}
 }

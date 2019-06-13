@@ -38,6 +38,10 @@ var _ ddtrace.Tracer = (*NoopTracer)(nil)
 // NoopTracer is an implementation of ddtrace.Tracer that is a no-op.
 type NoopTracer struct{}
 
+// ForceFlush traces
+func (NoopTracer) ForceFlush() {
+}
+
 // StartSpan implements ddtrace.Tracer.
 func (NoopTracer) StartSpan(operationName string, opts ...ddtrace.StartSpanOption) ddtrace.Span {
 	return NoopSpan{}
