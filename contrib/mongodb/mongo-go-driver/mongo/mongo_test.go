@@ -8,16 +8,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/options"
-	"github.com/mongodb/mongo-go-driver/x/network/result"
-	"github.com/mongodb/mongo-go-driver/x/network/wiremessage"
-	"github.com/stretchr/testify/assert"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/mocktracer"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	"github.com/signalfx/signalfx-go-tracing/internal/globalconfig"
+	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/x/network/result"
+	"go.mongodb.org/mongo-driver/x/network/wiremessage"
 )
 
 func Test(t *testing.T) {
@@ -39,8 +39,7 @@ func Test(t *testing.T) {
 	addr := fmt.Sprintf("mongodb://%s", li.Addr().String())
 	opts := options.Client()
 	opts.SetMonitor(NewMonitor())
-	opts.SetSingle(true)
-	client, err := mongo.Connect(ctx, addr, opts)
+	client, err := mongo.Connect(ctx, opts.ApplyURI(addr))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -197,8 +196,7 @@ func TestAnalyticsSettings(t *testing.T) {
 		addr := fmt.Sprintf("mongodb://%s", li.Addr().String())
 		mongopts := options.Client()
 		mongopts.SetMonitor(NewMonitor(opts...))
-		mongopts.SetSingle(true)
-		client, err := mongo.Connect(ctx, addr, mongopts)
+		client, err := mongo.Connect(ctx, mongopts.ApplyURI(addr))
 		if err != nil {
 			t.Fatal(err)
 		}

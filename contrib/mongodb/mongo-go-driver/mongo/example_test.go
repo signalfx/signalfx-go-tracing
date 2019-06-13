@@ -3,9 +3,9 @@ package mongo_test
 import (
 	"context"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	mongotrace "github.com/signalfx/signalfx-go-tracing/contrib/mongodb/mongo-go-driver/mongo"
 )
@@ -14,7 +14,7 @@ func Example() {
 	// connect to MongoDB
 	opts := options.Client()
 	opts.SetMonitor(mongotrace.NewMonitor())
-	client, err := mongo.Connect(context.Background(), "mongodb://localhost:27017", opts)
+	client, err := mongo.Connect(context.Background(), opts.ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
 		panic(err)
 	}

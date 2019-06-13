@@ -1,5 +1,4 @@
-// Package mongo provides functions to trace the mongodb/mongo-go-driver package (https://github.com/mongodb/mongo-go-driver).
-// It support v0.2.0 of github.com/mongodb/mongo-go-driver
+// Package mongo provides functions to trace the mongodb/mongo-go-driver package (https://go.mongodb.org/mongo-driver).
 //
 // `NewMonitor` will return an event.CommandMonitor which is used to trace requests.
 package mongo
@@ -14,8 +13,8 @@ import (
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/event"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/event"
 )
 
 type spanKey struct {
