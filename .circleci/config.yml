@@ -155,6 +155,11 @@ commands:
         default: 3
     steps:
       - run:
+          name: Prefetch and remove conflicting golib vendored libraries
+          command: |
+            go get -v github.com/signalfx/golib/...
+            rm -rf $(go env GOPATH)/github.com/signalfx/golib/vendor
+      - run:
           name: Fetching dependencies
           command: |
             RETRIES=<< parameters.retries >>
@@ -163,10 +168,6 @@ commands:
                 sleep 5
             done
             exit 1
-      - run:
-          name: Remove conflicting golib vendored libraries
-          command: |
-            rm -rf $GOPATH/github.com/signalfx/golib/vendor
 
   get_redis:
     parameters:
