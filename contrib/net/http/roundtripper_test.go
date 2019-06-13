@@ -111,10 +111,8 @@ func TestRoundTripperZipkin(t *testing.T) {
 			"http.status_code": "500",
 		}, tags)
 
-		ann := testutil.GetAnnotations(t, s1)
-
+		assert.Len(s1.Annotations, 0)
 		assert.Equal(tags["error"], "true")
-		assert.Len(ann, 0)
 	})
 
 	t.Run("host connect error", func(t *testing.T) {
@@ -143,10 +141,11 @@ func TestRoundTripperZipkin(t *testing.T) {
 			"span.kind":   "client",
 		}, tags)
 
-		ann := testutil.GetAnnotations(t, s0)
+
+		assert.Len(s0.Annotations, 1)
+		ann := testutil.GetAnnotation(t, s0, 0)
 
 		assert.Equal(tags["error"], "true")
-		assert.Len(ann, 5)
 		assert.Equal(ann["event"], "error")
 		assert.Contains(ann["message"], "connection refused")
 		assert.Greater(len(ann["stack"]), 50)

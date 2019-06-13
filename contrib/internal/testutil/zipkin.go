@@ -7,18 +7,11 @@ import (
 	"testing"
 )
 
-// GetAnnotations returns a map of the annotations set in the given span.
-func GetAnnotations(t *testing.T, span *trace.Span) map[string]string {
-	annotations := map[string]string{}
-
-	for _, ann := range span.Annotations {
-		var msg map[string]string
-		err := json.Unmarshal([]byte(*ann.Value), &msg)
-		require.NoError(t, err)
-		for key, val := range msg {
-			annotations[key] = val
-		}
-	}
-
-	return annotations
+// GetAnnotation returns the deserialized annotation at idx
+func GetAnnotation(t *testing.T, span *trace.Span, idx int) map[string]string {
+	require.Greater(t, len(span.Annotations), idx)
+	var msg map[string]string
+	err := json.Unmarshal([]byte(*span.Annotations[idx].Value), &msg)
+	require.NoError(t, err)
+	return msg
 }

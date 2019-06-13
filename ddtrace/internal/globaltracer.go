@@ -1,10 +1,8 @@
 package internal // import "github.com/signalfx/signalfx-go-tracing/ddtrace/internal"
 
 import (
-	"sync"
-	"time"
-
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
+	"sync"
 )
 
 var (
@@ -67,8 +65,8 @@ var _ ddtrace.Span = (*NoopSpan)(nil)
 // NoopSpan is an implementation of ddtrace.Span that is a no-op.
 type NoopSpan struct{}
 
-// AddLog impelments ddtrace.Span
-func (NoopSpan) AddLog(key string, value interface{}, time time.Time) {
+// LogFields impelments ddtrace.Span
+func (NoopSpan) LogFields(fields ...ddtrace.LogFieldEntry) {
 }
 
 // SetTag implements ddtrace.Span.

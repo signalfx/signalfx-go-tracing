@@ -99,8 +99,8 @@ type mockspan struct {
 	tracer    *mocktracer
 }
 
-// AddLog to span
-func (s *mockspan) AddLog(key string, value interface{}, time time.Time) {
+// LogFields to span
+func (s *mockspan) LogFields(fields ...ddtrace.LogFieldEntry) {
 }
 
 // SetTag sets a given tag on the span.

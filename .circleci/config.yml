@@ -163,6 +163,10 @@ commands:
                 sleep 5
             done
             exit 1
+      - run:
+          name: Remove conflicting golib vendored libraries
+          command: |
+            rm -rf $GOPATH/github.com/signalfx/golib/vendor
 
   get_redis:
     parameters:
@@ -267,7 +271,7 @@ workflows:
       - go_test:
           # test all remaining contrib tests not included in the other jobs
           name: test_contrib
-          packages: "`go list ./contrib/... | grep -v -P 'gocql|elastic|Shopify|kafka|memcache|globalsign|mongo|redis|redigo|sql|gorm'`" 
+          packages: "`go list ./contrib/... | grep -v -P 'gocql|elastic|Shopify|kafka|memcache|globalsign|mongo|redis|redigo|sql|gorm'`"
       - go_test:
           name: test_ddtrace
           packages: "./ddtrace/..."

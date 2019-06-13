@@ -39,10 +39,10 @@ type errorConfig struct {
 	stackSkip    uint
 }
 
-type logField struct {
-	key   string
-	value interface{}
-	time  time.Time
+// logFields holds the results of one invocation of LogFields
+type logFields struct {
+	fields []ddtrace.LogFieldEntry
+	time time.Time
 }
 
 // span represents a computation. Callers must call Finish when a span is
@@ -62,15 +62,15 @@ type span struct {
 	TraceID  uint64             `msg:"trace_id"`          // identifier of the root span
 	ParentID uint64             `msg:"parent_id"`         // identifier of the span's direct parent
 	Error    int32              `msg:"error"`             // error status of the span; 0 means no errors
-	Logs     []logField
+	Logs     []*logFields
 
 	finished bool         `msg:"-"` // true if the span has been submitted to a tracer.
 	context  *spanContext `msg:"-"` // span propagation context
 }
 
-// AddLog field to span
-func (z *span) AddLog(key string, value interface{}, time time.Time) {
-	z.Logs = append(z.Logs, logField{key: key, value: value, time: time})
+// LogFields field to span
+func (z *span) LogFields(fields ...ddtrace.LogFieldEntry) {
+	z.Logs = append(z.Logs, &logFields{fields, time.Now()})
 }
 
 // Context yields the SpanContext for this Span. Note that the return
