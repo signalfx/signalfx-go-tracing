@@ -2,7 +2,6 @@ package http
 
 import (
 	"fmt"
-	"github.com/signalfx/signalfx-go-tracing/contrib/internal/log"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
@@ -46,7 +45,7 @@ func (rt *roundTripper) RoundTrip(req *http.Request) (res *http.Response, err er
 	}
 	res, err = rt.base.RoundTrip(req.WithContext(ctx))
 	if err != nil {
-		log.LogError(span, err)
+		span.SetTag(ext.Error, err)
 	} else {
 		span.SetTag(ext.HTTPCode, strconv.Itoa(res.StatusCode))
 		// treat 5XX as errors but there's no err object to log.

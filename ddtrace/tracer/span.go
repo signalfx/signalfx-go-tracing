@@ -41,8 +41,8 @@ type errorConfig struct {
 
 // logFields holds the results of one invocation of LogFields
 type logFields struct {
-	fields []ddtrace.LogFieldEntry
-	time time.Time
+	fields map[string]interface{}
+	time   time.Time
 }
 
 // span represents a computation. Callers must call Finish when a span is
@@ -70,7 +70,11 @@ type span struct {
 
 // LogFields field to span
 func (z *span) LogFields(fields ...ddtrace.LogFieldEntry) {
-	z.Logs = append(z.Logs, &logFields{fields, time.Now()})
+	m := map[string]interface{}{}
+	for _, field := range fields {
+		m[field.Key] = field.Value
+	}
+	z.Logs = append(z.Logs, &logFields{m, time.Now()})
 }
 
 // Context yields the SpanContext for this Span. Note that the return
@@ -101,11 +105,12 @@ func (s *span) SetTag(key string, value interface{}) {
 	if s.finished {
 		return
 	}
-	//switch key {
-	//case ext.Error:
-	//	s.setTagError(value, &errorConfig{})
-	//	return
-	//}
+
+	if key == ext.Error {
+		s.setTagError(value, &errorConfig{})
+		return
+	}
+
 	if v, ok := value.(bool); ok {
 		s.setTagBool(key, v)
 		return
@@ -141,15 +146,24 @@ func (s *span) setTagError(value interface{}, cfg *errorConfig) {
 		// if anyone sets an error value as the tag, be nice here
 		// and provide all the benefits.
 		s.Error = 1
-		s.Meta[ext.ErrorMsg] = v.Error()
-		s.Meta[ext.ErrorType] = reflect.TypeOf(v).String()
+
+		fields := []ddtrace.LogFieldEntry{
+			ddtrace.LogField(ext.Event, "error"),
+			ddtrace.LogField(ext.ErrorKind, reflect.TypeOf(v).String()),
+			ddtrace.LogField(ext.ErrorObject, fmt.Sprintf("%#v", v)),
+			ddtrace.LogField(ext.Message, v.Error()),
+		}
+
 		if !cfg.noDebugStack {
 			if cfg.stackFrames == 0 {
-				s.Meta[ext.ErrorStack] = string(debug.Stack())
+				// TODO: maybe support xerrors and/or https://godoc.org/github.com/pkg/errors?
+				fields = append(fields, ddtrace.LogField(ext.Stack, string(debug.Stack())))
 			} else {
-				s.Meta[ext.ErrorStack] = takeStacktrace(cfg.stackFrames, cfg.stackSkip)
+				fields = append(fields, ddtrace.LogField(ext.Stack, takeStacktrace(cfg.stackFrames, cfg.stackSkip)))
 			}
 		}
+
+		s.LogFields(fields...)
 	case nil:
 		// no error
 		s.Error = 0
@@ -157,6 +171,10 @@ func (s *span) setTagError(value interface{}, cfg *errorConfig) {
 		// in all other cases, let's assume that setting this tag
 		// is the result of an error.
 		s.Error = 1
+	}
+
+	if s.Error == 1 {
+		s.setTagString(ext.Error, "true")
 	}
 }
 
@@ -257,15 +275,15 @@ func (s *span) Finish(opts ...ddtrace.FinishOption) {
 	} else {
 		t = cfg.FinishTime.UnixNano()
 	}
-	//if cfg.Error != nil {
-	//	s.Lock()
-	//	s.setTagError(cfg.Error, &errorConfig{
-	//		noDebugStack: cfg.NoDebugStack,
-	//		stackFrames:  cfg.StackFrames,
-	//		stackSkip:    cfg.SkipStackFrames,
-	//	})
-	//	s.Unlock()
-	//}
+	if cfg.Error != nil {
+		s.Lock()
+		s.setTagError(cfg.Error, &errorConfig{
+			noDebugStack: cfg.NoDebugStack,
+			stackFrames:  cfg.StackFrames,
+			stackSkip:    cfg.SkipStackFrames,
+		})
+		s.Unlock()
+	}
 	s.finish(t)
 }
 

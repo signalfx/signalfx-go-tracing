@@ -130,13 +130,7 @@ func convertLogs(logs []*logFields) []*sfxtrace.Annotation {
 	var annotations []*sfxtrace.Annotation
 
 	for _, log := range logs {
-		logMap := map[string]interface{}{}
-
-		for _, field := range log.fields {
-			logMap[field.Key] = field.Value
-		}
-
-		jsonLog, err := json.Marshal(logMap)
+		jsonLog, err := json.Marshal(log.fields)
 		if err != nil {
 			// TODO: should probably find a way to push this to the tracer error handling?
 			continue
