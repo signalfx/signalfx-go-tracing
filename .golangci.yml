@@ -1,0 +1,27 @@
+issues:
+  max-same-issues: 0
+  max-per-linter: 0
+  exclude-rules:
+    # We use certain values repeatedly in different test cases. Using consts would only
+    # reduce clarity.
+    - linters:
+       - goconst
+      path: _test\.go
+
+    # Test code can do weird things with context in BeforeEach
+    - text: cancel
+      path: _test\.go
+      linters:
+        - govet
+
+    # There are many places where we let users set TLS InsecureSkipVerify from
+    # config
+    - text: G402
+      linters:
+        - gosec
+
+linters:
+  disable-all: true
+  enable:
+    - golint
+    - govet
