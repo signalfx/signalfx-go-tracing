@@ -157,8 +157,8 @@ commands:
       - run:
           name: Prefetch and remove conflicting golib vendored libraries
           command: |
-            go get -v github.com/signalfx/golib/...
-            rm -rf $(go env GOPATH)/github.com/signalfx/golib/vendor
+            go get -v github.com/signalfx/golib/trace/...
+            rm -rf $(go env GOPATH)/src/github.com/signalfx/golib/vendor
       - run:
           name: Fetching dependencies
           command: |

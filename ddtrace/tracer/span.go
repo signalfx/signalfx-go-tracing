@@ -69,12 +69,12 @@ type span struct {
 }
 
 // LogFields field to span
-func (z *span) LogFields(fields ...ddtrace.LogFieldEntry) {
+func (s *span) LogFields(fields ...ddtrace.LogFieldEntry) {
 	m := map[string]interface{}{}
 	for _, field := range fields {
 		m[field.Key] = field.Value
 	}
-	z.Logs = append(z.Logs, &logFields{m, time.Now()})
+	s.Logs = append(s.Logs, &logFields{m, time.Now()})
 }
 
 // Context yields the SpanContext for this Span. Note that the return

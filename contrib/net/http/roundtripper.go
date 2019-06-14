@@ -44,16 +44,14 @@ func (rt *roundTripper) RoundTrip(req *http.Request) (res *http.Response, err er
 		fmt.Fprintf(os.Stderr, "contrib/net/http.Roundtrip: failed to inject http headers: %v\n", err)
 	}
 	res, err = rt.base.RoundTrip(req.WithContext(ctx))
-	if err != nil {
-		span.SetTag(ext.Error, err)
-	} else {
+	if err == nil {
 		span.SetTag(ext.HTTPCode, strconv.Itoa(res.StatusCode))
 		// treat 5XX as errors but there's no err object to log.
 		if res.StatusCode/100 == 5 {
 			span.SetTag(ext.Error, "true")
 		}
 	}
-	return res, err
+	return
 }
 
 // WrapRoundTripper returns a new RoundTripper which traces all requests sent
