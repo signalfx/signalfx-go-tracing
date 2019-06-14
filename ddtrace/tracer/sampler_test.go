@@ -1,6 +1,7 @@
 package tracer
 
 import (
+	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"io/ioutil"
 	"math"
 	"strings"
@@ -8,8 +9,6 @@ import (
 	"testing"
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/internal"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -164,7 +163,7 @@ func TestRateSampler(t *testing.T) {
 	assert.True(NewRateSampler(1).Sample(newBasicSpan("test")))
 	assert.False(NewRateSampler(0).Sample(newBasicSpan("test")))
 	assert.False(NewRateSampler(0).Sample(newBasicSpan("test")))
-	assert.False(NewRateSampler(0.99).Sample(internal.NoopSpan{}))
+	assert.False(NewRateSampler(0.99).Sample(ddtrace.NoopSpan{}))
 }
 
 func TestRateSamplerSetting(t *testing.T) {

@@ -1,17 +1,16 @@
-package internal // import "github.com/signalfx/signalfx-go-tracing/ddtrace/internal"
+package ddtrace // import "github.com/signalfx/signalfx-go-tracing/ddtrace"
 
 import (
-	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"sync"
 )
 
 var (
 	mu           sync.RWMutex   // guards globalTracer
-	globalTracer ddtrace.Tracer = &NoopTracer{}
+	globalTracer Tracer = &NoopTracer{}
 )
 
 // SetGlobalTracer sets the global tracer to t.
-func SetGlobalTracer(t ddtrace.Tracer) {
+func SetGlobalTracer(t Tracer) {
 	mu.Lock()
 	defer mu.Unlock()
 	if !Testing {
@@ -22,7 +21,7 @@ func SetGlobalTracer(t ddtrace.Tracer) {
 }
 
 // GetGlobalTracer returns the currently active tracer.
-func GetGlobalTracer() ddtrace.Tracer {
+func GetGlobalTracer() Tracer {
 	mu.RLock()
 	defer mu.RUnlock()
 	return globalTracer
@@ -32,7 +31,7 @@ func GetGlobalTracer() ddtrace.Tracer {
 // environment. This value is used by tracer.Start to prevent overriding the GlobalTracer in tests.
 var Testing = false
 
-var _ ddtrace.Tracer = (*NoopTracer)(nil)
+var _ Tracer = (*NoopTracer)(nil)
 
 // NoopTracer is an implementation of ddtrace.Tracer that is a no-op.
 type NoopTracer struct{}
@@ -42,7 +41,7 @@ func (NoopTracer) ForceFlush() {
 }
 
 // StartSpan implements ddtrace.Tracer.
-func (NoopTracer) StartSpan(operationName string, opts ...ddtrace.StartSpanOption) ddtrace.Span {
+func (NoopTracer) StartSpan(operationName string, opts ...StartSpanOption) Span {
 	return NoopSpan{}
 }
 
@@ -50,23 +49,23 @@ func (NoopTracer) StartSpan(operationName string, opts ...ddtrace.StartSpanOptio
 func (NoopTracer) SetServiceInfo(name, app, appType string) {}
 
 // Extract implements ddtrace.Tracer.
-func (NoopTracer) Extract(carrier interface{}) (ddtrace.SpanContext, error) {
+func (NoopTracer) Extract(carrier interface{}) (SpanContext, error) {
 	return NoopSpanContext{}, nil
 }
 
 // Inject implements ddtrace.Tracer.
-func (NoopTracer) Inject(context ddtrace.SpanContext, carrier interface{}) error { return nil }
+func (NoopTracer) Inject(context SpanContext, carrier interface{}) error { return nil }
 
 // Stop implements ddtrace.Tracer.
 func (NoopTracer) Stop() {}
 
-var _ ddtrace.Span = (*NoopSpan)(nil)
+var _ Span = (*NoopSpan)(nil)
 
 // NoopSpan is an implementation of ddtrace.Span that is a no-op.
 type NoopSpan struct{}
 
 // LogFields impelments ddtrace.Span
-func (NoopSpan) LogFields(fields ...ddtrace.LogFieldEntry) {
+func (NoopSpan) LogFields(fields ...LogFieldEntry) {
 }
 
 // SetTag implements ddtrace.Span.
@@ -82,15 +81,15 @@ func (NoopSpan) BaggageItem(key string) string { return "" }
 func (NoopSpan) SetBaggageItem(key, val string) {}
 
 // Finish implements ddtrace.Span.
-func (NoopSpan) Finish(opts ...ddtrace.FinishOption) {}
+func (NoopSpan) Finish(opts ...FinishOption) {}
 
 // Tracer implements ddtrace.Span.
-func (NoopSpan) Tracer() ddtrace.Tracer { return NoopTracer{} }
+func (NoopSpan) Tracer() Tracer { return NoopTracer{} }
 
 // Context implements ddtrace.Span.
-func (NoopSpan) Context() ddtrace.SpanContext { return NoopSpanContext{} }
+func (NoopSpan) Context() SpanContext { return NoopSpanContext{} }
 
-var _ ddtrace.SpanContext = (*NoopSpanContext)(nil)
+var _ SpanContext = (*NoopSpanContext)(nil)
 
 // NoopSpanContext is an implementation of ddtrace.SpanContext that is a no-op.
 type NoopSpanContext struct{}

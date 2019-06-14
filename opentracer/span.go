@@ -1,13 +1,10 @@
 package opentracer
 
 import (
-	"fmt"
-
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/log"
 )
 
@@ -38,24 +35,13 @@ func (s *span) FinishWithOptions(opts opentracing.FinishOptions) {
 func (s *span) LogFields(fields ...log.Field) {
 	// catch standard opentracing keys and adjust to internal ones as per spec:
 	// https://github.com/opentracing/specification/blob/master/semantic_conventions.md#log-fields-table
-	for _, f := range fields {
-		switch f.Key() {
-		case "event":
-			if v, ok := f.Value().(string); ok && v == "error" {
-				s.SetTag("error", true)
-			}
-		case "error", "error.object":
-			if err, ok := f.Value().(error); ok {
-				s.SetTag("error", err)
-			}
-		case "message":
-			s.SetTag(ext.ErrorMsg, fmt.Sprint(f.Value()))
-		case "stack":
-			s.SetTag(ext.ErrorStack, fmt.Sprint(f.Value()))
-		default:
-			// not implemented
-		}
+	spanLogs := make([]ddtrace.LogFieldEntry, len(fields))
+
+	for i := range fields {
+		spanLogs[i] = ddtrace.LogField(fields[i].Key(), fields[i].Value())
 	}
+
+	s.Span.LogFields(spanLogs...)
 }
 
 func (s *span) LogKV(keyVals ...interface{}) {

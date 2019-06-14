@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/internal"
 )
 
 type contextKey struct{}
@@ -21,13 +20,13 @@ func ContextWithSpan(ctx context.Context, s Span) context.Context {
 // span is returned.
 func SpanFromContext(ctx context.Context) (Span, bool) {
 	if ctx == nil {
-		return &internal.NoopSpan{}, false
+		return &ddtrace.NoopSpan{}, false
 	}
 	v := ctx.Value(activeSpanKey)
 	if s, ok := v.(ddtrace.Span); ok {
 		return s, true
 	}
-	return &internal.NoopSpan{}, false
+	return &ddtrace.NoopSpan{}, false
 }
 
 // StartSpanFromContext returns a new span with the given operation name and options. If a span

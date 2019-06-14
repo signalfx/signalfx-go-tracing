@@ -6,7 +6,6 @@ import (
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/internal"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 
 	"github.com/stretchr/testify/assert"
@@ -14,14 +13,14 @@ import (
 
 func TestStart(t *testing.T) {
 	trc := Start()
-	if tt, ok := internal.GetGlobalTracer().(Tracer); !ok || tt != trc {
+	if tt, ok := ddtrace.GetGlobalTracer().(Tracer); !ok || tt != trc {
 		t.Fail()
 	}
 }
 
 func TestTracerStop(t *testing.T) {
 	Start().Stop()
-	if _, ok := internal.GetGlobalTracer().(*internal.NoopTracer); !ok {
+	if _, ok := ddtrace.GetGlobalTracer().(*ddtrace.NoopTracer); !ok {
 		t.Fail()
 	}
 }

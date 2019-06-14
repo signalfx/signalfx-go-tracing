@@ -1,15 +1,16 @@
 package ddtrace_test
 
 import (
+	"github.com/signalfx/signalfx-go-tracing/tracing"
 	"io/ioutil"
 	"log"
 
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go"
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/mocktracer"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/opentracer"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
+	"github.com/signalfx/signalfx-go-tracing/opentracer"
 )
 
 // The below example illustrates a simple use case using the "tracer" package,
@@ -44,7 +45,7 @@ func Example_datadog() {
 func Example_opentracing() {
 	// Start a Datadog tracer, optionally providing a set of options,
 	// returning an opentracing.Tracer which wraps it.
-	t := opentracer.New(tracer.WithAgentAddr("host:port"))
+	t := opentracer.New(tracing.WithEndpointURL("host:port"))
 	defer tracer.Stop() // important for data integrity (flushes any leftovers)
 
 	// Use it with the Opentracing API. The (already started) Datadog tracer

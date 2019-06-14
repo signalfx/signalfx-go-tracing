@@ -9,7 +9,6 @@ import (
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/internal"
 )
 
 var _ ddtrace.Tracer = (*tracer)(nil)
@@ -66,20 +65,20 @@ const (
 // any running tracer, meaning that calling it several times will result in a restart
 // of the tracer by replacing the current instance with a new one.
 func Start(opts ...StartOption) {
-	if internal.Testing {
+	if ddtrace.Testing {
 		return // mock tracer active
 	}
-	internal.SetGlobalTracer(newTracer(opts...))
+	ddtrace.SetGlobalTracer(newTracer(opts...))
 }
 
 // Stop stops the started tracer. Subsequent calls are valid but become no-op.
 func Stop() {
-	internal.SetGlobalTracer(&internal.NoopTracer{})
+	ddtrace.SetGlobalTracer(&ddtrace.NoopTracer{})
 }
 
 // ForceFlush pending traces
 func ForceFlush() {
-	internal.GetGlobalTracer().ForceFlush()
+	ddtrace.GetGlobalTracer().ForceFlush()
 }
 
 // Span is an alias for ddtrace.Span. It is here to allow godoc to group methods returning
@@ -90,21 +89,21 @@ type Span = ddtrace.Span
 // StartSpan starts a new span with the given operation name and set of options.
 // If the tracer is not started, calling this function is a no-op.
 func StartSpan(operationName string, opts ...StartSpanOption) Span {
-	return internal.GetGlobalTracer().StartSpan(operationName, opts...)
+	return ddtrace.GetGlobalTracer().StartSpan(operationName, opts...)
 }
 
 // Extract extracts a SpanContext from the carrier. The carrier is expected
 // to implement TextMapReader, otherwise an error is returned.
 // If the tracer is not started, calling this function is a no-op.
 func Extract(carrier interface{}) (ddtrace.SpanContext, error) {
-	return internal.GetGlobalTracer().Extract(carrier)
+	return ddtrace.GetGlobalTracer().Extract(carrier)
 }
 
 // Inject injects the given SpanContext into the carrier. The carrier is
 // expected to implement TextMapWriter, otherwise an error is returned.
 // If the tracer is not started, calling this function is a no-op.
 func Inject(ctx ddtrace.SpanContext, carrier interface{}) error {
-	return internal.GetGlobalTracer().Inject(ctx, carrier)
+	return ddtrace.GetGlobalTracer().Inject(ctx, carrier)
 }
 
 const (

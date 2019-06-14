@@ -1,16 +1,14 @@
-package opentracer_test
+package opentracer
 
 import (
-	opentracing "github.com/opentracing/opentracing-go"
-
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/opentracer"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
+	"github.com/opentracing/opentracing-go"
+	"github.com/signalfx/signalfx-go-tracing/tracing"
 )
 
 func Example() {
 	// Start a Datadog tracer, optionally providing a set of options,
 	// returning an opentracing.Tracer which wraps it.
-	t := opentracer.New(tracer.WithAgentAddr("host:port"))
+	t := New(tracing.WithEndpointURL("host:port"))
 
 	// Use it with the Opentracing API. The (already started) Datadog tracer
 	// may be used in parallel with the Opentracing API if desired.

@@ -15,8 +15,6 @@ import (
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/internal"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/tinylib/msgp/msgp"
 )
@@ -94,22 +92,22 @@ func TestTracerStart(t *testing.T) {
 	t.Run("normal", func(t *testing.T) {
 		Start()
 		defer Stop()
-		if _, ok := internal.GetGlobalTracer().(*tracer); !ok {
+		if _, ok := ddtrace.GetGlobalTracer().(*tracer); !ok {
 			t.Fail()
 		}
 	})
 
 	t.Run("testing", func(t *testing.T) {
-		internal.Testing = true
+		ddtrace.Testing = true
 		Start()
 		defer Stop()
-		if _, ok := internal.GetGlobalTracer().(*tracer); ok {
+		if _, ok := ddtrace.GetGlobalTracer().(*tracer); ok {
 			t.Fail()
 		}
-		if _, ok := internal.GetGlobalTracer().(*internal.NoopTracer); !ok {
+		if _, ok := ddtrace.GetGlobalTracer().(*ddtrace.NoopTracer); !ok {
 			t.Fail()
 		}
-		internal.Testing = false
+		ddtrace.Testing = false
 	})
 
 	t.Run("deadlock/api", func(t *testing.T) {
@@ -121,7 +119,7 @@ func TestTracerStart(t *testing.T) {
 		Start()
 
 		// ensure at least one worker started and handles requests
-		internal.GetGlobalTracer().(*tracer).ForceFlush()
+		ddtrace.GetGlobalTracer().(*tracer).ForceFlush()
 
 		Stop()
 		Stop()
@@ -1024,9 +1022,9 @@ func startTestTracer(opts ...StartOption) (*tracer, *dummyTransport, func()) {
 	o := append([]StartOption{withTransport(transport)}, opts...)
 	tracer := newTracer(o...)
 	tracer.syncPush = make(chan struct{})
-	internal.SetGlobalTracer(tracer)
+	ddtrace.SetGlobalTracer(tracer)
 	return tracer, transport, func() {
-		internal.SetGlobalTracer(&internal.NoopTracer{})
+		ddtrace.SetGlobalTracer(&ddtrace.NoopTracer{})
 		tracer.Stop()
 	}
 }

@@ -16,17 +16,17 @@ package opentracer
 
 import (
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/internal"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
+	"github.com/signalfx/signalfx-go-tracing/tracing"
 
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go"
 )
 
 // New creates, instantiates and returns an Opentracing compatible version of the
-// Datadog tracer using the provided set of options.
-func New(opts ...tracer.StartOption) opentracing.Tracer {
-	tracer.Start(opts...)
-	return &opentracer{internal.GetGlobalTracer()}
+// tracer using the provided set of options.
+func New(opts ...tracing.StartOption) opentracing.Tracer {
+	tracing.Start(opts...)
+	return &opentracer{ddtrace.GetGlobalTracer()}
 }
 
 var _ opentracing.Tracer = (*opentracer)(nil)
