@@ -212,6 +212,18 @@ commands:
     steps:
       - run: dockerize -wait << parameters.address >> -timeout << parameters.timeout >>
 
+  save_test_results:
+    description: Collect and archive test results from `dir`.
+    parameters:
+      dir:
+        type: string
+        default: "~/testresults"
+    steps:
+      - store_test_results:
+          path: << parameters.dir >>
+      - store_artifacts:
+          path: << parameters.dir >>
+
 jobs:
   go_test:
     description: Run go tests
@@ -244,7 +256,11 @@ jobs:
       - run:
           name: Run go tests
           command: |
-            INTEGRATION=<< parameters.integration >> go test << parameters.options >> << parameters.packages >>
+            mkdir ~/testresults
+            (cd /tmp; GO111MODULE=on go get github.com/tebeka/go2xunit)
+            export INTEGRATION=<< parameters.integration >>
+            bash -euo pipefail -c "go test << parameters.options >> << parameters.packages >> | tee /dev/stderr | grep -v '\[no test files\]' | go2xunit" > ~/testresults/unit.xml
+      - save_test_results
 
   lint_vet:
     executor: go
@@ -264,7 +280,7 @@ workflows:
       # - go_test:
       #    name: test_cassandra
       #    executor: go_cassandra
-      #    packages: "`go list ./contrib/... | grep 'gocql'`"
+      #    packages: "`go list ./contrib/... | grep 'gocql' | xargs`"
       #    after_deps:
       #      - dockerize_wait:
       #          address: tcp://localhost:9042
@@ -272,14 +288,14 @@ workflows:
       - go_test:
           # test all remaining contrib tests not included in the other jobs
           name: test_contrib
-          packages: "`go list ./contrib/... | grep -v -P 'gocql|elastic|Shopify|kafka|memcache|globalsign|mongo|redis|redigo|sql|gorm'`"
+          packages: "`go list ./contrib/... | grep -v -P 'gocql|elastic|Shopify|kafka|memcache|globalsign|mongo|redis|redigo|sql|gorm' | xargs`"
       - go_test:
           name: test_ddtrace
           packages: "./ddtrace/..."
       - go_test:
           name: test_elasticsearch
           executor: go_elasticsearch
-          packages: "`go list ./contrib/... | grep 'elastic'`"
+          packages: "`go list ./contrib/... | grep 'elastic' | xargs`"
           after_deps:
             - dockerize_wait:
                 address: http://localhost:9200
@@ -288,7 +304,7 @@ workflows:
       - go_test:
           name: test_kafka_zookeeper
           executor: go_kafka_zookeeper
-          packages: "`go list ./contrib/... | grep -P 'Shopify|kafka'`"
+          packages: "`go list ./contrib/... | grep -P 'Shopify|kafka' | xargs`"
           after_deps:
             - dockerize_wait:
                 address: tcp://localhost:2181
@@ -297,28 +313,28 @@ workflows:
       - go_test:
           name: test_memcached
           executor: go_memcached
-          packages: "`go list ./contrib/... | grep 'memcache'`"
+          packages: "`go list ./contrib/... | grep 'memcache' | xargs`"
           after_deps:
             - dockerize_wait:
                 address: tcp://localhost:11211
       - go_test:
           name: test_mongo
           executor: go_mongo
-          packages: "`go list ./contrib/... | grep -P 'globalsign|mongo'`"
+          packages: "`go list ./contrib/... | grep -P 'globalsign|mongo' | xargs`"
           after_deps:
             - dockerize_wait:
                 address: tcp://localhost:27017
       - go_test:
           name: test_redis
           executor: go_redis
-          packages: "`go list ./contrib/... | grep -P 'redis|redigo'`"
+          packages: "`go list ./contrib/... | grep -P 'redis|redigo' | xargs`"
           after_deps:
             - dockerize_wait:
                 address: tcp://localhost:6379
       - go_test:
           name: test_sql
           executor: go_sql
-          packages: "`go list ./contrib/... | grep -P 'sql|gorm'`"
+          packages: "`go list ./contrib/... | grep -P 'sql|gorm' | xargs`"
           after_deps:
             - dockerize_wait:
                 address: tcp://localhost:3306
