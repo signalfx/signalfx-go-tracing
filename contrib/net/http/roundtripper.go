@@ -2,13 +2,12 @@ package http
 
 import (
 	"fmt"
-	"net/http"
-	"os"
-	"strconv"
-
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
+	"net/http"
+	"os"
+	"strconv"
 )
 
 const defaultResourceName = "http.request"
@@ -23,7 +22,7 @@ func (rt *roundTripper) RoundTrip(req *http.Request) (res *http.Response, err er
 		tracer.SpanType(ext.SpanTypeHTTP),
 		tracer.ResourceName(defaultResourceName),
 		tracer.Tag(ext.HTTPMethod, req.Method),
-		tracer.Tag(ext.HTTPURL, req.URL.Path),
+		tracer.Tag(ext.HTTPURL, req.URL.String()),
 	}
 	if rate := rt.cfg.analyticsRate; rate > 0 {
 		opts = append(opts, tracer.Tag(ext.EventSampleRate, rate))
@@ -45,16 +44,14 @@ func (rt *roundTripper) RoundTrip(req *http.Request) (res *http.Response, err er
 		fmt.Fprintf(os.Stderr, "contrib/net/http.Roundtrip: failed to inject http headers: %v\n", err)
 	}
 	res, err = rt.base.RoundTrip(req.WithContext(ctx))
-	if err != nil {
-		span.SetTag("http.errors", err.Error())
-	} else {
+	if err == nil {
 		span.SetTag(ext.HTTPCode, strconv.Itoa(res.StatusCode))
-		// treat 5XX as errors
+		// treat 5XX as errors but there's no err object to log.
 		if res.StatusCode/100 == 5 {
-			span.SetTag("http.errors", res.Status)
+			span.SetTag(ext.Error, "true")
 		}
 	}
-	return res, err
+	return
 }
 
 // WrapRoundTripper returns a new RoundTripper which traces all requests sent

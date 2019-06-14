@@ -48,13 +48,14 @@ const (
 	// Error specifies the error tag. It's value is usually of type "error".
 	Error = "error"
 
-	// ErrorMsg specifies the error message.
+	// TODO: these should be removed once everything is migrated to logs.
+	// Deprecated: ErrorMsg specifies the error message.
 	ErrorMsg = "error.msg"
 
-	// ErrorType specifies the error type.
+	// Deprecated: ErrorType specifies the error type.
 	ErrorType = "error.type"
 
-	// ErrorStack specifies the stack dump.
+	// Deprecated: ErrorStack specifies the stack dump.
 	ErrorStack = "error.stack"
 
 	// Environment specifies the environment to use with a trace.
@@ -75,4 +76,19 @@ const (
 	// ManualDrop is a tag which specifies that the trace to which this span
 	// belongs to should be dropped when set to true.
 	ManualDrop = "manual.drop"
+
+	// Event is the log event (usually error)
+	Event = "event"
+
+	// ErrorKind is the error type
+	ErrorKind = "error.kind"
+
+	// ErrorObject is the error object string
+	ErrorObject = "error.object"
+
+	// Message is an error message
+	Message = "message"
+
+	// Stack is a stack trace
+	Stack = "stack"
 )

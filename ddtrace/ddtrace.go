@@ -33,12 +33,26 @@ type Tracer interface {
 	ForceFlush()
 }
 
+// LogFieldEntry holds a key/value pair for a log
+type LogFieldEntry struct {
+	Key   string
+	Value interface{}
+}
+
+// LogField creates a key/value pair
+func LogField(key string, value interface{}) LogFieldEntry {
+	return LogFieldEntry{key, value}
+}
+
 // Span represents a chunk of computation time. Spans have names, durations,
 // timestamps and other metadata. A Tracer is used to create hierarchies of
 // spans in a request, buffer and submit them to the server.
 type Span interface {
 	// SetTag sets a key/value pair as metadata on the span.
 	SetTag(key string, value interface{})
+
+	// LogFields adds a log field.
+	LogFields(fields ...LogFieldEntry)
 
 	// SetOperationName sets the operation name for this span. An operation name should be
 	// a representative name for a group of spans (e.g. "grpc.server" or "http.request").

@@ -47,7 +47,8 @@ func TestKubernetes(t *testing.T) {
 	}))
 	defer s.Close()
 
-	cfg, err := clientcmd.BuildConfigFromKubeconfigGetter(s.URL, func() (*clientcmdapi.Config, error) {
+	url := s.URL
+	cfg, err := clientcmd.BuildConfigFromKubeconfigGetter(url, func() (*clientcmdapi.Config, error) {
 		return clientcmdapi.NewConfig(), nil
 	})
 	assert.NoError(t, err)
@@ -67,7 +68,7 @@ func TestKubernetes(t *testing.T) {
 		assert.Equal(t, "GET namespaces", s.Tag(ext.ResourceName))
 		assert.Equal(t, "200", s.Tag(ext.HTTPCode))
 		assert.Equal(t, "GET", s.Tag(ext.HTTPMethod))
-		assert.Equal(t, "/api/v1/namespaces", s.Tag(ext.HTTPURL))
+		assert.Equal(t, url + "/api/v1/namespaces", s.Tag(ext.HTTPURL))
 		auditID, ok := s.Tag("kubernetes.audit_id").(string)
 		assert.True(t, ok)
 		assert.True(t, len(auditID) > 0)

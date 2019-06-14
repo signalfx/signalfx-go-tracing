@@ -6,13 +6,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	books "google.golang.org/api/books/v1"
-	civicinfo "google.golang.org/api/civicinfo/v2"
-	urlshortener "google.golang.org/api/urlshortener/v1"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/mocktracer"
 	"github.com/signalfx/signalfx-go-tracing/internal/globalconfig"
+	"github.com/stretchr/testify/assert"
+	"google.golang.org/api/books/v1"
+	"google.golang.org/api/civicinfo/v2"
+	"google.golang.org/api/urlshortener/v1"
 )
 
 type roundTripperFunc func(*http.Request) (*http.Response, error)
@@ -53,7 +53,7 @@ func TestBooks(t *testing.T) {
 	assert.Equal(t, "books.bookshelves.list", s0.Tag(ext.ResourceName))
 	assert.Equal(t, "400", s0.Tag(ext.HTTPCode))
 	assert.Equal(t, "GET", s0.Tag(ext.HTTPMethod))
-	assert.Equal(t, "/books/v1/users/montana.banana/bookshelves", s0.Tag(ext.HTTPURL))
+	assert.Equal(t, svc.BasePath + "users/montana.banana/bookshelves?alt=json&prettyPrint=false", s0.Tag(ext.HTTPURL))
 }
 
 func TestCivicInfo(t *testing.T) {
@@ -78,7 +78,7 @@ func TestCivicInfo(t *testing.T) {
 	assert.Equal(t, "civicinfo.representatives.representativeInfoByAddress", s0.Tag(ext.ResourceName))
 	assert.Equal(t, "400", s0.Tag(ext.HTTPCode))
 	assert.Equal(t, "GET", s0.Tag(ext.HTTPMethod))
-	assert.Equal(t, "/civicinfo/v2/representatives", s0.Tag(ext.HTTPURL))
+	assert.Equal(t, svc.BasePath + "representatives?alt=json&prettyPrint=false", s0.Tag(ext.HTTPURL))
 }
 
 func TestURLShortener(t *testing.T) {
@@ -103,7 +103,7 @@ func TestURLShortener(t *testing.T) {
 	assert.Equal(t, "urlshortener.url.list", s0.Tag(ext.ResourceName))
 	assert.Equal(t, "400", s0.Tag(ext.HTTPCode))
 	assert.Equal(t, "GET", s0.Tag(ext.HTTPMethod))
-	assert.Equal(t, "/urlshortener/v1/url/history", s0.Tag(ext.HTTPURL))
+	assert.Equal(t, svc.BasePath + "url/history?alt=json&prettyPrint=false", s0.Tag(ext.HTTPURL))
 }
 
 func TestAnalyticsSettings(t *testing.T) {

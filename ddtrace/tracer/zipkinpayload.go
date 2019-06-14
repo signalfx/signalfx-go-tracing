@@ -2,6 +2,7 @@ package tracer
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/mailru/easyjson"
@@ -10,6 +11,7 @@ import (
 	"github.com/signalfx/golib/trace/format"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"strings"
+	"time"
 )
 
 const (
@@ -21,11 +23,10 @@ const (
 var _ encoder = (*zipkinPayload)(nil)
 
 type zipkinPayload struct {
-	service string
-	buf        bytes.Buffer
-	spanCount  int
-	reader     *bytes.Reader
-
+	service   string
+	buf       bytes.Buffer
+	spanCount int
+	reader    *bytes.Reader
 }
 
 func (p *zipkinPayload) Read(b []byte) (n int, err error) {
@@ -73,16 +74,12 @@ func idToHexPtr(id uint64) *string {
 }
 
 func formatTags(tags map[string]string) {
-	if tags["error.type"] != "" || tags["error.msg"] != "" || tags["error.stack"] != "" {
-		tags["error"] = "true"
-	}
-
 	delete(tags, ext.ServiceName)
 	delete(tags, ext.ResourceName)
 	delete(tags, ext.Pid)
 }
 
-func (p *zipkinPayload)  convertSpans(spans spanList) []*traceformat.Span {
+func (p *zipkinPayload) convertSpans(spans spanList) []*traceformat.Span {
 	sfxSpans := make([]*traceformat.Span, 0, len(spans))
 
 	for _, span := range spans {
@@ -105,6 +102,7 @@ func (p *zipkinPayload)  convertSpans(spans spanList) []*traceformat.Span {
 		sfxSpan.LocalEndpoint = localEndpoint
 		sfxSpan.Timestamp = pointer.Int64(span.Start / 1000)
 		sfxSpan.Duration = pointer.Int64(span.Duration / 1000)
+		sfxSpan.Annotations = convertLogs(span.Logs)
 
 		if span.Resource != "" && sfxSpan.Kind != nil && *sfxSpan.Kind == spanKindServer {
 			sfxSpan.Name = pointer.String(span.Resource)
@@ -125,6 +123,25 @@ func (p *zipkinPayload)  convertSpans(spans spanList) []*traceformat.Span {
 	}
 
 	return sfxSpans
+}
+
+// convertLogs to annotations
+func convertLogs(logs []*logFields) []*sfxtrace.Annotation {
+	var annotations []*sfxtrace.Annotation
+
+	for _, log := range logs {
+		jsonLog, err := json.Marshal(log.fields)
+		if err != nil {
+			// TODO: should probably find a way to push this to the tracer error handling?
+			continue
+		}
+		annotations = append(annotations, &sfxtrace.Annotation{
+			Value: pointer.String(string(jsonLog)),
+			// In microseconds.
+			Timestamp: pointer.Int64(log.time.UnixNano() / int64(time.Microsecond))})
+	}
+
+	return annotations
 }
 
 func deriveKind(s *span) *string {
