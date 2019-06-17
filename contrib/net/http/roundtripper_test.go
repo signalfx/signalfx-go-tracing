@@ -18,9 +18,6 @@ import (
 )
 
 func TestRoundTripperZipkin(t *testing.T) {
-	assert := assert.New(t)
-	require := require.New(t)
-
 	zipkin := zipkinserver.Start()
 	defer zipkin.Stop()
 
@@ -60,13 +57,16 @@ func TestRoundTripperZipkin(t *testing.T) {
 	}
 
 	t.Run("successful request", func(t *testing.T) {
+		assert := assert.New(t)
+		require := require.New(t)
+
 		zipkin.Reset()
 		_, err := client.Get(s.URL + "/query")
 		require.NoError(err)
 
 		tracer.ForceFlush()
 
-		spans := zipkin.Spans
+		spans := zipkin.Spans()
 		require.Len(spans, 2)
 
 		s1 := spans[1]
@@ -85,6 +85,9 @@ func TestRoundTripperZipkin(t *testing.T) {
 	})
 
 	t.Run("500 error", func(t *testing.T) {
+		assert := assert.New(t)
+		require := require.New(t)
+
 		zipkin.Reset()
 
 		_, err := client.Post(s.URL+"/?error=500", "text", strings.NewReader(""))
@@ -92,7 +95,7 @@ func TestRoundTripperZipkin(t *testing.T) {
 
 		tracer.ForceFlush()
 
-		spans := zipkin.Spans
+		spans := zipkin.Spans()
 		require.Len(spans, 2)
 
 		s1 := spans[1]
@@ -116,6 +119,9 @@ func TestRoundTripperZipkin(t *testing.T) {
 	})
 
 	t.Run("host connect error", func(t *testing.T) {
+		assert := assert.New(t)
+		require := require.New(t)
+
 		zipkin.Reset()
 
 		_, err := client.Get("http://localhost:1/query")
@@ -123,7 +129,7 @@ func TestRoundTripperZipkin(t *testing.T) {
 
 		tracer.ForceFlush()
 
-		spans := zipkin.Spans
+		spans := zipkin.Spans()
 		require.Len(spans, 1)
 
 		s0 := spans[0]

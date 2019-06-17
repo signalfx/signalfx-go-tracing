@@ -27,9 +27,10 @@ func Test_span_LogFields(t *testing.T) {
 	span.Finish()
 
 	tracer.ForceFlush()
+	spans := zipkin.Spans()
 
 	require.Len(zipkin.Spans, 1)
-	annotations := zipkin.Spans[0].Annotations
+	annotations := spans[0].Annotations
 	require.Len(annotations, 2)
 
 	assert.Equal(`{"int":5,"str":"value"}`, *annotations[0].Value)

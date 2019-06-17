@@ -6,12 +6,14 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 )
 
 // ZipkinServer is an embedded Zipkin server
 type ZipkinServer struct {
 	server *httptest.Server
-	Spans  traceformat.Trace
+	spans  traceformat.Trace
+	lock   sync.Mutex
 }
 
 // URL of the Zipkin server
@@ -26,7 +28,16 @@ func (z *ZipkinServer) Stop() {
 
 // Reset received spans
 func (z *ZipkinServer) Reset() {
-	z.Spans = nil
+	z.lock.Lock()
+	z.spans = nil
+	z.lock.Unlock()
+}
+
+// Spans returns received spans
+func (z *ZipkinServer) Spans() traceformat.Trace {
+	z.lock.Lock()
+	defer z.lock.Unlock()
+	return z.spans
 }
 
 // Start embedded Zipkin server
@@ -60,7 +71,9 @@ func Start() *ZipkinServer {
 			return
 		}
 
-		zipkin.Spans = append(zipkin.Spans, trace...)
+		zipkin.lock.Lock()
+		zipkin.spans = append(zipkin.spans, trace...)
+		zipkin.lock.Unlock()
 	}))
 	return zipkin
 }
