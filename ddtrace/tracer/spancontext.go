@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/internal"
 )
 
 var _ ddtrace.SpanContext = (*spanContext)(nil)
@@ -199,7 +198,7 @@ func (t *trace) push(sp *span) {
 		// capacity is reached, we will not be able to complete this trace.
 		t.full = true
 		t.spans = nil // GC
-		if tr, ok := internal.GetGlobalTracer().(*tracer); ok {
+		if tr, ok := ddtrace.GetGlobalTracer().(*tracer); ok {
 			// we have a tracer we can submit errors too.
 			tr.pushError(&spanBufferFullError{})
 		}
@@ -235,7 +234,7 @@ func (t *trace) finishedOne(s *span) {
 	if len(t.spans) != t.finished {
 		return
 	}
-	if tr, ok := internal.GetGlobalTracer().(*tracer); ok {
+	if tr, ok := ddtrace.GetGlobalTracer().(*tracer); ok {
 		// we have a tracer that can receive completed traces.
 		tr.pushTrace(t.spans)
 	}

@@ -13,7 +13,6 @@ import (
 	"sync"
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/internal"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 )
 
@@ -41,8 +40,8 @@ type Tracer interface {
 // interface to query the tracer's state.
 func Start() Tracer {
 	var t mocktracer
-	internal.SetGlobalTracer(&t)
-	internal.Testing = true
+	ddtrace.SetGlobalTracer(&t)
+	ddtrace.Testing = true
 	return &t
 }
 
@@ -56,8 +55,8 @@ func (*mocktracer) ForceFlush() {
 
 // Stop deactivates the mock tracer and sets the active tracer to a no-op.
 func (*mocktracer) Stop() {
-	internal.SetGlobalTracer(&internal.NoopTracer{})
-	internal.Testing = false
+	ddtrace.SetGlobalTracer(&ddtrace.NoopTracer{})
+	ddtrace.Testing = false
 }
 
 func (t *mocktracer) StartSpan(operationName string, opts ...ddtrace.StartSpanOption) ddtrace.Span {

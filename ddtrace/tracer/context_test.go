@@ -2,10 +2,10 @@ package tracer
 
 import (
 	"context"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/internal"
 )
 
 func TestContextWithSpan(t *testing.T) {
@@ -30,11 +30,11 @@ func TestSpanFromContext(t *testing.T) {
 		assert := assert.New(t)
 		span, ok := SpanFromContext(context.Background())
 		assert.False(ok)
-		_, ok = span.(*internal.NoopSpan)
+		_, ok = span.(*ddtrace.NoopSpan)
 		assert.True(ok)
 		span, ok = SpanFromContext(nil)
 		assert.False(ok)
-		_, ok = span.(*internal.NoopSpan)
+		_, ok = span.(*ddtrace.NoopSpan)
 		assert.True(ok)
 	})
 }
@@ -60,7 +60,7 @@ func TestStartSpanFromContext(t *testing.T) {
 	gotctx, ok := SpanFromContext(ctx)
 	assert.True(ok)
 	assert.Equal(gotctx, got)
-	_, ok = gotctx.(*internal.NoopSpan)
+	_, ok = gotctx.(*ddtrace.NoopSpan)
 	assert.False(ok)
 
 	assert.Equal(uint64(456), got.TraceID)
