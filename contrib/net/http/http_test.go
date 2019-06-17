@@ -43,7 +43,7 @@ func TestHttpTracer200Zipkin(t *testing.T) {
 	assert.Equal(map[string]string{
 		"component":        "web",
 		"foo":              "bar",
-		"http.url":         "/200",
+		"http.url":         "http://example.com/200",
 		"http.method":      "GET",
 		"http.status_code": "200",
 		"span.kind":        "server",
@@ -78,7 +78,7 @@ func TestHttpTracer500Zipkin(t *testing.T) {
 	assert.Equal(map[string]string{
 		"component":        "web",
 		"foo":              "bar",
-		"http.url":         "/500",
+		"http.url":         "http://example.com/500",
 		"http.method":      "GET",
 		"http.status_code": "500",
 		"span.kind":        "server",
@@ -118,7 +118,7 @@ func TestHttpTracer200(t *testing.T) {
 	assert.Equal(url, s.Tag(ext.ResourceName))
 	assert.Equal("200", s.Tag(ext.HTTPCode))
 	assert.Equal("GET", s.Tag(ext.HTTPMethod))
-	assert.Equal(url, s.Tag(ext.HTTPURL))
+	assert.Equal("http://example.com" + url, s.Tag(ext.HTTPURL))
 	assert.Equal(nil, s.Tag(ext.Error))
 	assert.Equal("bar", s.Tag("foo"))
 }
@@ -146,7 +146,7 @@ func TestHttpTracer500(t *testing.T) {
 	assert.Equal(url, s.Tag(ext.ResourceName))
 	assert.Equal("500", s.Tag(ext.HTTPCode))
 	assert.Equal("GET", s.Tag(ext.HTTPMethod))
-	assert.Equal(url, s.Tag(ext.HTTPURL))
+	assert.Equal("http://example.com" + url, s.Tag(ext.HTTPURL))
 	assert.Equal("500: Internal Server Error", s.Tag(ext.Error).(error).Error())
 	assert.Equal("bar", s.Tag("foo"))
 }
@@ -175,7 +175,7 @@ func TestWrapHandler200(t *testing.T) {
 	assert.Equal("my-resource", s.Tag(ext.ResourceName))
 	assert.Equal("200", s.Tag(ext.HTTPCode))
 	assert.Equal("GET", s.Tag(ext.HTTPMethod))
-	assert.Equal(url, s.Tag(ext.HTTPURL))
+	assert.Equal("http://example.com" + url, s.Tag(ext.HTTPURL))
 	assert.Equal(nil, s.Tag(ext.Error))
 	assert.Equal("bar", s.Tag("foo"))
 }
