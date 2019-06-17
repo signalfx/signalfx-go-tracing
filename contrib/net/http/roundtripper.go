@@ -27,7 +27,7 @@ func (rt *roundTripper) RoundTrip(req *http.Request) (res *http.Response, err er
 	if rate := rt.cfg.analyticsRate; rate > 0 {
 		opts = append(opts, tracer.Tag(ext.EventSampleRate, rate))
 	}
-	span, ctx := tracer.StartSpanFromContext(req.Context(), defaultResourceName, opts...)
+	span, ctx := tracer.StartSpanFromContext(req.Context(), req.Method, opts...)
 	defer func() {
 		if rt.cfg.after != nil {
 			rt.cfg.after(res, span)

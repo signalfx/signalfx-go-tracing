@@ -74,6 +74,8 @@ func TestRoundTripperZipkin(t *testing.T) {
 			assert.Equal("test-http-service", *s1.LocalEndpoint.ServiceName)
 		}
 
+		assert.Equal("GET", *s1.Name)
+		assert.Equal("CLIENT", *s1.Kind)
 		assert.Equal(map[string]string{
 			"component":        "http",
 			"http.method":      "GET",
@@ -104,7 +106,7 @@ func TestRoundTripperZipkin(t *testing.T) {
 		}
 		tags := s1.Tags
 
-		assert.Equal("http.request", *s1.Name)
+		assert.Equal("POST", *s1.Name)
 		assert.Equal(map[string]string{
 			"component":        "http",
 			"error":            "true",
@@ -138,7 +140,7 @@ func TestRoundTripperZipkin(t *testing.T) {
 		}
 		tags := s0.Tags
 
-		assert.Equal("http.request", *s0.Name)
+		assert.Equal("GET", *s0.Name)
 		assert.Equal(map[string]string{
 			"component":   "http",
 			"error":       "true",
@@ -200,7 +202,7 @@ func TestRoundTripper(t *testing.T) {
 	assert.Equal(t, "test", s0.Tag(ext.ResourceName))
 
 	s1 := spans[1]
-	assert.Equal(t, "http.request", s1.OperationName())
+	assert.Equal(t, "GET", s1.OperationName())
 	assert.Equal(t, "http.request", s1.Tag(ext.ResourceName))
 	assert.Equal(t, "200", s1.Tag(ext.HTTPCode))
 	assert.Equal(t, "GET", s1.Tag(ext.HTTPMethod))
