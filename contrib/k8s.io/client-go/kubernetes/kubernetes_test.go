@@ -63,7 +63,7 @@ func TestKubernetes(t *testing.T) {
 	assert.Len(t, spans, 1)
 	{
 		s := spans[0]
-		assert.Equal(t, "http.request", s.OperationName())
+		assert.Equal(t, "GET", s.OperationName())
 		assert.Equal(t, "kubernetes", s.Tag(ext.ServiceName))
 		assert.Equal(t, "GET namespaces", s.Tag(ext.ResourceName))
 		assert.Equal(t, "200", s.Tag(ext.HTTPCode))
