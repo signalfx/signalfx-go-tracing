@@ -66,8 +66,7 @@ func TestRoundTripperZipkin(t *testing.T) {
 
 		tracer.ForceFlush()
 
-		spans := zipkin.Spans()
-		require.Len(spans, 2)
+		spans := zipkin.WaitForSpans(t, 2)
 
 		s1 := spans[1]
 		if assert.NotNil(s1.LocalEndpoint.ServiceName) {
@@ -97,8 +96,7 @@ func TestRoundTripperZipkin(t *testing.T) {
 
 		tracer.ForceFlush()
 
-		spans := zipkin.Spans()
-		require.Len(spans, 2)
+		spans := zipkin.WaitForSpans(t, 2)
 
 		s1 := spans[1]
 		if assert.NotNil(s1.LocalEndpoint.ServiceName) {
@@ -131,8 +129,7 @@ func TestRoundTripperZipkin(t *testing.T) {
 
 		tracer.ForceFlush()
 
-		spans := zipkin.Spans()
-		require.Len(spans, 1)
+		spans := zipkin.WaitForSpans(t, 1)
 
 		s0 := spans[0]
 		if assert.NotNil(s0.LocalEndpoint.ServiceName) {

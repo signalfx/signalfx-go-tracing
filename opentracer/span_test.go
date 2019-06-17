@@ -1,6 +1,7 @@
 package opentracer
 
 import (
+	"context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/log"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
@@ -27,12 +28,33 @@ func Test_span_LogFields(t *testing.T) {
 	span.Finish()
 
 	tracer.ForceFlush()
-	spans := zipkin.Spans()
+	spans := zipkin.WaitForSpans(t, 1)
 
-	require.Len(zipkin.Spans, 1)
 	annotations := spans[0].Annotations
 	require.Len(annotations, 2)
 
 	assert.Equal(`{"int":5,"str":"value"}`, *annotations[0].Value)
 	assert.Equal(`{"bool":true}`, *annotations[1].Value)
+}
+
+func TestMixedSpans(t *testing.T) {
+	assert := assert.New(t)
+
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	ot := New(tracing.WithEndpointURL(zipkin.URL()))
+	opentracing.SetGlobalTracer(ot)
+
+	span0, _ := tracer.StartSpanFromContext(context.Background(), "span-1")
+	span1 := opentracing.StartSpan("span-2", opentracing.ChildOf(span0.Context()))
+
+	span1.Finish()
+	span0.Finish()
+
+	tracer.ForceFlush()
+	spans := zipkin.WaitForSpans(t, 2)
+
+	assert.Equal(spans[0].TraceID, spans[1].TraceID)
+	assert.Equal(spans[0].ID, *spans[1].ParentID)
 }

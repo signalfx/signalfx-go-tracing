@@ -25,6 +25,14 @@ type dataLossError struct {
 	context error // any context error, if available
 }
 
+type closeError struct {
+	msg string
+}
+
+func (e *closeError) Error() string {
+	return e.msg
+}
+
 func (e *dataLossError) Error() string {
 	return fmt.Sprintf("lost traces (count: %d), error: %v", e.count, e.context)
 }

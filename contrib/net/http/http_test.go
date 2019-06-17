@@ -29,13 +29,11 @@ func TestHttpTracer200Zipkin(t *testing.T) {
 	router().ServeHTTP(w, r)
 
 	assert := assert.New(t)
-	require := require.New(t)
 	assert.Equal(200, w.Code)
 	assert.Equal("OK\n", w.Body.String())
 
 	tracer.ForceFlush()
-	spans := zipkin.Spans()
-	require.Len(spans, 1)
+	spans := zipkin.WaitForSpans(t, 1)
 	span := spans[0]
 
 	assert.Equal("SERVER", *span.Kind)
@@ -69,8 +67,7 @@ func TestHttpTracer500Zipkin(t *testing.T) {
 	assert.Equal("500!\n", w.Body.String())
 
 	tracer.ForceFlush()
-	spans := zipkin.Spans()
-	require.Len(spans, 1)
+	spans := zipkin.WaitForSpans(t, 1)
 	span := spans[0]
 
 	assert.Equal("SERVER", *span.Kind)
