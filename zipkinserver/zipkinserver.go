@@ -1,6 +1,7 @@
 package zipkinserver
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	"github.com/mailru/easyjson"
 	traceformat "github.com/signalfx/golib/trace/format"
 	"io"
@@ -37,8 +38,7 @@ func (z *ZipkinServer) Reset() {
 
 // WaitForSpans waits for numSpans to become available
 func (z *ZipkinServer) WaitForSpans(t *testing.T, numSpans int) traceformat.Trace {
-	start := time.Now()
-	deadline := start.Add(3 * time.Second)
+	deadline := time.Now().Add(3 * time.Second)
 	var spans traceformat.Trace
 
 	for time.Now().Before(deadline) {
@@ -50,14 +50,14 @@ func (z *ZipkinServer) WaitForSpans(t *testing.T, numSpans int) traceformat.Trac
 		case len(spans) == numSpans:
 			return spans
 		case len(spans) > numSpans:
-			t.Fatalf("received %d spans, expected %d", len(spans), numSpans)
+			t.Fatalf("received %d spans, expected %d: %s", len(spans), numSpans, spew.Sdump(spans))
 			return nil
 		default:
 			time.Sleep(250 * time.Millisecond)
 		}
 	}
 
-	t.Fatalf("timed out waiting for spans, received %d while expecting %d", len(spans), numSpans)
+	t.Fatalf("timed out waiting for spans, received %d while expecting %d: %s", len(spans), numSpans, spew.Sdump(spans))
 	return nil
 }
 
