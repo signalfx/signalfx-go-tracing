@@ -8,11 +8,11 @@ import (
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"github.com/stretchr/testify/assert"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/mocktracer"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	"github.com/signalfx/signalfx-go-tracing/internal/globalconfig"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
@@ -68,7 +68,7 @@ func TestCollection_Insert(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(2, len(spans))
-	assert.Equal("mongodb.query", spans[0].OperationName())
+	assert.Equal("mongo.collection.insert", spans[0].OperationName())
 }
 
 func TestCollection_Update(t *testing.T) {
@@ -88,7 +88,7 @@ func TestCollection_Update(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(3, len(spans))
-	assert.Equal("mongodb.query", spans[1].OperationName())
+	assert.Equal("mongo.collection.update", spans[1].OperationName())
 }
 
 func TestCollection_UpdateId(t *testing.T) {
@@ -110,7 +110,7 @@ func TestCollection_UpdateId(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(5, len(spans))
-	assert.Equal("mongodb.query", spans[3].OperationName())
+	assert.Equal("mongo.collection.updateid", spans[3].OperationName())
 }
 
 func TestCollection_Upsert(t *testing.T) {
@@ -133,8 +133,8 @@ func TestCollection_Upsert(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(6, len(spans))
-	assert.Equal("mongodb.query", spans[1].OperationName())
-	assert.Equal("mongodb.query", spans[4].OperationName())
+	assert.Equal("mongo.collection.upsert", spans[1].OperationName())
+	assert.Equal("mongo.collection.upsertid", spans[4].OperationName())
 }
 
 func TestCollection_UpdateAll(t *testing.T) {
@@ -154,7 +154,7 @@ func TestCollection_UpdateAll(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(3, len(spans))
-	assert.Equal("mongodb.query", spans[1].OperationName())
+	assert.Equal("mongo.collection.updateall", spans[1].OperationName())
 }
 
 func TestCollection_FindId(t *testing.T) {
@@ -196,7 +196,7 @@ func TestCollection_Remove(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(3, len(spans))
-	assert.Equal("mongodb.query", spans[1].OperationName())
+	assert.Equal("mongo.collection.remove", spans[1].OperationName())
 }
 
 func TestCollection_RemoveId(t *testing.T) {
@@ -222,7 +222,7 @@ func TestCollection_RemoveId(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, removeByID)
 	assert.Equal(5, len(spans))
-	assert.Equal("mongodb.query", spans[3].OperationName())
+	assert.Equal("mongo.collection.removeid", spans[3].OperationName())
 }
 
 func TestCollection_RemoveAll(t *testing.T) {
@@ -242,7 +242,7 @@ func TestCollection_RemoveAll(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(3, len(spans))
-	assert.Equal("mongodb.query", spans[1].OperationName())
+	assert.Equal("mongo.collection.removeall", spans[1].OperationName())
 }
 
 func TestCollection_DropCollection(t *testing.T) {
@@ -254,7 +254,7 @@ func TestCollection_DropCollection(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(2, len(spans))
-	assert.Equal("mongodb.query", spans[0].OperationName())
+	assert.Equal("mongo.collection.dropcollection", spans[0].OperationName())
 }
 
 func TestCollection_Create(t *testing.T) {
@@ -266,7 +266,7 @@ func TestCollection_Create(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(2, len(spans))
-	assert.Equal("mongodb.query", spans[0].OperationName())
+	assert.Equal("mongo.collection.create", spans[0].OperationName())
 }
 
 func TestCollection_Count(t *testing.T) {
@@ -278,7 +278,7 @@ func TestCollection_Count(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(2, len(spans))
-	assert.Equal("mongodb.query", spans[0].OperationName())
+	assert.Equal("mongo.collection.count", spans[0].OperationName())
 }
 
 func TestCollection_IndexCommands(t *testing.T) {
@@ -294,11 +294,11 @@ func TestCollection_IndexCommands(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, indexTest)
 	assert.Equal(6, len(spans))
-	assert.Equal("mongodb.query", spans[0].OperationName())
-	assert.Equal("mongodb.query", spans[1].OperationName())
-	assert.Equal("mongodb.query", spans[2].OperationName())
-	assert.Equal("mongodb.query", spans[3].OperationName())
-	assert.Equal("mongodb.query", spans[4].OperationName())
+	assert.Equal("mongo.collection.indexes", spans[0].OperationName())
+	assert.Equal("mongo.collection.dropindex", spans[1].OperationName())
+	assert.Equal("mongo.collection.dropindexname", spans[2].OperationName())
+	assert.Equal("mongo.collection.ensureindex", spans[3].OperationName())
+	assert.Equal("mongo.collection.ensureindexkey", spans[4].OperationName())
 	assert.Equal("mgo-unittest", spans[5].OperationName())
 }
 
@@ -328,10 +328,10 @@ func TestCollection_FindAndIter(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(8, len(spans))
-	assert.Equal("mongodb.query", spans[3].OperationName())
-	assert.Equal("mongodb.query", spans[4].OperationName())
-	assert.Equal("mongodb.query", spans[5].OperationName())
-	assert.Equal("mongodb.query", spans[6].OperationName())
+	assert.Equal("mongo.query.iter", spans[3].OperationName())
+	assert.Equal("mongo.iter.next", spans[4].OperationName())
+	assert.Equal("mongo.iter.all", spans[5].OperationName())
+	assert.Equal("mongo.iter.close", spans[6].OperationName())
 }
 
 func TestCollection_Bulk(t *testing.T) {
@@ -352,7 +352,7 @@ func TestCollection_Bulk(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(2, len(spans))
-	assert.Equal("mongodb.query", spans[0].OperationName())
+	assert.Equal("mongo.bulk", spans[0].OperationName())
 }
 
 func TestAnalyticsSettings(t *testing.T) {

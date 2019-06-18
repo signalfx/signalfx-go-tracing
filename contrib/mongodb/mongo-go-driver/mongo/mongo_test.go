@@ -61,7 +61,7 @@ func Test(t *testing.T) {
 	assert.Equal(t, hostname, s.Tag(ext.PeerHostname))
 	assert.Equal(t, port, s.Tag(ext.PeerPort))
 	assert.Contains(t, s.Tag(ext.DBStatement), `"test-item":"test-value"`)
-	assert.Equal(t, "test-database", s.Tag(ext.DBInstance))
+	assert.Equal(t, "test-database", s.Tag(ext.DBName))
 	assert.Equal(t, "mongo", s.Tag(ext.DBType))
 }
 
