@@ -47,7 +47,7 @@ func TestBooks(t *testing.T) {
 	assert.Len(t, spans, 1)
 
 	s0 := spans[0]
-	assert.Equal(t, "http.request", s0.OperationName())
+	assert.Equal(t, "GET", s0.OperationName())
 	assert.Equal(t, "http", s0.Tag(ext.SpanType))
 	assert.Equal(t, "google.books", s0.Tag(ext.ServiceName))
 	assert.Equal(t, "books.bookshelves.list", s0.Tag(ext.ResourceName))
@@ -72,7 +72,7 @@ func TestCivicInfo(t *testing.T) {
 	assert.Len(t, spans, 1)
 
 	s0 := spans[0]
-	assert.Equal(t, "http.request", s0.OperationName())
+	assert.Equal(t, "GET", s0.OperationName())
 	assert.Equal(t, "http", s0.Tag(ext.SpanType))
 	assert.Equal(t, "google.civicinfo", s0.Tag(ext.ServiceName))
 	assert.Equal(t, "civicinfo.representatives.representativeInfoByAddress", s0.Tag(ext.ResourceName))
@@ -97,7 +97,7 @@ func TestURLShortener(t *testing.T) {
 	assert.Len(t, spans, 1)
 
 	s0 := spans[0]
-	assert.Equal(t, "http.request", s0.OperationName())
+	assert.Equal(t, "GET", s0.OperationName())
 	assert.Equal(t, "http", s0.Tag(ext.SpanType))
 	assert.Equal(t, "google.urlshortener", s0.Tag(ext.ServiceName))
 	assert.Equal(t, "urlshortener.url.list", s0.Tag(ext.ResourceName))

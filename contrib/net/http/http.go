@@ -36,12 +36,11 @@ func NewServeMux(opts ...Option) *ServeMux {
 func (mux *ServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// get the resource associated to this request
 	_, route := mux.Handler(r)
-	resource := r.Method + " " + route
 	opts := mux.cfg.spanOpts
 	if mux.cfg.analyticsRate > 0 {
 		opts = append(opts, tracer.Tag(ext.EventSampleRate, mux.cfg.analyticsRate))
 	}
-	httputil.TraceAndServe(mux.ServeMux, w, r, mux.cfg.serviceName, resource, opts...)
+	httputil.TraceAndServe(mux.ServeMux, w, r, mux.cfg.serviceName, route, opts...)
 }
 
 // WrapHandler wraps an http.Handler with tracing using the given service and resource.

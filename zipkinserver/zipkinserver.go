@@ -1,12 +1,15 @@
 package zipkinserver
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	"github.com/mailru/easyjson"
 	traceformat "github.com/signalfx/golib/trace/format"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"sync"
+	"testing"
+	"time"
 )
 
 // ZipkinServer is an embedded Zipkin server
@@ -33,11 +36,29 @@ func (z *ZipkinServer) Reset() {
 	z.lock.Unlock()
 }
 
-// Spans returns received spans
-func (z *ZipkinServer) Spans() traceformat.Trace {
-	z.lock.Lock()
-	defer z.lock.Unlock()
-	return z.spans
+// WaitForSpans waits for numSpans to become available
+func (z *ZipkinServer) WaitForSpans(t *testing.T, numSpans int) traceformat.Trace {
+	deadline := time.Now().Add(3 * time.Second)
+	var spans traceformat.Trace
+
+	for time.Now().Before(deadline) {
+		z.lock.Lock()
+		spans = z.spans
+		z.lock.Unlock()
+
+		switch {
+		case len(spans) == numSpans:
+			return spans
+		case len(spans) > numSpans:
+			t.Fatalf("received %d spans, expected %d: %s", len(spans), numSpans, spew.Sdump(spans))
+			return nil
+		default:
+			time.Sleep(250 * time.Millisecond)
+		}
+	}
+
+	t.Fatalf("timed out waiting for spans, received %d while expecting %d: %s", len(spans), numSpans, spew.Sdump(spans))
+	return nil
 }
 
 // Start embedded Zipkin server

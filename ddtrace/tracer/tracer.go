@@ -327,11 +327,12 @@ func (t *tracer) flushTraces() {
 		log.Printf("Sending payload: size: %d traces: %d\n", size, count)
 	}
 	rc, err := t.config.transport.send(t.payload)
-	if err != nil {
-		t.pushError(&dataLossError{context: err, count: count})
-	}
 	if err == nil {
-		t.prioritySampling.readRatesJSON(rc) // TODO: handle error?
+		if err := rc.Close(); err != nil {
+			t.pushError(&closeError{"failed to close transport"})
+		}
+	} else {
+		t.pushError(&dataLossError{context: err, count: count})
 	}
 	t.payload.reset()
 }

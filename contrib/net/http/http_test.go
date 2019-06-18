@@ -1,16 +1,97 @@
 package http
 
 import (
+	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
+	"github.com/signalfx/signalfx-go-tracing/tracing"
+	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/mocktracer"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	"github.com/signalfx/signalfx-go-tracing/internal/globalconfig"
+	"github.com/stretchr/testify/assert"
 )
+
+func TestHttpTracer200Zipkin(t *testing.T) {
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	tracing.Start(tracing.WithEndpointURL(zipkin.URL()), tracing.WithServiceName("test-http-service"))
+	defer tracing.Stop()
+
+	url := "/200"
+	r := httptest.NewRequest("GET", url, nil)
+	w := httptest.NewRecorder()
+	router().ServeHTTP(w, r)
+
+	assert := assert.New(t)
+	assert.Equal(200, w.Code)
+	assert.Equal("OK\n", w.Body.String())
+
+	tracer.ForceFlush()
+	spans := zipkin.WaitForSpans(t, 1)
+	span := spans[0]
+
+	assert.Equal("SERVER", *span.Kind)
+	assert.Equal("/200", *span.Name)
+	assert.Equal(map[string]string{
+		"component":        "web",
+		"foo":              "bar",
+		"http.url":         "http://example.com/200",
+		"http.method":      "GET",
+		"http.status_code": "200",
+		"span.kind":        "server",
+	}, span.Tags)
+}
+
+func TestHttpTracer500Zipkin(t *testing.T) {
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	tracing.Start(tracing.WithEndpointURL(zipkin.URL()), tracing.WithServiceName("test-http-service"))
+	defer tracing.Stop()
+
+	// Send and verify a 500 request
+	url := "/500"
+	r := httptest.NewRequest("GET", url, nil)
+	w := httptest.NewRecorder()
+	router().ServeHTTP(w, r)
+
+	assert := assert.New(t)
+	require := require.New(t)
+	assert.Equal(500, w.Code)
+	assert.Equal("500!\n", w.Body.String())
+
+	tracer.ForceFlush()
+	spans := zipkin.WaitForSpans(t, 1)
+	span := spans[0]
+
+	assert.Equal("SERVER", *span.Kind)
+	assert.Equal("/500", *span.Name)
+	assert.Equal(map[string]string{
+		"component":        "web",
+		"foo":              "bar",
+		"http.url":         "http://example.com/500",
+		"http.method":      "GET",
+		"http.status_code": "500",
+		"span.kind":        "server",
+		"error":            "true",
+	}, span.Tags)
+
+	require.Len(span.Annotations, 1)
+
+	ann := testutil.GetAnnotation(t, span, 0)
+	assert.Equal(ann["event"], "error")
+	assert.Contains(ann["message"], "500: Internal Server Error")
+	assert.Greater(len(ann["stack"]), 50)
+	assert.Contains(ann["stack"], "goroutine")
+	assert.Equal(ann["error.kind"], "*errors.errorString")
+	assert.Contains(ann["error.object"], "&errors.errorString")
+}
 
 func TestHttpTracer200(t *testing.T) {
 	mt := mocktracer.Start()
@@ -31,10 +112,10 @@ func TestHttpTracer200(t *testing.T) {
 	s := spans[0]
 	assert.Equal("http.request", s.OperationName())
 	assert.Equal("my-service", s.Tag(ext.ServiceName))
-	assert.Equal("GET "+url, s.Tag(ext.ResourceName))
+	assert.Equal(url, s.Tag(ext.ResourceName))
 	assert.Equal("200", s.Tag(ext.HTTPCode))
 	assert.Equal("GET", s.Tag(ext.HTTPMethod))
-	assert.Equal(url, s.Tag(ext.HTTPURL))
+	assert.Equal("http://example.com" + url, s.Tag(ext.HTTPURL))
 	assert.Equal(nil, s.Tag(ext.Error))
 	assert.Equal("bar", s.Tag("foo"))
 }
@@ -59,10 +140,10 @@ func TestHttpTracer500(t *testing.T) {
 	s := spans[0]
 	assert.Equal("http.request", s.OperationName())
 	assert.Equal("my-service", s.Tag(ext.ServiceName))
-	assert.Equal("GET "+url, s.Tag(ext.ResourceName))
+	assert.Equal(url, s.Tag(ext.ResourceName))
 	assert.Equal("500", s.Tag(ext.HTTPCode))
 	assert.Equal("GET", s.Tag(ext.HTTPMethod))
-	assert.Equal(url, s.Tag(ext.HTTPURL))
+	assert.Equal("http://example.com" + url, s.Tag(ext.HTTPURL))
 	assert.Equal("500: Internal Server Error", s.Tag(ext.Error).(error).Error())
 	assert.Equal("bar", s.Tag("foo"))
 }
@@ -91,7 +172,7 @@ func TestWrapHandler200(t *testing.T) {
 	assert.Equal("my-resource", s.Tag(ext.ResourceName))
 	assert.Equal("200", s.Tag(ext.HTTPCode))
 	assert.Equal("GET", s.Tag(ext.HTTPMethod))
-	assert.Equal(url, s.Tag(ext.HTTPURL))
+	assert.Equal("http://example.com" + url, s.Tag(ext.HTTPURL))
 	assert.Equal(nil, s.Tag(ext.Error))
 	assert.Equal("bar", s.Tag("foo"))
 }
