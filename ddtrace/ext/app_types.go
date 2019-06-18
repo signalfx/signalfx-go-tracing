@@ -34,6 +34,9 @@ const (
 	// SpanTypeHTTP marks a span as an HTTP client request.
 	SpanTypeHTTP = "http"
 
+	// SpanTypeGin marks a span as a gin request
+	SpanTypeGin = "gin"
+
 	// SpanTypeSQL marks a span as an SQL operation. These spans may
 	// have an "sql.command" tag.
 	SpanTypeSQL = "sql"

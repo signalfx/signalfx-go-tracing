@@ -3,6 +3,7 @@ package gin // import "github.com/signalfx/signalfx-go-tracing/contrib/gin-gonic
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
@@ -19,13 +20,13 @@ func Middleware(service string, opts ...Option) gin.HandlerFunc {
 		opt(cfg)
 	}
 	return func(c *gin.Context) {
-		resource := c.HandlerName()
 		opts := []ddtrace.StartSpanOption{
 			tracer.ServiceName(service),
-			tracer.ResourceName(resource),
-			tracer.SpanType(ext.SpanTypeWeb),
+			tracer.ResourceName(c.FullPath()),
+			tracer.SpanType(ext.SpanTypeGin),
 			tracer.Tag(ext.HTTPMethod, c.Request.Method),
-			tracer.Tag(ext.HTTPURL, c.Request.URL.Path),
+			tracer.Tag(ext.HTTPPath, c.FullPath()),
+			tracer.Tag(ext.HTTPURL, getURL(c.Request)),
 		}
 		if cfg.analyticsRate > 0 {
 			opts = append(opts, tracer.Tag(ext.EventSampleRate, cfg.analyticsRate))
@@ -65,4 +66,19 @@ func HTML(c *gin.Context, code int, name string, obj interface{}) {
 		}
 	}()
 	c.HTML(code, name, obj)
+}
+
+func getURL(r *http.Request) string {
+	url := r.URL.RequestURI()
+
+	// If the URL is relative, RequestURI will return only the path of it.
+	if !r.URL.IsAbs() {
+		scheme := "http"
+		if r.TLS != nil {
+			scheme = "https"
+		}
+		url = fmt.Sprintf("%s://%s%s", scheme, r.Host, r.URL.String())
+	}
+
+	return url
 }

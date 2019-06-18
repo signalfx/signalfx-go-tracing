@@ -68,13 +68,13 @@ func TestTrace200(t *testing.T) {
 	}
 	span := spans[0]
 	assert.Equal("http.request", span.OperationName())
-	assert.Equal(ext.SpanTypeWeb, span.Tag(ext.SpanType))
+	assert.Equal(ext.SpanTypeGin, span.Tag(ext.SpanType))
 	assert.Equal("foobar", span.Tag(ext.ServiceName))
-	assert.Contains(span.Tag(ext.ResourceName), "gin.TestTrace200")
+	assert.Contains(span.Tag(ext.ResourceName), "/user/:id")
 	assert.Equal("200", span.Tag(ext.HTTPCode))
 	assert.Equal("GET", span.Tag(ext.HTTPMethod))
 	// TODO(x) would be much nicer to have "/user/:id" here
-	assert.Equal("/user/123", span.Tag(ext.HTTPURL))
+	assert.Equal("http://example.com/user/123", span.Tag(ext.HTTPURL))
 }
 
 func TestError(t *testing.T) {
