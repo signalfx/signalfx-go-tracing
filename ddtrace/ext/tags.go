@@ -45,6 +45,9 @@ const (
 	// SpanType defines the Span type (web, db, cache).
 	SpanType = "span.type"
 
+	// SpanKind defines the Span kind (SERVER, CLIENT).
+	SpanKind = "span.kind"
+
 	// ServiceName defines the Service name for this Span.
 	ServiceName = "service.name"
 

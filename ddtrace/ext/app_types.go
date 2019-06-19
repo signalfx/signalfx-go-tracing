@@ -71,3 +71,12 @@ const (
 	// SpanTypeMessageProducer marks a span as a queue operation.
 	SpanTypeMessageProducer = "queue"
 )
+
+// Span kinds have Either client or server for the appropriate roles in an RPC,
+// and producer or consumer for the appropriate roles in a messaging scenario.
+const (
+	// SpanKindServer marks a span as a server span
+	SpanKindServer = "SERVER"
+	// SpanKindClient marks a span as a server span
+	SpanKindClient = "CLIENT"
+)

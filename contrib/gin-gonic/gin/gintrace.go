@@ -3,12 +3,12 @@ package gin // import "github.com/signalfx/signalfx-go-tracing/contrib/gin-gonic
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
+	"github.com/signalfx/signalfx-go-tracing/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,13 +20,14 @@ func Middleware(service string, opts ...Option) gin.HandlerFunc {
 		opt(cfg)
 	}
 	return func(c *gin.Context) {
+		operationName := c.FullPath()
 		opts := []ddtrace.StartSpanOption{
 			tracer.ServiceName(service),
-			tracer.ResourceName(c.FullPath()),
+			tracer.ResourceName(operationName),
 			tracer.SpanType(ext.SpanTypeGin),
+			tracer.Tag(ext.SpanKind, ext.SpanKindServer),
 			tracer.Tag(ext.HTTPMethod, c.Request.Method),
-			tracer.Tag(ext.HTTPPath, c.FullPath()),
-			tracer.Tag(ext.HTTPURL, getURL(c.Request)),
+			tracer.Tag(ext.HTTPURL, utils.GetURL(c.Request)),
 		}
 		if cfg.analyticsRate > 0 {
 			opts = append(opts, tracer.Tag(ext.EventSampleRate, cfg.analyticsRate))
@@ -34,7 +35,7 @@ func Middleware(service string, opts ...Option) gin.HandlerFunc {
 		if spanctx, err := tracer.Extract(tracer.HTTPHeadersCarrier(c.Request.Header)); err == nil {
 			opts = append(opts, tracer.ChildOf(spanctx))
 		}
-		span, ctx := tracer.StartSpanFromContext(c.Request.Context(), "http.request", opts...)
+		span, ctx := tracer.StartSpanFromContext(c.Request.Context(), operationName, opts...)
 		defer span.Finish()
 
 		// pass the span through the request context
@@ -46,7 +47,6 @@ func Middleware(service string, opts ...Option) gin.HandlerFunc {
 		span.SetTag(ext.HTTPCode, strconv.Itoa(c.Writer.Status()))
 
 		if len(c.Errors) > 0 {
-			span.SetTag("gin.errors", c.Errors.String())
 			span.SetTag(ext.Error, c.Errors[0])
 		}
 	}
@@ -66,19 +66,4 @@ func HTML(c *gin.Context, code int, name string, obj interface{}) {
 		}
 	}()
 	c.HTML(code, name, obj)
-}
-
-func getURL(r *http.Request) string {
-	url := r.URL.RequestURI()
-
-	// If the URL is relative, RequestURI will return only the path of it.
-	if !r.URL.IsAbs() {
-		scheme := "http"
-		if r.TLS != nil {
-			scheme = "https"
-		}
-		url = fmt.Sprintf("%s://%s%s", scheme, r.Host, r.URL.String())
-	}
-
-	return url
 }
