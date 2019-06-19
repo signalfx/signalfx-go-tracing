@@ -74,9 +74,14 @@ func idToHexPtr(id uint64) *string {
 }
 
 func formatTags(tags map[string]string) {
+	tags[ext.PeerHostname] = tags[ext.TargetHost]
+	tags[ext.PeerPort] = tags[ext.TargetPort]
+
 	delete(tags, ext.ServiceName)
 	delete(tags, ext.ResourceName)
 	delete(tags, ext.Pid)
+	delete(tags, ext.TargetHost)
+	delete(tags, ext.TargetPort)
 }
 
 func (p *zipkinPayload) convertSpans(spans spanList) []*traceformat.Span {
@@ -154,6 +159,8 @@ func deriveKind(s *span) *string {
 		return pointer.String(spanKindClient)
 	case ext.SpanTypeWeb:
 		return pointer.String(spanKindServer)
+	case ext.SpanTypeSQL:
+		return pointer.String(spanKindClient)
 	}
 
 	return nil
