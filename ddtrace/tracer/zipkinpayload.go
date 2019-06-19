@@ -74,8 +74,15 @@ func idToHexPtr(id uint64) *string {
 }
 
 func formatTags(tags map[string]string) {
-	tags[ext.PeerHostname] = tags[ext.TargetHost]
-	tags[ext.PeerPort] = tags[ext.TargetPort]
+	hostname := tags[ext.TargetHost]
+	if hostname != "" {
+		tags[ext.PeerHostname] = hostname
+	}
+
+	port := tags[ext.TargetPort]
+	if port != "" {
+		tags[ext.PeerPort] = port
+	}
 
 	delete(tags, ext.ServiceName)
 	delete(tags, ext.ResourceName)

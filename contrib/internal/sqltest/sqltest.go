@@ -145,7 +145,7 @@ func testZipkin(cfg *Config) func(t *testing.T) {
 				"component":     "sql",
 				"db.type":       cfg.DriverName,
 				"db.instance":   cfg.DBName,
-				"db.statement":  "SELECT id, name FROM testsql LIMIT 5",
+				"db.statement":  query,
 				"db.user":       cfg.DBUser,
 				"peer.hostname": "127.0.0.1",
 				"peer.port":     strconv.Itoa(cfg.DBPort),
