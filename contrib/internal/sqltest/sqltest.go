@@ -55,19 +55,16 @@ func RunAll(t *testing.T, cfg *Config) {
 		"Statement":     testStatement,
 		"BeginRollback": testBeginRollback,
 		"Exec":          testExec,
-		"Zipkin":        testZipkin,
 	} {
 		t.Run(name, test(cfg))
 	}
+
+	cfg.mockTracer.Stop()
+	t.Run("Zipkin", testZipkin(cfg))
 }
 
 func testZipkin(cfg *Config) func(t *testing.T) {
 	return func(t *testing.T) {
-		cfg.mockTracer.Stop()
-		defer func() {
-			cfg.mockTracer = mocktracer.Start()
-		}()
-
 		query := fmt.Sprintf("SELECT id, name FROM %s LIMIT 5", cfg.TableName)
 
 		zipkin := zipkinserver.Start()
