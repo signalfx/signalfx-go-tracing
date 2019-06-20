@@ -12,12 +12,9 @@ func setTagsForCommand(tags map[string]string, command string) map[string]string
 	}
 
 	tags[ext.ResourceName] = fmt.Sprintf("mongo.%s", command)
-	if dbName, ok := tags[ext.DBName]; ok {
-		tags[ext.DBStatement] = fmt.Sprintf("%s %s", command, dbName)
-	} else {
-		// DBName not set in tags
+	if dbInstance, ok := tags[ext.DBInstance]; ok {
+		tags[ext.DBStatement] = fmt.Sprintf("%s %s", command, dbInstance)
 	}
-	tags[ext.ResourceName] = fmt.Sprintf("mongo.%s", command)
 
 	return tags
 }

@@ -8,10 +8,13 @@ import (
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/mocktracer"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	"github.com/signalfx/signalfx-go-tracing/internal/globalconfig"
+	"github.com/signalfx/signalfx-go-tracing/tracing"
+	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -425,5 +428,96 @@ func TestAnalyticsSettings(t *testing.T) {
 		globalconfig.SetAnalyticsRate(0.4)
 
 		assertRate(t, mt, 0.23, WithAnalyticsRate(0.23))
+	})
+}
+
+func TestWithZipkin(t *testing.T) {
+	assert := assert.New(t)
+
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	tracing.Start(tracing.WithEndpointURL(zipkin.URL()), tracing.WithServiceName("test-mgo-service"))
+	defer tracing.Stop()
+
+	session, err := Dial("localhost:27017", WithServiceName("test-mgo-service"), WithContext(context.Background()))
+	defer session.Close()
+
+	assert.NotNil(session)
+	assert.Nil(err)
+
+	t.Run("test insert", func(t *testing.T) {
+		zipkin.Reset()
+
+		db := session.DB("my_db")
+		collection := db.C("MyCollection")
+
+		entity := bson.D{
+			bson.DocElem{
+				Name: "entity",
+				Value: bson.DocElem{
+					Name:  "index",
+					Value: 0}}}
+
+		collection.Insert(entity)
+
+		tracer.ForceFlush()
+
+		spans := zipkin.WaitForSpans(t, 1)
+
+		span := spans[0]
+		if assert.NotNil(span.LocalEndpoint.ServiceName) {
+			assert.Equal("test-mgo-service", *span.LocalEndpoint.ServiceName)
+		}
+
+		assert.Equal("mongo.collection.insert", *span.Name)
+
+		assert.Equal(span.Tags, map[string]string{
+			"component":     "mongodb",
+			"peer.hostname": "localhost:27017",
+			"db.instance":   "my_db",
+			"db.type":       "mongo",
+			"db.statement":  "collection.insert my_db",
+		})
+		assert.Len(span.Annotations, 0)
+	})
+
+	t.Run("test error", func(t *testing.T) {
+		zipkin.Reset()
+
+		db := session.DB("my_db")
+		collection := db.C("")
+
+		entity := bson.D{
+			bson.DocElem{
+				Name: "entity",
+				Value: bson.DocElem{
+					Name:  "index",
+					Value: 0}}}
+
+		collection.Insert(entity)
+
+		tracer.ForceFlush()
+
+		spans := zipkin.WaitForSpans(t, 1)
+		span := spans[0]
+
+		assert.Equal(span.Tags, map[string]string{
+			"component":     "mongodb",
+			"peer.hostname": "localhost:27017",
+			"db.instance":   "my_db",
+			"db.type":       "mongo",
+			"db.statement":  "collection.insert my_db",
+			"error":         "true",
+		})
+
+		ann := testutil.GetAnnotation(t, span, 0)
+
+		assert.Equal(ann["event"], "error")
+		assert.Contains(ann["message"], "Invalid namespace")
+		assert.Greater(len(ann["stack"]), 50)
+		assert.Contains(ann["stack"], "goroutine")
+		assert.Equal(ann["error.kind"], "*mgo.QueryError")
+		assert.Contains(ann["error.object"], "&mgo.QueryError{")
 	})
 }

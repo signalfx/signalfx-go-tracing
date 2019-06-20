@@ -12,6 +12,8 @@ import (
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/mocktracer"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	"github.com/signalfx/signalfx-go-tracing/internal/globalconfig"
+	"github.com/signalfx/signalfx-go-tracing/tracing"
+	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -61,8 +63,62 @@ func Test(t *testing.T) {
 	assert.Equal(t, hostname, s.Tag(ext.PeerHostname))
 	assert.Equal(t, port, s.Tag(ext.PeerPort))
 	assert.Contains(t, s.Tag(ext.DBStatement), `"test-item":"test-value"`)
-	assert.Equal(t, "test-database", s.Tag(ext.DBName))
+	assert.Equal(t, "test-database", s.Tag(ext.DBInstance))
 	assert.Equal(t, "mongo", s.Tag(ext.DBType))
+}
+
+func TestWithZipkin(t *testing.T) {
+	assert := assert.New(t)
+
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	tracing.Start(tracing.WithEndpointURL(zipkin.URL()), tracing.WithServiceName("test-mongo-service"))
+	defer tracing.Stop()
+
+	li, err := mockMongo()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	hostname, port, _ := net.SplitHostPort(li.Addr().String())
+
+	addr := fmt.Sprintf("mongodb://%s", li.Addr().String())
+	opts := options.Client()
+	opts.SetMonitor(NewMonitor())
+	client, err := mongo.Connect(context.Background(), opts.ApplyURI(addr))
+
+	assert.NotNil(client)
+	assert.Nil(err)
+
+	t.Run("test insert", func(t *testing.T) {
+		zipkin.Reset()
+
+		client.
+			Database("test-database").
+			Collection("test-collection").
+			InsertOne(context.Background(), bson.D{{Key: "test-item", Value: "test-value"}})
+
+		tracer.ForceFlush()
+
+		spans := zipkin.WaitForSpans(t, 1)
+
+		span := spans[0]
+		if assert.NotNil(span.LocalEndpoint.ServiceName) {
+			assert.Equal("test-mongo-service", *span.LocalEndpoint.ServiceName)
+		}
+
+		assert.Equal("mongo.insert", *span.Name)
+
+		assert.Equal("mongodb", span.Tags["component"])
+		assert.Equal(hostname, span.Tags[ext.PeerHostname])
+		assert.Equal(port, span.Tags[ext.PeerPort])
+		assert.Equal("test-database", span.Tags[ext.DBInstance])
+		assert.Equal("mongo", span.Tags[ext.DBType])
+		assert.Contains(span.Tags[ext.DBStatement], `"test-item":"test-value"`)
+
+		assert.Len(span.Annotations, 0)
+	})
 }
 
 // mockMongo implements a crude mongodb server that responds with

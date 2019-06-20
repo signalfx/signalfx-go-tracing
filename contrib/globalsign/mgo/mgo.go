@@ -15,6 +15,9 @@ import (
 // for tracing.
 func Dial(url string, opts ...DialOption) (*Session, error) {
 	session, err := mgo.Dial(url)
+	if err != nil {
+		return nil, err
+	}
 	s := &Session{
 		Session: session,
 		cfg:     newConfig(),
@@ -79,7 +82,7 @@ func (s *Session) DB(name string) *Database {
 	for k, v := range s.tags {
 		tags[k] = v
 	}
-	tags[ext.DBName] = name
+	tags[ext.DBInstance] = name
 	return &Database{
 		Database: s.Session.DB(name),
 		cfg:      s.cfg,

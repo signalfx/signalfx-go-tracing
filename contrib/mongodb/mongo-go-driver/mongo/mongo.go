@@ -35,7 +35,7 @@ func (m *monitor) Started(ctx context.Context, evt *event.CommandStartedEvent) {
 		tracer.ServiceName(m.cfg.serviceName),
 		tracer.ResourceName("mongo." + evt.CommandName),
 		tracer.SpanType(ext.SpanTypeMongoDB),
-		tracer.Tag(ext.DBName, evt.DatabaseName),
+		tracer.Tag(ext.DBInstance, evt.DatabaseName),
 		tracer.Tag(ext.DBStatement, string(b)),
 		tracer.Tag(ext.DBType, "mongo"),
 		tracer.Tag(ext.PeerHostname, hostname),
