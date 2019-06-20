@@ -14,6 +14,7 @@ type Pipe struct {
 
 // Iter invokes and traces Pipe.Iter
 func (p *Pipe) Iter() *Iter {
+	p.tags = setTagsForCommand(p.tags, "pipe.iter")
 	span := newChildSpanFromContext(p.cfg, p.tags)
 	iter := p.Pipe.Iter()
 	span.Finish()
@@ -31,6 +32,7 @@ func (p *Pipe) All(result interface{}) error {
 
 // One invokes and traces Pipe.One
 func (p *Pipe) One(result interface{}) (err error) {
+	p.tags = setTagsForCommand(p.tags, "pipe.findone")
 	span := newChildSpanFromContext(p.cfg, p.tags)
 	defer span.Finish(tracer.WithError(err))
 	err = p.Pipe.One(result)
@@ -39,6 +41,7 @@ func (p *Pipe) One(result interface{}) (err error) {
 
 // Explain invokes and traces Pipe.Explain
 func (p *Pipe) Explain(result interface{}) (err error) {
+	p.tags = setTagsForCommand(p.tags, "pipe.explain")
 	span := newChildSpanFromContext(p.cfg, p.tags)
 	defer span.Finish(tracer.WithError(err))
 	err = p.Pipe.Explain(result)

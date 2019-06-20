@@ -34,6 +34,7 @@ func (m *monitor) Started(ctx context.Context, evt *event.CommandStartedEvent) {
 	opts := []ddtrace.StartSpanOption{
 		tracer.ServiceName(m.cfg.serviceName),
 		tracer.ResourceName("mongo." + evt.CommandName),
+		tracer.SpanType(ext.SpanTypeMongoDB),
 		tracer.Tag(ext.DBInstance, evt.DatabaseName),
 		tracer.Tag(ext.DBStatement, string(b)),
 		tracer.Tag(ext.DBType, "mongo"),
@@ -43,7 +44,7 @@ func (m *monitor) Started(ctx context.Context, evt *event.CommandStartedEvent) {
 	if m.cfg.analyticsRate > 0 {
 		opts = append(opts, tracer.Tag(ext.EventSampleRate, m.cfg.analyticsRate))
 	}
-	span, _ := tracer.StartSpanFromContext(ctx, "mongodb.query", opts...)
+	span, _ := tracer.StartSpanFromContext(ctx, "mongo."+evt.CommandName, opts...)
 	key := spanKey{
 		ConnectionID: evt.ConnectionID,
 		RequestID:    evt.RequestID,

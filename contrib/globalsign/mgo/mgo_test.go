@@ -4,15 +4,19 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"github.com/stretchr/testify/assert"
+	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/mocktracer"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	"github.com/signalfx/signalfx-go-tracing/internal/globalconfig"
+	"github.com/signalfx/signalfx-go-tracing/tracing"
+	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
@@ -68,7 +72,7 @@ func TestCollection_Insert(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(2, len(spans))
-	assert.Equal("mongodb.query", spans[0].OperationName())
+	assert.Equal("mongo.collection.insert", spans[0].OperationName())
 }
 
 func TestCollection_Update(t *testing.T) {
@@ -88,7 +92,7 @@ func TestCollection_Update(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(3, len(spans))
-	assert.Equal("mongodb.query", spans[1].OperationName())
+	assert.Equal("mongo.collection.update", spans[1].OperationName())
 }
 
 func TestCollection_UpdateId(t *testing.T) {
@@ -110,7 +114,7 @@ func TestCollection_UpdateId(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(5, len(spans))
-	assert.Equal("mongodb.query", spans[3].OperationName())
+	assert.Equal("mongo.collection.updateid", spans[3].OperationName())
 }
 
 func TestCollection_Upsert(t *testing.T) {
@@ -133,8 +137,8 @@ func TestCollection_Upsert(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(6, len(spans))
-	assert.Equal("mongodb.query", spans[1].OperationName())
-	assert.Equal("mongodb.query", spans[4].OperationName())
+	assert.Equal("mongo.collection.upsert", spans[1].OperationName())
+	assert.Equal("mongo.collection.upsertid", spans[4].OperationName())
 }
 
 func TestCollection_UpdateAll(t *testing.T) {
@@ -154,7 +158,7 @@ func TestCollection_UpdateAll(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(3, len(spans))
-	assert.Equal("mongodb.query", spans[1].OperationName())
+	assert.Equal("mongo.collection.updateall", spans[1].OperationName())
 }
 
 func TestCollection_FindId(t *testing.T) {
@@ -196,7 +200,7 @@ func TestCollection_Remove(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(3, len(spans))
-	assert.Equal("mongodb.query", spans[1].OperationName())
+	assert.Equal("mongo.collection.remove", spans[1].OperationName())
 }
 
 func TestCollection_RemoveId(t *testing.T) {
@@ -222,7 +226,7 @@ func TestCollection_RemoveId(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, removeByID)
 	assert.Equal(5, len(spans))
-	assert.Equal("mongodb.query", spans[3].OperationName())
+	assert.Equal("mongo.collection.removeid", spans[3].OperationName())
 }
 
 func TestCollection_RemoveAll(t *testing.T) {
@@ -242,7 +246,7 @@ func TestCollection_RemoveAll(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(3, len(spans))
-	assert.Equal("mongodb.query", spans[1].OperationName())
+	assert.Equal("mongo.collection.removeall", spans[1].OperationName())
 }
 
 func TestCollection_DropCollection(t *testing.T) {
@@ -254,7 +258,7 @@ func TestCollection_DropCollection(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(2, len(spans))
-	assert.Equal("mongodb.query", spans[0].OperationName())
+	assert.Equal("mongo.collection.dropcollection", spans[0].OperationName())
 }
 
 func TestCollection_Create(t *testing.T) {
@@ -266,7 +270,7 @@ func TestCollection_Create(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(2, len(spans))
-	assert.Equal("mongodb.query", spans[0].OperationName())
+	assert.Equal("mongo.collection.create", spans[0].OperationName())
 }
 
 func TestCollection_Count(t *testing.T) {
@@ -278,7 +282,7 @@ func TestCollection_Count(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(2, len(spans))
-	assert.Equal("mongodb.query", spans[0].OperationName())
+	assert.Equal("mongo.collection.count", spans[0].OperationName())
 }
 
 func TestCollection_IndexCommands(t *testing.T) {
@@ -294,11 +298,11 @@ func TestCollection_IndexCommands(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, indexTest)
 	assert.Equal(6, len(spans))
-	assert.Equal("mongodb.query", spans[0].OperationName())
-	assert.Equal("mongodb.query", spans[1].OperationName())
-	assert.Equal("mongodb.query", spans[2].OperationName())
-	assert.Equal("mongodb.query", spans[3].OperationName())
-	assert.Equal("mongodb.query", spans[4].OperationName())
+	assert.Equal("mongo.collection.indexes", spans[0].OperationName())
+	assert.Equal("mongo.collection.dropindex", spans[1].OperationName())
+	assert.Equal("mongo.collection.dropindexname", spans[2].OperationName())
+	assert.Equal("mongo.collection.ensureindex", spans[3].OperationName())
+	assert.Equal("mongo.collection.ensureindexkey", spans[4].OperationName())
 	assert.Equal("mgo-unittest", spans[5].OperationName())
 }
 
@@ -328,10 +332,10 @@ func TestCollection_FindAndIter(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(8, len(spans))
-	assert.Equal("mongodb.query", spans[3].OperationName())
-	assert.Equal("mongodb.query", spans[4].OperationName())
-	assert.Equal("mongodb.query", spans[5].OperationName())
-	assert.Equal("mongodb.query", spans[6].OperationName())
+	assert.Equal("mongo.query.iter", spans[3].OperationName())
+	assert.Equal("mongo.iter.next", spans[4].OperationName())
+	assert.Equal("mongo.iter.all", spans[5].OperationName())
+	assert.Equal("mongo.iter.close", spans[6].OperationName())
 }
 
 func TestCollection_Bulk(t *testing.T) {
@@ -352,7 +356,7 @@ func TestCollection_Bulk(t *testing.T) {
 
 	spans := testMongoCollectionCommand(assert, insert)
 	assert.Equal(2, len(spans))
-	assert.Equal("mongodb.query", spans[0].OperationName())
+	assert.Equal("mongo.bulk", spans[0].OperationName())
 }
 
 func TestAnalyticsSettings(t *testing.T) {
@@ -425,5 +429,105 @@ func TestAnalyticsSettings(t *testing.T) {
 		globalconfig.SetAnalyticsRate(0.4)
 
 		assertRate(t, mt, 0.23, WithAnalyticsRate(0.23))
+	})
+}
+
+func TestWithZipkin(t *testing.T) {
+	assert := assert.New(t)
+
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	tracing.Start(tracing.WithEndpointURL(zipkin.URL()), tracing.WithServiceName("test-mgo-service"))
+	defer tracing.Stop()
+
+	session, err := Dial("localhost:27017", WithServiceName("test-mgo-service"), WithContext(context.Background()))
+	defer session.Close()
+
+	assert.NotNil(session)
+	assert.Nil(err)
+
+	t.Run("test insert", func(t *testing.T) {
+		zipkin.Reset()
+
+		db := session.DB("my_db")
+		collection := db.C("MyCollection")
+
+		entity := bson.D{
+			bson.DocElem{
+				Name: "entity",
+				Value: bson.DocElem{
+					Name:  "index",
+					Value: 0}}}
+
+		collection.Insert(entity)
+
+		tracer.ForceFlush()
+
+		spans := zipkin.WaitForSpans(t, 1)
+
+		span := spans[0]
+		if assert.NotNil(span.LocalEndpoint.ServiceName) {
+			assert.Equal("test-mgo-service", *span.LocalEndpoint.ServiceName)
+		}
+
+		assert.Equal("mongo.collection.insert", *span.Name)
+		assert.Equal(ext.SpanKindClient, *span.Kind)
+
+		assert.Equal(span.Tags, map[string]string{
+			"component":     "mongodb",
+			"peer.hostname": "localhost:27017",
+			"db.instance":   "my_db",
+			"db.type":       "mongo",
+			"db.statement":  "collection.insert my_db",
+			"span.kind":     strings.ToLower(ext.SpanKindClient),
+		})
+		assert.Len(span.Annotations, 0)
+	})
+
+	t.Run("test error", func(t *testing.T) {
+		zipkin.Reset()
+
+		db := session.DB("my_db")
+		collection := db.C("")
+
+		entity := bson.D{
+			bson.DocElem{
+				Name: "entity",
+				Value: bson.DocElem{
+					Name:  "index",
+					Value: 0}}}
+
+		collection.Insert(entity)
+
+		tracer.ForceFlush()
+
+		spans := zipkin.WaitForSpans(t, 1)
+		span := spans[0]
+		if assert.NotNil(span.LocalEndpoint.ServiceName) {
+			assert.Equal("test-mgo-service", *span.LocalEndpoint.ServiceName)
+		}
+
+		assert.Equal("mongo.collection.insert", *span.Name)
+		assert.Equal(ext.SpanKindClient, *span.Kind)
+
+		assert.Equal(span.Tags, map[string]string{
+			"component":     "mongodb",
+			"peer.hostname": "localhost:27017",
+			"db.instance":   "my_db",
+			"db.type":       "mongo",
+			"db.statement":  "collection.insert my_db",
+			"error":         "true",
+			"span.kind":     strings.ToLower(ext.SpanKindClient),
+		})
+
+		ann := testutil.GetAnnotation(t, span, 0)
+
+		assert.Equal(ann["event"], "error")
+		assert.Contains(ann["message"], "Invalid namespace")
+		assert.Greater(len(ann["stack"]), 50)
+		assert.Contains(ann["stack"], "goroutine")
+		assert.Equal(ann["error.kind"], "*mgo.QueryError")
+		assert.Contains(ann["error.object"], "&mgo.QueryError{")
 	})
 }

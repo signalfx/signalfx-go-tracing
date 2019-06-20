@@ -17,6 +17,7 @@ type Collection struct {
 
 // Create invokes and traces Collection.Create
 func (c *Collection) Create(info *mgo.CollectionInfo) error {
+	c.tags = setTagsForCommand(c.tags, "collection.create")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.Create(info)
 	span.Finish(tracer.WithError(err))
@@ -25,6 +26,7 @@ func (c *Collection) Create(info *mgo.CollectionInfo) error {
 
 // DropCollection invokes and traces Collection.DropCollection
 func (c *Collection) DropCollection() error {
+	c.tags = setTagsForCommand(c.tags, "collection.dropcollection")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.DropCollection()
 	span.Finish(tracer.WithError(err))
@@ -33,6 +35,7 @@ func (c *Collection) DropCollection() error {
 
 // EnsureIndexKey invokes and traces Collection.EnsureIndexKey
 func (c *Collection) EnsureIndexKey(key ...string) error {
+	c.tags = setTagsForCommand(c.tags, "collection.ensureindexkey")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.EnsureIndexKey(key...)
 	span.Finish(tracer.WithError(err))
@@ -41,6 +44,7 @@ func (c *Collection) EnsureIndexKey(key ...string) error {
 
 // EnsureIndex invokes and traces Collection.EnsureIndex
 func (c *Collection) EnsureIndex(index mgo.Index) error {
+	c.tags = setTagsForCommand(c.tags, "collection.ensureindex")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.EnsureIndex(index)
 	span.Finish(tracer.WithError(err))
@@ -49,6 +53,7 @@ func (c *Collection) EnsureIndex(index mgo.Index) error {
 
 // DropIndex invokes and traces Collection.DropIndex
 func (c *Collection) DropIndex(key ...string) error {
+	c.tags = setTagsForCommand(c.tags, "collection.dropindex")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.DropIndex(key...)
 	span.Finish(tracer.WithError(err))
@@ -57,6 +62,7 @@ func (c *Collection) DropIndex(key ...string) error {
 
 // DropIndexName invokes and traces Collection.DropIndexName
 func (c *Collection) DropIndexName(name string) error {
+	c.tags = setTagsForCommand(c.tags, "collection.dropindexname")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.DropIndexName(name)
 	span.Finish(tracer.WithError(err))
@@ -65,6 +71,7 @@ func (c *Collection) DropIndexName(name string) error {
 
 // Indexes invokes and traces Collection.Indexes
 func (c *Collection) Indexes() (indexes []mgo.Index, err error) {
+	c.tags = setTagsForCommand(c.tags, "collection.indexes")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	indexes, err = c.Collection.Indexes()
 	span.Finish(tracer.WithError(err))
@@ -73,6 +80,7 @@ func (c *Collection) Indexes() (indexes []mgo.Index, err error) {
 
 // Insert invokes and traces Collectin.Insert
 func (c *Collection) Insert(docs ...interface{}) error {
+	c.tags = setTagsForCommand(c.tags, "collection.insert")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.Insert(docs...)
 	span.Finish(tracer.WithError(err))
@@ -99,6 +107,7 @@ func (c *Collection) FindId(id interface{}) *Query { // nolint
 
 // Count invokes and traces Collection.Count
 func (c *Collection) Count() (n int, err error) {
+	c.tags = setTagsForCommand(c.tags, "collection.count")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	n, err = c.Collection.Count()
 	span.Finish(tracer.WithError(err))
@@ -132,6 +141,7 @@ func (c *Collection) Pipe(pipeline interface{}) *Pipe {
 
 // Update invokes and traces Collection.Update
 func (c *Collection) Update(selector interface{}, update interface{}) error {
+	c.tags = setTagsForCommand(c.tags, "collection.update")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.Update(selector, update)
 	span.Finish(tracer.WithError(err))
@@ -140,6 +150,7 @@ func (c *Collection) Update(selector interface{}, update interface{}) error {
 
 // UpdateId invokes and traces Collection.UpdateId
 func (c *Collection) UpdateId(id interface{}, update interface{}) error { // nolint
+	c.tags = setTagsForCommand(c.tags, "collection.updateid")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.UpdateId(id, update)
 	span.Finish(tracer.WithError(err))
@@ -148,6 +159,7 @@ func (c *Collection) UpdateId(id interface{}, update interface{}) error { // nol
 
 // UpdateAll invokes and traces Collection.UpdateAll
 func (c *Collection) UpdateAll(selector interface{}, update interface{}) (info *mgo.ChangeInfo, err error) {
+	c.tags = setTagsForCommand(c.tags, "collection.updateall")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	info, err = c.Collection.UpdateAll(selector, update)
 	span.Finish(tracer.WithError(err))
@@ -156,6 +168,7 @@ func (c *Collection) UpdateAll(selector interface{}, update interface{}) (info *
 
 // Upsert invokes and traces Collection.Upsert
 func (c *Collection) Upsert(selector interface{}, update interface{}) (info *mgo.ChangeInfo, err error) {
+	c.tags = setTagsForCommand(c.tags, "collection.upsert")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	info, err = c.Collection.Upsert(selector, update)
 	span.Finish(tracer.WithError(err))
@@ -164,6 +177,7 @@ func (c *Collection) Upsert(selector interface{}, update interface{}) (info *mgo
 
 // UpsertId invokes and traces Collection.UpsertId
 func (c *Collection) UpsertId(id interface{}, update interface{}) (info *mgo.ChangeInfo, err error) { // nolint
+	c.tags = setTagsForCommand(c.tags, "collection.upsertid")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	info, err = c.Collection.UpsertId(id, update)
 	span.Finish(tracer.WithError(err))
@@ -172,6 +186,7 @@ func (c *Collection) UpsertId(id interface{}, update interface{}) (info *mgo.Cha
 
 // Remove invokes and traces Collection.Remove
 func (c *Collection) Remove(selector interface{}) error {
+	c.tags = setTagsForCommand(c.tags, "collection.remove")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.Remove(selector)
 	span.Finish(tracer.WithError(err))
@@ -180,6 +195,7 @@ func (c *Collection) Remove(selector interface{}) error {
 
 // RemoveId invokes and traces Collection.RemoveId
 func (c *Collection) RemoveId(id interface{}) error { // nolint
+	c.tags = setTagsForCommand(c.tags, "collection.removeid")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.RemoveId(id)
 	span.Finish(tracer.WithError(err))
@@ -188,6 +204,7 @@ func (c *Collection) RemoveId(id interface{}) error { // nolint
 
 // RemoveAll invokes and traces Collection.RemoveAll
 func (c *Collection) RemoveAll(selector interface{}) (info *mgo.ChangeInfo, err error) {
+	c.tags = setTagsForCommand(c.tags, "collection.removeall")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	info, err = c.Collection.RemoveAll(selector)
 	span.Finish(tracer.WithError(err))
@@ -196,6 +213,7 @@ func (c *Collection) RemoveAll(selector interface{}) (info *mgo.ChangeInfo, err 
 
 // Repair invokes and traces Collection.Repair
 func (c *Collection) Repair() *Iter {
+	c.tags = setTagsForCommand(c.tags, "collection.repair")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	iter := c.Collection.Repair()
 	span.Finish()

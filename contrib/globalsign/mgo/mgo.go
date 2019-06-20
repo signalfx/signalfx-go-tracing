@@ -15,13 +15,15 @@ import (
 // for tracing.
 func Dial(url string, opts ...DialOption) (*Session, error) {
 	session, err := mgo.Dial(url)
-	info, _ := session.BuildInfo()
+	if err != nil {
+		return nil, err
+	}
 	s := &Session{
 		Session: session,
 		cfg:     newConfig(),
 		tags: map[string]string{
-			"hosts":       strings.Join(session.LiveServers(), ", "),
-			"mgo_version": info.Version,
+			ext.PeerHostname: strings.Join(session.LiveServers(), ", "),
+			ext.DBType:       "mongo",
 		},
 	}
 	for _, fn := range opts {
@@ -39,14 +41,19 @@ type Session struct {
 
 func newChildSpanFromContext(cfg *mongoConfig, tags map[string]string) ddtrace.Span {
 	opts := []ddtrace.StartSpanOption{
-		tracer.SpanType(ext.SpanTypeMongoDB),
 		tracer.ServiceName(cfg.serviceName),
-		tracer.ResourceName("mongodb.query"),
+		tracer.SpanType(ext.SpanTypeMongoDB),
 	}
 	if cfg.analyticsRate > 0 {
 		opts = append(opts, tracer.Tag(ext.EventSampleRate, cfg.analyticsRate))
 	}
-	span, _ := tracer.StartSpanFromContext(cfg.ctx, "mongodb.query", opts...)
+	var operationName string
+	if resourceName, ok := tags[ext.ResourceName]; ok {
+		operationName = resourceName
+	} else {
+		operationName = "mongo"
+	}
+	span, _ := tracer.StartSpanFromContext(cfg.ctx, operationName, opts...)
 	for key, value := range tags {
 		span.SetTag(key, value)
 	}
@@ -55,6 +62,7 @@ func newChildSpanFromContext(cfg *mongoConfig, tags map[string]string) ddtrace.S
 
 // Run invokes and traces Session.Run
 func (s *Session) Run(cmd interface{}, result interface{}) (err error) {
+	s.tags = setTagsForCommand(s.tags, "session.run")
 	span := newChildSpanFromContext(s.cfg, s.tags)
 	err = s.Session.Run(cmd, result)
 	span.Finish(tracer.WithError(err))
@@ -74,7 +82,7 @@ func (s *Session) DB(name string) *Database {
 	for k, v := range s.tags {
 		tags[k] = v
 	}
-	tags["name"] = name
+	tags[ext.DBInstance] = name
 	return &Database{
 		Database: s.Session.DB(name),
 		cfg:      s.cfg,
@@ -100,6 +108,7 @@ type Iter struct {
 
 // Next invokes and traces Iter.Next
 func (iter *Iter) Next(result interface{}) bool {
+	iter.tags = setTagsForCommand(iter.tags, "iter.next")
 	span := newChildSpanFromContext(iter.cfg, iter.tags)
 	r := iter.Iter.Next(result)
 	span.Finish()
@@ -108,6 +117,7 @@ func (iter *Iter) Next(result interface{}) bool {
 
 // For invokes and traces Iter.For
 func (iter *Iter) For(result interface{}, f func() error) (err error) {
+	iter.tags = setTagsForCommand(iter.tags, "iter.for")
 	span := newChildSpanFromContext(iter.cfg, iter.tags)
 	err = iter.Iter.For(result, f)
 	span.Finish(tracer.WithError(err))
@@ -116,6 +126,7 @@ func (iter *Iter) For(result interface{}, f func() error) (err error) {
 
 // All invokes and traces Iter.All
 func (iter *Iter) All(result interface{}) (err error) {
+	iter.tags = setTagsForCommand(iter.tags, "iter.all")
 	span := newChildSpanFromContext(iter.cfg, iter.tags)
 	err = iter.Iter.All(result)
 	span.Finish(tracer.WithError(err))
@@ -124,6 +135,7 @@ func (iter *Iter) All(result interface{}) (err error) {
 
 // Close invokes and traces Iter.Close
 func (iter *Iter) Close() (err error) {
+	iter.tags = setTagsForCommand(iter.tags, "iter.close")
 	span := newChildSpanFromContext(iter.cfg, iter.tags)
 	err = iter.Iter.Close()
 	span.Finish(tracer.WithError(err))
@@ -139,6 +151,7 @@ type Bulk struct {
 
 // Run invokes and traces Bulk.Run
 func (b *Bulk) Run() (result *mgo.BulkResult, err error) {
+	b.tags = setTagsForCommand(b.tags, "bulk")
 	span := newChildSpanFromContext(b.cfg, b.tags)
 	result, err = b.Bulk.Run()
 	span.Finish(tracer.WithError(err))

@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/mailru/easyjson"
 	"github.com/signalfx/golib/pointer"
 	sfxtrace "github.com/signalfx/golib/trace"
-	"github.com/signalfx/golib/trace/format"
+	traceformat "github.com/signalfx/golib/trace/format"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
-	"strings"
-	"time"
 )
 
 const (
@@ -166,6 +167,8 @@ func deriveKind(s *span) *string {
 		return pointer.String(spanKindClient)
 	case ext.SpanTypeWeb:
 		return pointer.String(spanKindServer)
+	case ext.SpanTypeMongoDB:
+    return pointer.String(spanKindClient)
 	case ext.SpanTypeSQL:
 		return pointer.String(spanKindClient)
 	}
