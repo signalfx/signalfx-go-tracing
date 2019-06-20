@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/globalsign/mgo"
@@ -471,6 +472,7 @@ func TestWithZipkin(t *testing.T) {
 		}
 
 		assert.Equal("mongo.collection.insert", *span.Name)
+		assert.Equal(ext.SpanKindClient, *span.Kind)
 
 		assert.Equal(span.Tags, map[string]string{
 			"component":     "mongodb",
@@ -478,6 +480,7 @@ func TestWithZipkin(t *testing.T) {
 			"db.instance":   "my_db",
 			"db.type":       "mongo",
 			"db.statement":  "collection.insert my_db",
+			"span.kind":     strings.ToLower(ext.SpanKindClient),
 		})
 		assert.Len(span.Annotations, 0)
 	})
@@ -501,6 +504,12 @@ func TestWithZipkin(t *testing.T) {
 
 		spans := zipkin.WaitForSpans(t, 1)
 		span := spans[0]
+		if assert.NotNil(span.LocalEndpoint.ServiceName) {
+			assert.Equal("test-mgo-service", *span.LocalEndpoint.ServiceName)
+		}
+
+		assert.Equal("mongo.collection.insert", *span.Name)
+		assert.Equal(ext.SpanKindClient, *span.Kind)
 
 		assert.Equal(span.Tags, map[string]string{
 			"component":     "mongodb",
@@ -509,6 +518,7 @@ func TestWithZipkin(t *testing.T) {
 			"db.type":       "mongo",
 			"db.statement":  "collection.insert my_db",
 			"error":         "true",
+			"span.kind":     strings.ToLower(ext.SpanKindClient),
 		})
 
 		ann := testutil.GetAnnotation(t, span, 0)

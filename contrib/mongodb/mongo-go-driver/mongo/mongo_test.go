@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strings"
 	"testing"
 	"time"
 
@@ -109,12 +110,14 @@ func TestWithZipkin(t *testing.T) {
 		}
 
 		assert.Equal("mongo.insert", *span.Name)
+		assert.Equal(ext.SpanKindClient, *span.Kind)
 
 		assert.Equal("mongodb", span.Tags["component"])
 		assert.Equal(hostname, span.Tags[ext.PeerHostname])
 		assert.Equal(port, span.Tags[ext.PeerPort])
 		assert.Equal("test-database", span.Tags[ext.DBInstance])
 		assert.Equal("mongo", span.Tags[ext.DBType])
+		assert.Equal(strings.ToLower(ext.SpanKindClient), span.Tags[ext.SpanKind])
 		assert.Contains(span.Tags[ext.DBStatement], `"test-item":"test-value"`)
 
 		assert.Len(span.Annotations, 0)
