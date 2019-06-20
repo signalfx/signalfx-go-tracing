@@ -37,16 +37,19 @@ func TestMySQL(t *testing.T) {
 
 	testConfig := &sqltest.Config{
 		DB:         dbx.DB,
+		DBName:     "test",
+		DBPort:     3306,
+		DBUser:     "test",
 		DriverName: "mysql",
 		TableName:  tableName,
-		ExpectName: "mysql.query",
+		ExpectName: "Query",
 		ExpectTags: map[string]interface{}{
 			ext.ServiceName: "mysql-test",
 			ext.SpanType:    ext.SpanTypeSQL,
 			ext.TargetHost:  "127.0.0.1",
 			ext.TargetPort:  "3306",
 			ext.DBUser:      "test",
-			ext.DBName:      "test",
+			ext.DBInstance:  "test",
 		},
 	}
 	sqltest.RunAll(t, testConfig)
@@ -62,16 +65,19 @@ func TestPostgres(t *testing.T) {
 
 	testConfig := &sqltest.Config{
 		DB:         dbx.DB,
+		DBName:     "postgres",
+		DBPort:     5432,
+		DBUser:     "postgres",
 		DriverName: "postgres",
 		TableName:  tableName,
-		ExpectName: "postgres.query",
+		ExpectName: "Query",
 		ExpectTags: map[string]interface{}{
 			ext.ServiceName: "postgres.db",
 			ext.SpanType:    ext.SpanTypeSQL,
 			ext.TargetHost:  "127.0.0.1",
 			ext.TargetPort:  "5432",
 			ext.DBUser:      "postgres",
-			ext.DBName:      "postgres",
+			ext.DBInstance:  "postgres",
 		},
 	}
 	sqltest.RunAll(t, testConfig)

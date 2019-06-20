@@ -3,8 +3,8 @@ package internal
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParseDSN(t *testing.T) {
@@ -21,14 +21,14 @@ func TestParseDSN(t *testing.T) {
 				ext.DBUser:     "bob",
 				ext.TargetHost: "1.2.3.4",
 				ext.TargetPort: "5432",
-				ext.DBName:     "mydb",
+				ext.DBInstance: "mydb",
 			},
 		},
 		{
 			driverName: "mysql",
 			dsn:        "bob:secret@tcp(1.2.3.4:5432)/mydb",
 			expected: map[string]string{
-				ext.DBName:     "mydb",
+				ext.DBInstance: "mydb",
 				ext.DBUser:     "bob",
 				ext.TargetHost: "1.2.3.4",
 				ext.TargetPort: "5432",
@@ -40,7 +40,7 @@ func TestParseDSN(t *testing.T) {
 			expected: map[string]string{
 				ext.TargetPort:    "5433",
 				ext.TargetHost:    "master-db-master-active.postgres.service.consul",
-				ext.DBName:        "dogdatastaging",
+				ext.DBInstance:    "dogdatastaging",
 				ext.DBApplication: "trace-api",
 				ext.DBUser:        "dog",
 			},

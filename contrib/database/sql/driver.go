@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
-	"fmt"
 	"time"
 
 	"github.com/signalfx/signalfx-go-tracing/contrib/database/sql/internal"
@@ -62,7 +61,6 @@ func (tp *traceParams) tryTrace(ctx context.Context, resource string, query stri
 		// See: https://github.com/DataDog/dd-trace-go/issues/270
 		return
 	}
-	name := fmt.Sprintf("%s.query", tp.driverName)
 	opts := []ddtrace.StartSpanOption{
 		tracer.SpanType(ext.SpanTypeSQL),
 		tracer.ServiceName(tp.config.serviceName),
@@ -71,14 +69,16 @@ func (tp *traceParams) tryTrace(ctx context.Context, resource string, query stri
 	if rate := tp.config.analyticsRate; rate > 0 {
 		opts = append(opts, tracer.Tag(ext.EventSampleRate, rate))
 	}
-	span, _ := tracer.StartSpanFromContext(ctx, name, opts...)
+	span, _ := tracer.StartSpanFromContext(ctx, resource, opts...)
 	if query != "" {
 		resource = query
+		span.SetTag(ext.DBStatement, query)
 	}
 	span.SetTag(ext.ResourceName, resource)
 	for k, v := range tp.meta {
 		span.SetTag(k, v)
 	}
+	span.SetTag(ext.DBType, tp.driverName)
 	span.Finish(tracer.WithError(err))
 }
 

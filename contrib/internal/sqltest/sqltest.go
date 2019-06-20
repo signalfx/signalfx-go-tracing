@@ -4,7 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
+	"github.com/signalfx/signalfx-go-tracing/tracing"
+	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
 	"log"
+	"strconv"
 	"testing"
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
@@ -12,6 +16,7 @@ import (
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // Prepare sets up a table with the given name in both the MySQL and Postgres databases and returns
@@ -53,6 +58,98 @@ func RunAll(t *testing.T, cfg *Config) {
 	} {
 		t.Run(name, test(cfg))
 	}
+
+	cfg.mockTracer.Stop()
+	t.Run("Zipkin", testZipkin(cfg))
+}
+
+func testZipkin(cfg *Config) func(t *testing.T) {
+	return func(t *testing.T) {
+		query := fmt.Sprintf("SELECT id, name FROM %s LIMIT 5", cfg.TableName)
+
+		zipkin := zipkinserver.Start()
+		defer zipkin.Stop()
+
+		tracing.Start(tracing.WithEndpointURL(zipkin.URL()), tracing.WithServiceName("sql-service"))
+		defer tracing.Stop()
+
+		t.Run("error", func(t *testing.T) {
+			zipkin.Reset()
+			assert := assert.New(t)
+			require := require.New(t)
+
+			rows, err := cfg.DB.Query("invalid query")
+			require.Error(err)
+			require.Nil(rows)
+
+			tracer.ForceFlush()
+			spans := zipkin.WaitForSpans(t, 1)
+
+			span := spans[0]
+
+			assert.Equal("CLIENT", *span.Kind)
+			assert.Equal("Query", *span.Name)
+			assert.Equal(map[string]string{
+				"component":     "sql",
+				"db.type":       cfg.DriverName,
+				"db.instance":   cfg.DBName,
+				"db.statement":  "invalid query",
+				"db.user":       cfg.DBUser,
+				"peer.hostname": "127.0.0.1",
+				"peer.port":     strconv.Itoa(cfg.DBPort),
+				"span.kind":     "client",
+				"error":         "true",
+			}, span.Tags)
+
+			require.Len(span.Annotations, 1)
+
+			ann := testutil.GetAnnotation(t, span, 0)
+			assert.Equal(ann["event"], "error")
+			assert.Greater(len(ann["stack"]), 50)
+			assert.Contains(ann["stack"], "goroutine")
+
+			switch cfg.DriverName {
+			case "mysql":
+				assert.Contains(ann["message"], "You have an error in your SQL syntax")
+				assert.Equal(ann["error.kind"], "*mysql.MySQLError")
+				assert.Contains(ann["error.object"], "&mysql.MySQLError")
+			case "postgres":
+				assert.Contains(ann["message"], `pq: syntax error at or near "invalid"`)
+				assert.Equal(ann["error.kind"], "*pq.Error")
+				assert.Contains(ann["error.object"], "&pq.Error")
+			default:
+				panic(cfg.DriverName + "unsupported")
+			}
+		})
+
+		t.Run("query", func(t *testing.T) {
+			zipkin.Reset()
+			assert := assert.New(t)
+			require := require.New(t)
+
+			rows, err := cfg.DB.Query(query)
+			require.NoError(err)
+			defer rows.Close()
+
+			tracer.ForceFlush()
+			spans := zipkin.WaitForSpans(t, 1)
+
+			span := spans[0]
+
+			assert.Equal("CLIENT", *span.Kind)
+			assert.Equal("Query", *span.Name)
+			assert.Equal(map[string]string{
+				"component":     "sql",
+				"db.type":       cfg.DriverName,
+				"db.instance":   cfg.DBName,
+				"db.statement":  query,
+				"db.user":       cfg.DBUser,
+				"peer.hostname": "127.0.0.1",
+				"peer.port":     strconv.Itoa(cfg.DBPort),
+				"span.kind":     "client",
+			}, span.Tags)
+		})
+	}
 }
 
 func testPing(cfg *Config) func(*testing.T) {
@@ -65,7 +162,7 @@ func testPing(cfg *Config) func(*testing.T) {
 		assert.Len(spans, 1)
 
 		span := spans[0]
-		assert.Equal(cfg.ExpectName, span.OperationName())
+		assert.Equal("Ping", span.OperationName())
 		for k, v := range cfg.ExpectTags {
 			assert.Equal(v, span.Tag(k), "Value mismatch on tag %s", k)
 		}
@@ -110,7 +207,7 @@ func testStatement(cfg *Config) func(*testing.T) {
 		assert.Len(spans, 1)
 
 		span := spans[0]
-		assert.Equal(cfg.ExpectName, span.OperationName())
+		assert.Equal("Prepare", span.OperationName())
 		for k, v := range cfg.ExpectTags {
 			assert.Equal(v, span.Tag(k), "Value mismatch on tag %s", k)
 		}
@@ -122,7 +219,7 @@ func testStatement(cfg *Config) func(*testing.T) {
 		spans = cfg.mockTracer.FinishedSpans()
 		assert.Len(spans, 1)
 		span = spans[0]
-		assert.Equal(cfg.ExpectName, span.OperationName())
+		assert.Equal("Exec", span.OperationName())
 		for k, v := range cfg.ExpectTags {
 			assert.Equal(v, span.Tag(k), "Value mismatch on tag %s", k)
 		}
@@ -141,7 +238,7 @@ func testBeginRollback(cfg *Config) func(*testing.T) {
 		assert.Len(spans, 1)
 
 		span := spans[0]
-		assert.Equal(cfg.ExpectName, span.OperationName())
+		assert.Equal("Begin", span.OperationName())
 		for k, v := range cfg.ExpectTags {
 			assert.Equal(v, span.Tag(k), "Value mismatch on tag %s", k)
 		}
@@ -153,7 +250,7 @@ func testBeginRollback(cfg *Config) func(*testing.T) {
 		spans = cfg.mockTracer.FinishedSpans()
 		assert.Len(spans, 1)
 		span = spans[0]
-		assert.Equal(cfg.ExpectName, span.OperationName())
+		assert.Equal("Rollback", span.OperationName())
 		for k, v := range cfg.ExpectTags {
 			assert.Equal(v, span.Tag(k), "Value mismatch on tag %s", k)
 		}
@@ -163,6 +260,7 @@ func testBeginRollback(cfg *Config) func(*testing.T) {
 func testExec(cfg *Config) func(*testing.T) {
 	return func(t *testing.T) {
 		assert := assert.New(t)
+		require := require.New(t)
 		query := fmt.Sprintf("INSERT INTO %s(name) VALUES('New York')", cfg.TableName)
 
 		parent, ctx := tracer.StartSpanFromContext(context.Background(), "test.parent",
@@ -185,11 +283,11 @@ func testExec(cfg *Config) func(*testing.T) {
 
 		var span mocktracer.Span
 		for _, s := range spans {
-			if s.OperationName() == cfg.ExpectName && s.Tag(ext.ResourceName) == query {
+			if s.OperationName() == "Exec" && s.Tag(ext.ResourceName) == query {
 				span = s
 			}
 		}
-		assert.NotNil(span, "span not found")
+		require.NotNil(span, "span not found")
 		for k, v := range cfg.ExpectTags {
 			assert.Equal(v, span.Tag(k), "Value mismatch on tag %s", k)
 		}
@@ -198,7 +296,7 @@ func testExec(cfg *Config) func(*testing.T) {
 				span = s
 			}
 		}
-		assert.NotNil(span, "span not found")
+		require.NotNil(span, "span not found")
 		for k, v := range cfg.ExpectTags {
 			assert.Equal(v, span.Tag(k), "Value mismatch on tag %s", k)
 		}
@@ -213,4 +311,7 @@ type Config struct {
 	TableName  string
 	ExpectName string
 	ExpectTags map[string]interface{}
+	DBName     string
+	DBUser     string
+	DBPort     int
 }
