@@ -27,6 +27,12 @@ const (
 	// HTTPURL sets the HTTP URL for a span.
 	HTTPURL = "http.url"
 
+	// HTTPRoute sets the HTTP route for a span.
+	HTTPRoute = "http.route"
+
+	// HTTPPath sets the HTTP path for a span.
+	HTTPPath = "http.path"
+
 	// TODO: In the next major version, prefix these constants (SpanType, etc)
 	// with "Key*" (KeySpanType, etc) to more easily differentiate between
 	// constants representing tag values and constants representing keys.
@@ -38,6 +44,9 @@ const (
 
 	// SpanType defines the Span type (web, db, cache).
 	SpanType = "span.type"
+
+	// SpanKind defines the Span kind (SERVER, CLIENT).
+	SpanKind = "span.kind"
 
 	// ServiceName defines the Service name for this Span.
 	ServiceName = "service.name"

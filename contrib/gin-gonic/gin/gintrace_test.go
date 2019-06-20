@@ -2,17 +2,23 @@ package gin
 
 import (
 	"errors"
+	"fmt"
 	"html/template"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
+	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/mocktracer"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	"github.com/signalfx/signalfx-go-tracing/internal/globalconfig"
+	"github.com/signalfx/signalfx-go-tracing/tracing"
+	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func init() {
@@ -67,14 +73,14 @@ func TestTrace200(t *testing.T) {
 		t.Fatalf("no spans")
 	}
 	span := spans[0]
-	assert.Equal("http.request", span.OperationName())
-	assert.Equal(ext.SpanTypeWeb, span.Tag(ext.SpanType))
+	assert.Equal("/user/:id", span.OperationName())
+	assert.Equal(ext.SpanTypeGin, span.Tag(ext.SpanType))
 	assert.Equal("foobar", span.Tag(ext.ServiceName))
-	assert.Contains(span.Tag(ext.ResourceName), "gin.TestTrace200")
+	assert.Contains(span.Tag(ext.ResourceName), "/user/:id")
 	assert.Equal("200", span.Tag(ext.HTTPCode))
 	assert.Equal("GET", span.Tag(ext.HTTPMethod))
 	// TODO(x) would be much nicer to have "/user/:id" here
-	assert.Equal("/user/123", span.Tag(ext.HTTPURL))
+	assert.Equal("http://example.com/user/123", span.Tag(ext.HTTPURL))
 }
 
 func TestError(t *testing.T) {
@@ -104,7 +110,7 @@ func TestError(t *testing.T) {
 		t.Fatalf("no spans")
 	}
 	span := spans[0]
-	assert.Equal("http.request", span.OperationName())
+	assert.Equal("/", span.OperationName())
 	assert.Equal("foobar", span.Tag(ext.ServiceName))
 	assert.Equal("500", span.Tag(ext.HTTPCode))
 	assert.Equal(wantErr.Error(), span.Tag(ext.Error).(error).Error())
@@ -249,5 +255,97 @@ func TestAnalyticsSettings(t *testing.T) {
 		globalconfig.SetAnalyticsRate(0.4)
 
 		assertRate(t, mt, 0.23, WithAnalyticsRate(0.23))
+	})
+}
+
+func TestWithZipkin(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	tracing.Start(tracing.WithEndpointURL(zipkin.URL()), tracing.WithServiceName("test-gin-service"))
+	defer tracing.Stop()
+
+	router := gin.New()
+	router.Use(Middleware("foobar"))
+	router.GET("/successful", func(c *gin.Context) {
+		_, ok := tracer.SpanFromContext(c.Request.Context())
+		assert.True(ok)
+		c.Status(200)
+	})
+	router.POST("/unsuccessful", func(c *gin.Context) {
+		_, ok := tracer.SpanFromContext(c.Request.Context())
+		assert.True(ok)
+		c.AbortWithError(400, fmt.Errorf("Gin Error"))
+	})
+
+	t.Run("successful request", func(t *testing.T) {
+		zipkin.Reset()
+
+		r := httptest.NewRequest("GET", "/successful", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, r)
+		response := w.Result()
+		assert.Equal(response.StatusCode, 200)
+
+		tracer.ForceFlush()
+
+		spans := zipkin.WaitForSpans(t, 1)
+		require.Len(spans, 1)
+
+		span := spans[0]
+		if assert.NotNil(span.LocalEndpoint.ServiceName) {
+			assert.Equal("test-gin-service", *span.LocalEndpoint.ServiceName)
+		}
+
+		assert.Equal("/", *span.Name) // Gin bug. Fix PR has been made here https://github.com/gin-gonic/gin/pull/1919
+		assert.Equal(map[string]string{
+			"component":        "gin",
+			"http.method":      "GET",
+			"http.status_code": "200",
+			"http.url":         "http://example.com/successful",
+			"span.kind":        strings.ToLower(ext.SpanKindServer),
+		}, span.Tags)
+		assert.Len(span.Annotations, 0)
+	})
+
+	t.Run("unsuccessful request", func(t *testing.T) {
+		zipkin.Reset()
+
+		r := httptest.NewRequest("POST", "/unsuccessful", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, r)
+		response := w.Result()
+		assert.Equal(400, response.StatusCode)
+
+		tracer.ForceFlush()
+
+		spans := zipkin.WaitForSpans(t, 1)
+
+		span := spans[0]
+		if assert.NotNil(span.LocalEndpoint.ServiceName) {
+			assert.Equal("test-gin-service", *span.LocalEndpoint.ServiceName)
+		}
+
+		assert.Equal("/", *span.Name)
+		assert.Equal(map[string]string{
+			"component":        "gin",
+			"http.method":      "POST",
+			"http.status_code": "400",
+			"http.url":         "http://example.com/unsuccessful",
+			"error":            "true",
+			"span.kind":        strings.ToLower(ext.SpanKindServer),
+		}, span.Tags)
+
+		assert.Len(span.Annotations, 1)
+		ann := testutil.GetAnnotation(t, span, 0)
+
+		assert.Equal(ann["event"], "error")
+		assert.Contains(ann["message"], "Gin Error")
+		assert.Contains(ann["stack"], "goroutine")
+		assert.Equal(ann["error.kind"], "*gin.Error")
+		assert.Contains(ann["error.object"], "&gin.Error{")
 	})
 }
