@@ -8,14 +8,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestContextWithSpan(t *testing.T) {
-	want := &span{SpanID: 123}
-	ctx := ContextWithSpan(context.Background(), want)
-	got, ok := ctx.Value(activeSpanKey).(*span)
-	assert := assert.New(t)
-	assert.True(ok)
-	assert.Equal(got, want)
-}
+// Not needed with delegating to opentracing.
+//func TestContextWithSpan(t *testing.T) {
+//	want := &span{SpanID: 123}
+//	ctx := ContextWithSpan(context.Background(), want)
+//	got, ok := ctx.Value(activeSpanKey).(*span)
+//	assert := assert.New(t)
+//	assert.True(ok)
+//	assert.Equal(got, want)
+//}
 
 func TestSpanFromContext(t *testing.T) {
 	t.Run("regular", func(t *testing.T) {

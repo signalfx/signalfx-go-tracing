@@ -27,7 +27,7 @@ func Example() {
 
 	// We may finish the child span using the returned error. If it's
 	// nil, it will be disregarded.
-	child.Finish(WithError(err))
+	child.FinishWithOptionsExt(WithError(err))
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,11 +1,13 @@
 package ddtrace // import "github.com/signalfx/signalfx-go-tracing/ddtrace"
 
 import (
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/log"
 	"sync"
 )
 
 var (
-	mu           sync.RWMutex   // guards globalTracer
+	mu           sync.RWMutex // guards globalTracer
 	globalTracer Tracer = &NoopTracer{}
 )
 
@@ -64,41 +66,70 @@ var _ Span = (*NoopSpan)(nil)
 // NoopSpan is an implementation of ddtrace.Span that is a no-op.
 type NoopSpan struct{}
 
-// LogFields impelments ddtrace.Span
-func (NoopSpan) LogFields(fields ...LogFieldEntry) {
+// FinishWithOptionsExt implements ddtrace.Span.
+func (NoopSpan) FinishWithOptionsExt(opts ...FinishOption) {
+}
+
+// Finish implements ddtrace.Span.
+func (NoopSpan) Finish() {
+}
+
+// FinishWithOptions implements ddtrace.Span.
+func (NoopSpan) FinishWithOptions(opts opentracing.FinishOptions) {
+}
+
+// Context implements ddtrace.Span.
+func (NoopSpan) Context() opentracing.SpanContext {
+	return NoopSpanContext{}
+}
+
+// SetOperationName implements ddtrace.Span.
+func (NoopSpan) SetOperationName(operationName string) opentracing.Span {
+	return NoopSpan{}
 }
 
 // SetTag implements ddtrace.Span.
-func (NoopSpan) SetTag(key string, value interface{}) {}
+func (NoopSpan) SetTag(key string, value interface{}) opentracing.Span {
+	return NoopSpan{}
+}
 
-// SetOperationName implements ddtrace.Span.
-func (NoopSpan) SetOperationName(operationName string) {}
+// LogFields impelments ddtrace.Span
+func (NoopSpan) LogFields(fields ...log.Field) {
+}
+
+// LogKV implements ddtrace.Span.
+func (NoopSpan) LogKV(alternatingKeyValues ...interface{}) {
+}
+
+// SetBaggageItem implements ddtrace.Span.
+func (NoopSpan) SetBaggageItem(restrictedKey, value string) opentracing.Span {
+	return NoopSpan{}
+}
+
+// Tracer implements ddtrace.Span.
+func (NoopSpan) Tracer() opentracing.Tracer {
+	panic("not implemented")
+}
+
+// LogEvent implements ddtrace.Span.
+func (NoopSpan) LogEvent(event string) {
+}
+
+// LogEventWithPayload implements ddtrace.Span.
+func (NoopSpan) LogEventWithPayload(event string, payload interface{}) {
+}
+
+// Log implements ddtrace.Span.
+func (NoopSpan) Log(data opentracing.LogData) {
+}
 
 // BaggageItem implements ddtrace.Span.
 func (NoopSpan) BaggageItem(key string) string { return "" }
-
-// SetBaggageItem implements ddtrace.Span.
-func (NoopSpan) SetBaggageItem(key, val string) {}
-
-// Finish implements ddtrace.Span.
-func (NoopSpan) Finish(opts ...FinishOption) {}
-
-// Tracer implements ddtrace.Span.
-func (NoopSpan) Tracer() Tracer { return NoopTracer{} }
-
-// Context implements ddtrace.Span.
-func (NoopSpan) Context() SpanContext { return NoopSpanContext{} }
 
 var _ SpanContext = (*NoopSpanContext)(nil)
 
 // NoopSpanContext is an implementation of ddtrace.SpanContext that is a no-op.
 type NoopSpanContext struct{}
-
-// SpanID implements ddtrace.SpanContext.
-func (NoopSpanContext) SpanID() uint64 { return 0 }
-
-// TraceID implements ddtrace.SpanContext.
-func (NoopSpanContext) TraceID() uint64 { return 0 }
 
 // ForeachBaggageItem implements ddtrace.SpanContext.
 func (NoopSpanContext) ForeachBaggageItem(handler func(k, v string) bool) {}

@@ -209,7 +209,7 @@ func (p *Producer) Produce(msg *kafka.Message, deliveryChan chan kafka.Event) er
 				// delivery errors are returned via TopicPartition.Error
 				err = msg.TopicPartition.Error
 			}
-			span.Finish(tracer.WithError(err))
+			span.FinishWithOptionsExt(tracer.WithError(err))
 			oldDeliveryChan <- evt
 		}()
 	}
@@ -217,7 +217,7 @@ func (p *Producer) Produce(msg *kafka.Message, deliveryChan chan kafka.Event) er
 	err := p.Producer.Produce(msg, deliveryChan)
 	// with no delivery channel, finish immediately
 	if deliveryChan == nil {
-		span.Finish(tracer.WithError(err))
+		span.FinishWithOptionsExt(tracer.WithError(err))
 	}
 
 	return err

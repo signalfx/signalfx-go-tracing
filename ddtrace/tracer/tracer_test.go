@@ -1152,6 +1152,6 @@ func BenchmarkTracerStackFrames(b *testing.B) {
 
 	for n := 0; n < b.N; n++ {
 		span := tracer.StartSpan("test")
-		span.Finish(StackFrames(64, 0))
+		span.FinishWithOptionsExt(StackFrames(64, 0))
 	}
 }

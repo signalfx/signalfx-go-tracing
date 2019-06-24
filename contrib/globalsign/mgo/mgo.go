@@ -65,7 +65,7 @@ func (s *Session) Run(cmd interface{}, result interface{}) (err error) {
 	s.tags = setTagsForCommand(s.tags, "session.run")
 	span := newChildSpanFromContext(s.cfg, s.tags)
 	err = s.Session.Run(cmd, result)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return
 }
 
@@ -120,7 +120,7 @@ func (iter *Iter) For(result interface{}, f func() error) (err error) {
 	iter.tags = setTagsForCommand(iter.tags, "iter.for")
 	span := newChildSpanFromContext(iter.cfg, iter.tags)
 	err = iter.Iter.For(result, f)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -129,7 +129,7 @@ func (iter *Iter) All(result interface{}) (err error) {
 	iter.tags = setTagsForCommand(iter.tags, "iter.all")
 	span := newChildSpanFromContext(iter.cfg, iter.tags)
 	err = iter.Iter.All(result)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -138,7 +138,7 @@ func (iter *Iter) Close() (err error) {
 	iter.tags = setTagsForCommand(iter.tags, "iter.close")
 	span := newChildSpanFromContext(iter.cfg, iter.tags)
 	err = iter.Iter.Close()
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -154,7 +154,7 @@ func (b *Bulk) Run() (result *mgo.BulkResult, err error) {
 	b.tags = setTagsForCommand(b.tags, "bulk")
 	span := newChildSpanFromContext(b.cfg, b.tags)
 	result, err = b.Bulk.Run()
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 
 	return result, err
 }

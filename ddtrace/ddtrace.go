@@ -8,7 +8,10 @@
 // with by accessing the subdirectories of this package: https://godoc.org/github.com/signalfx/signalfx-go-tracing/ddtrace#pkg-subdirectories.
 package ddtrace // import "github.com/signalfx/signalfx-go-tracing/ddtrace"
 
-import "time"
+import (
+	"github.com/opentracing/opentracing-go"
+	"time"
+)
 
 // Tracer specifies an implementation of the Datadog tracer which allows starting
 // and propagating spans. The official implementation if exposed as functions
@@ -33,61 +36,19 @@ type Tracer interface {
 	ForceFlush()
 }
 
-// LogFieldEntry holds a key/value pair for a log
-type LogFieldEntry struct {
-	Key   string
-	Value interface{}
-}
-
-// LogField creates a key/value pair
-func LogField(key string, value interface{}) LogFieldEntry {
-	return LogFieldEntry{key, value}
-}
-
 // Span represents a chunk of computation time. Spans have names, durations,
 // timestamps and other metadata. A Tracer is used to create hierarchies of
 // spans in a request, buffer and submit them to the server.
 type Span interface {
-	// SetTag sets a key/value pair as metadata on the span.
-	SetTag(key string, value interface{})
-
-	// LogFields adds a log field.
-	LogFields(fields ...LogFieldEntry)
-
-	// SetOperationName sets the operation name for this span. An operation name should be
-	// a representative name for a group of spans (e.g. "grpc.server" or "http.request").
-	SetOperationName(operationName string)
-
-	// BaggageItem returns the baggage item held by the given key.
-	BaggageItem(key string) string
-
-	// SetBaggageItem sets a new baggage item at the given key. The baggage
-	// item should propagate to all descendant spans, both in- and cross-process.
-	SetBaggageItem(key, val string)
-
-	// Finish finishes the current span with the given options. Finish calls should be idempotent.
-	Finish(opts ...FinishOption)
-
-	// Context returns the SpanContext of this Span.
-	Context() SpanContext
+	opentracing.Span
+	FinishWithOptionsExt(opts ...FinishOption)
 }
 
 // SpanContext represents a span state that can propagate to descendant spans
 // and across process boundaries. It contains all the information needed to
 // spawn a direct descendant of the span that it belongs to. It can be used
 // to create distributed tracing by propagating it using the provided interfaces.
-type SpanContext interface {
-	// SpanID returns the span ID that this context is carrying.
-	SpanID() uint64
-
-	// TraceID returns the trace ID that this context is carrying.
-	TraceID() uint64
-
-	// ForeachBaggageItem provides an iterator over the key/value pairs set as
-	// baggage within this context. Iteration stops when the handler returns
-	// false.
-	ForeachBaggageItem(handler func(k, v string) bool)
-}
+type SpanContext = opentracing.SpanContext
 
 // StartSpanOption is a configuration option that can be used with a Tracer's StartSpan method.
 type StartSpanOption func(cfg *StartSpanConfig)
@@ -98,9 +59,7 @@ type FinishOption func(cfg *FinishConfig)
 // FinishConfig holds the configuration for finishing a span. It is usually passed around by
 // reference to one or more FinishOption functions which shape it into its final form.
 type FinishConfig struct {
-	// FinishTime represents the time that should be set as finishing time for the
-	// span. Implementations should use the current time when FinishTime.IsZero().
-	FinishTime time.Time
+	opentracing.FinishOptions
 
 	// Error holds an optional error that should be set on the span before
 	// finishing.

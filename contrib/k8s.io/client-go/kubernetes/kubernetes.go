@@ -3,7 +3,6 @@ package kubernetes // import "github.com/signalfx/signalfx-go-tracing/contrib/k8
 
 import (
 	"net/http"
-	"strconv"
 	"strings"
 
 	httptrace "github.com/signalfx/signalfx-go-tracing/contrib/net/http"
@@ -36,14 +35,15 @@ func wrapRoundTripperWithOptions(rt http.RoundTripper, opts ...httptrace.RoundTr
 	opts = append(opts, httptrace.WithBefore(func(req *http.Request, span ddtrace.Span) {
 		span.SetTag(ext.ServiceName, "kubernetes")
 		span.SetTag(ext.ResourceName, RequestToResource(req.Method, req.URL.Path))
-		traceID := span.Context().TraceID()
-		if traceID == 0 {
-			// tracer is not running
-			return
-		}
-		kubeAuditID := strconv.FormatUint(traceID, 10)
-		req.Header.Set("Audit-Id", kubeAuditID)
-		span.SetTag("kubernetes.audit_id", kubeAuditID)
+		// TODO: replace with injector
+		//traceID := span.Context().TraceID()
+		//if traceID == 0 {
+		//	// tracer is not running
+		//	return
+		//}
+		//kubeAuditID := strconv.FormatUint(traceID, 10)
+		//req.Header.Set("Audit-Id", kubeAuditID)
+		//span.SetTag("kubernetes.audit_id", kubeAuditID)
 	}))
 	return httptrace.WrapRoundTripper(rt, opts...)
 }

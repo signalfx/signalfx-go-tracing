@@ -52,5 +52,5 @@ func finishWithError(span ddtrace.Span, err error, cfg *config) {
 	if cfg.noDebugStack {
 		finishOptions = append(finishOptions, tracer.NoDebugStack())
 	}
-	span.Finish(finishOptions...)
+	span.FinishWithOptionsExt(finishOptions...)
 }

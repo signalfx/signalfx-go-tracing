@@ -4,6 +4,8 @@ package tracer
 
 import (
 	"fmt"
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/log"
 	"reflect"
 	"runtime"
 	"runtime/debug"
@@ -68,14 +70,37 @@ type span struct {
 	context  *spanContext `msg:"-"` // span propagation context
 }
 
+// LogKV pairs
+func (s *span) LogKV(alternatingKeyValues ...interface{}) {
+	fields, err := log.InterleavedKVToFields(alternatingKeyValues...)
+	if err != nil {
+		return
+	}
+	s.LogFields(fields...)
+}
+
+// Tracer returns the global tracer
+func (s *span) Tracer() opentracing.Tracer {
+	return ddtrace.GetGlobalTracer().(opentracing.Tracer)
+}
+
 // LogFields field to span
-func (s *span) LogFields(fields ...ddtrace.LogFieldEntry) {
+func (s *span) LogFields(fields ...log.Field) {
 	m := map[string]interface{}{}
 	for _, field := range fields {
-		m[field.Key] = field.Value
+		m[field.Key()] = field.Value()
 	}
 	s.Logs = append(s.Logs, &logFields{m, time.Now()})
 }
+
+// LogEvent is deprecated
+func (s *span) LogEvent(event string) { /* deprecated */ }
+
+// LogEventWithPayload is deprecated
+func (s *span) LogEventWithPayload(event string, payload interface{}) { /* deprecated */ }
+
+// Log is deprecated
+func (s *span) Log(data opentracing.LogData) { /* deprecated */ }
 
 // Context yields the SpanContext for this Span. Note that the return
 // value of Context() is still valid after a call to Finish(). This is
@@ -85,8 +110,9 @@ func (s *span) Context() ddtrace.SpanContext { return s.context }
 // SetBaggageItem sets a key/value pair as baggage on the span. Baggage items
 // are propagated down to descendant spans and injected cross-process. Use with
 // care as it adds extra load onto your tracing layer.
-func (s *span) SetBaggageItem(key, val string) {
+func (s *span) SetBaggageItem(key, val string) opentracing.Span {
 	s.context.setBaggageItem(key, val)
+	return s
 }
 
 // BaggageItem gets the value for a baggage item given its key. Returns the
@@ -96,36 +122,37 @@ func (s *span) BaggageItem(key string) string {
 }
 
 // SetTag adds a set of key/value metadata to the span.
-func (s *span) SetTag(key string, value interface{}) {
+func (s *span) SetTag(key string, value interface{}) opentracing.Span {
 	s.Lock()
 	defer s.Unlock()
 	// We don't lock spans when flushing, so we could have a data race when
 	// modifying a span as it's being flushed. This protects us against that
 	// race, since spans are marked `finished` before we flush them.
 	if s.finished {
-		return
+		return s
 	}
 
 	if key == ext.Error {
 		s.setTagError(value, &errorConfig{})
-		return
+		return s
 	}
 
 	if v, ok := value.(bool); ok {
 		s.setTagBool(key, v)
-		return
+		return s
 	}
 	if v, ok := value.(string); ok {
 		s.setTagString(key, v)
-		return
+		return s
 	}
 	if v, ok := toFloat64(value); ok {
 		s.setTagNumeric(key, v)
-		return
+		return s
 	}
 	// not numeric, not a string and not an error, the likelihood of this
 	// happening is close to zero, but we should nevertheless account for it.
 	s.Meta[key] = fmt.Sprint(value)
+	return s
 }
 
 // setTagError sets the error tag. It accounts for various valid scenarios.
@@ -147,19 +174,19 @@ func (s *span) setTagError(value interface{}, cfg *errorConfig) {
 		// and provide all the benefits.
 		s.Error = 1
 
-		fields := []ddtrace.LogFieldEntry{
-			ddtrace.LogField(ext.Event, "error"),
-			ddtrace.LogField(ext.ErrorKind, reflect.TypeOf(v).String()),
-			ddtrace.LogField(ext.ErrorObject, fmt.Sprintf("%#v", v)),
-			ddtrace.LogField(ext.Message, v.Error()),
+		fields := []log.Field{
+			log.String(ext.Event, "error"),
+			log.String(ext.ErrorKind, reflect.TypeOf(v).String()),
+			log.String(ext.ErrorObject, fmt.Sprintf("%#v", v)),
+			log.String(ext.Message, v.Error()),
 		}
 
 		if !cfg.noDebugStack {
 			if cfg.stackFrames == 0 {
 				// TODO: maybe support xerrors and/or https://godoc.org/github.com/pkg/errors?
-				fields = append(fields, ddtrace.LogField(ext.Stack, string(debug.Stack())))
+				fields = append(fields, log.String(ext.Stack, string(debug.Stack())))
 			} else {
-				fields = append(fields, ddtrace.LogField(ext.Stack, takeStacktrace(cfg.stackFrames, cfg.stackSkip)))
+				fields = append(fields, log.String(ext.Stack, takeStacktrace(cfg.stackFrames, cfg.stackSkip)))
 			}
 		}
 
@@ -262,9 +289,9 @@ func (s *span) setTagNumeric(key string, v float64) {
 	}
 }
 
-// Finish closes this Span (but not its children) providing the duration
+// FinishWithOptionsExt closes this Span (but not its children) providing the duration
 // of its part of the tracing session.
-func (s *span) Finish(opts ...ddtrace.FinishOption) {
+func (s *span) FinishWithOptionsExt(opts ...ddtrace.FinishOption) {
 	var cfg ddtrace.FinishConfig
 	for _, fn := range opts {
 		fn(&cfg)
@@ -284,18 +311,35 @@ func (s *span) Finish(opts ...ddtrace.FinishOption) {
 		})
 		s.Unlock()
 	}
-	s.finish(t)
+	s.internalFinish(t)
+}
+
+// FinishWithOptions closes this span
+func (s *span) FinishWithOptions(opts opentracing.FinishOptions) {
+	for _, lr := range opts.LogRecords {
+		if len(lr.Fields) > 0 {
+			s.LogFields(lr.Fields...)
+		}
+	}
+
+	s.internalFinish(opts.FinishTime.UnixNano())
+}
+
+// Finish closes this span
+func (s *span) Finish() {
+	s.internalFinish(time.Now().UnixNano())
 }
 
 // SetOperationName sets or changes the operation name.
-func (s *span) SetOperationName(operationName string) {
+func (s *span) SetOperationName(operationName string) opentracing.Span {
 	s.Lock()
 	defer s.Unlock()
 
 	s.Name = operationName
+	return s
 }
 
-func (s *span) finish(finishTime int64) {
+func (s *span) internalFinish(finishTime int64) {
 	s.Lock()
 	defer s.Unlock()
 	// We don't lock spans when flushing, so we could have a data race when

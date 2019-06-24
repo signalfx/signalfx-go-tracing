@@ -68,7 +68,7 @@ func (h *handlers) Complete(req *request.Request) {
 	if req.HTTPResponse != nil {
 		span.SetTag(ext.HTTPCode, strconv.Itoa(req.HTTPResponse.StatusCode))
 	}
-	span.Finish(tracer.WithError(req.Error))
+	span.FinishWithOptionsExt(tracer.WithError(req.Error))
 }
 
 func (h *handlers) operationName(req *request.Request) string {

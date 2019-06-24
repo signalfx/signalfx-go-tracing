@@ -97,7 +97,7 @@ func TestSpanFinishWithTime(t *testing.T) {
 
 	finishTime := time.Now().Add(10 * time.Second)
 	span := newBasicSpan("web.request")
-	span.Finish(FinishTime(finishTime))
+	span.FinishWithOptionsExt(FinishTime(finishTime))
 
 	duration := finishTime.UnixNano() - span.Start
 	assert.Equal(duration, span.Duration)
@@ -108,7 +108,7 @@ func TestSpanFinishWithError(t *testing.T) {
 
 	err := errors.New("test error")
 	span := newBasicSpan("web.request")
-	span.Finish(WithError(err))
+	span.FinishWithOptionsExt(WithError(err))
 
 	assert.Equal(int32(1), span.Error)
 	assert.Equal("true", span.Meta[ext.Error])
@@ -129,7 +129,7 @@ func TestSpanFinishWithErrorNoDebugStack(t *testing.T) {
 
 	err := errors.New("test error")
 	span := newBasicSpan("web.request")
-	span.Finish(WithError(err), NoDebugStack())
+	span.FinishWithOptionsExt(WithError(err), NoDebugStack())
 
 	assert.Equal(int32(1), span.Error)
 	assert.Equal("true", span.Meta[ext.Error])
@@ -148,7 +148,7 @@ func TestSpanFinishWithErrorStackFrames(t *testing.T) {
 
 	err := errors.New("test error")
 	span := newBasicSpan("web.request")
-	span.Finish(WithError(err), StackFrames(2, 1))
+	span.FinishWithOptionsExt(WithError(err), StackFrames(2, 1))
 
 	assert.Equal(int32(1), span.Error)
 	assert.Equal("true", span.Meta[ext.Error])

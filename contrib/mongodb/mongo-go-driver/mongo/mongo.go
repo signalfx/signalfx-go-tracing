@@ -76,7 +76,7 @@ func (m *monitor) Finished(evt *event.CommandFinishedEvent, err error) {
 	if !ok {
 		return
 	}
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 }
 
 // NewMonitor creates a new mongodb event CommandMonitor.

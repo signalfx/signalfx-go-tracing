@@ -61,7 +61,7 @@ func (db *DB) WithContext(ctx context.Context) *DB {
 func (db *DB) CompactRange(r util.Range) error {
 	span := startSpan(db.cfg, "CompactRange")
 	err := db.DB.CompactRange(r)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -69,7 +69,7 @@ func (db *DB) CompactRange(r util.Range) error {
 func (db *DB) Delete(key []byte, wo *opt.WriteOptions) error {
 	span := startSpan(db.cfg, "Delete")
 	err := db.DB.Delete(key, wo)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -77,7 +77,7 @@ func (db *DB) Delete(key []byte, wo *opt.WriteOptions) error {
 func (db *DB) Get(key []byte, ro *opt.ReadOptions) (value []byte, err error) {
 	span := startSpan(db.cfg, "Get")
 	value, err = db.DB.Get(key, ro)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return value, err
 }
 
@@ -96,7 +96,7 @@ func (db *DB) GetSnapshot() (*Snapshot, error) {
 func (db *DB) Has(key []byte, ro *opt.ReadOptions) (ret bool, err error) {
 	span := startSpan(db.cfg, "Has")
 	ret, err = db.DB.Has(key, ro)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return ret, err
 }
 
@@ -122,7 +122,7 @@ func (db *DB) OpenTransaction() (*Transaction, error) {
 func (db *DB) Put(key, value []byte, wo *opt.WriteOptions) error {
 	span := startSpan(db.cfg, "Put")
 	err := db.DB.Put(key, value, wo)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -130,7 +130,7 @@ func (db *DB) Put(key, value []byte, wo *opt.WriteOptions) error {
 func (db *DB) Write(batch *leveldb.Batch, wo *opt.WriteOptions) error {
 	span := startSpan(db.cfg, "Write")
 	err := db.DB.Write(batch, wo)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -162,7 +162,7 @@ func (snap *Snapshot) WithContext(ctx context.Context) *Snapshot {
 func (snap *Snapshot) Get(key []byte, ro *opt.ReadOptions) (value []byte, err error) {
 	span := startSpan(snap.cfg, "Get")
 	value, err = snap.Snapshot.Get(key, ro)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return value, err
 }
 
@@ -170,7 +170,7 @@ func (snap *Snapshot) Get(key []byte, ro *opt.ReadOptions) (value []byte, err er
 func (snap *Snapshot) Has(key []byte, ro *opt.ReadOptions) (ret bool, err error) {
 	span := startSpan(snap.cfg, "Has")
 	ret, err = snap.Snapshot.Has(key, ro)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return ret, err
 }
 
@@ -209,7 +209,7 @@ func (tr *Transaction) WithContext(ctx context.Context) *Transaction {
 func (tr *Transaction) Commit() error {
 	span := startSpan(tr.cfg, "Commit")
 	err := tr.Transaction.Commit()
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -217,7 +217,7 @@ func (tr *Transaction) Commit() error {
 func (tr *Transaction) Get(key []byte, ro *opt.ReadOptions) ([]byte, error) {
 	span := startSpan(tr.cfg, "Get")
 	value, err := tr.Transaction.Get(key, ro)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return value, err
 }
 
@@ -225,7 +225,7 @@ func (tr *Transaction) Get(key []byte, ro *opt.ReadOptions) ([]byte, error) {
 func (tr *Transaction) Has(key []byte, ro *opt.ReadOptions) (bool, error) {
 	span := startSpan(tr.cfg, "Has")
 	ret, err := tr.Transaction.Has(key, ro)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return ret, err
 }
 
@@ -254,7 +254,7 @@ func WrapIterator(it iterator.Iterator, opts ...Option) *Iterator {
 func (it *Iterator) Release() {
 	err := it.Error()
 	it.Iterator.Release()
-	it.span.Finish(tracer.WithError(err))
+	it.span.FinishWithOptionsExt(tracer.WithError(err))
 }
 
 func startSpan(cfg *config, name string) ddtrace.Span {

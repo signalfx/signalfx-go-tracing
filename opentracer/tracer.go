@@ -50,10 +50,7 @@ func (t *opentracer) StartSpan(operationName string, options ...opentracing.Star
 	for k, v := range sso.Tags {
 		opts = append(opts, tracer.Tag(k, v))
 	}
-	return &span{
-		Span:       t.Tracer.StartSpan(operationName, opts...),
-		opentracer: t,
-	}
+	return t.Tracer.StartSpan(operationName, opts...)
 }
 
 // Inject implements opentracing.Tracer.

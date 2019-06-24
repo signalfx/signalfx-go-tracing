@@ -112,7 +112,7 @@ func (tx *Tx) WithContext(ctx context.Context) *Tx {
 func (tx *Tx) Ascend(index string, iterator func(key, value string) bool) error {
 	span := tx.startSpan("Ascend")
 	err := tx.Tx.Ascend(index, iterator)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -120,7 +120,7 @@ func (tx *Tx) Ascend(index string, iterator func(key, value string) bool) error 
 func (tx *Tx) AscendEqual(index, pivot string, iterator func(key, value string) bool) error {
 	span := tx.startSpan("AscendEqual")
 	err := tx.Tx.AscendEqual(index, pivot, iterator)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -128,7 +128,7 @@ func (tx *Tx) AscendEqual(index, pivot string, iterator func(key, value string) 
 func (tx *Tx) AscendGreaterOrEqual(index, pivot string, iterator func(key, value string) bool) error {
 	span := tx.startSpan("AscendGreaterOrEqual")
 	err := tx.Tx.AscendGreaterOrEqual(index, pivot, iterator)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -136,7 +136,7 @@ func (tx *Tx) AscendGreaterOrEqual(index, pivot string, iterator func(key, value
 func (tx *Tx) AscendKeys(pattern string, iterator func(key, value string) bool) error {
 	span := tx.startSpan("AscendKeys")
 	err := tx.Tx.AscendKeys(pattern, iterator)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -144,7 +144,7 @@ func (tx *Tx) AscendKeys(pattern string, iterator func(key, value string) bool) 
 func (tx *Tx) AscendLessThan(index, pivot string, iterator func(key, value string) bool) error {
 	span := tx.startSpan("AscendLessThan")
 	err := tx.Tx.AscendLessThan(index, pivot, iterator)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -152,7 +152,7 @@ func (tx *Tx) AscendLessThan(index, pivot string, iterator func(key, value strin
 func (tx *Tx) AscendRange(index, greaterOrEqual, lessThan string, iterator func(key, value string) bool) error {
 	span := tx.startSpan("AscendRange")
 	err := tx.Tx.AscendRange(index, greaterOrEqual, lessThan, iterator)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -160,7 +160,7 @@ func (tx *Tx) AscendRange(index, greaterOrEqual, lessThan string, iterator func(
 func (tx *Tx) CreateIndex(name, pattern string, less ...func(a, b string) bool) error {
 	span := tx.startSpan("CreateIndex")
 	err := tx.Tx.CreateIndex(name, pattern, less...)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -168,7 +168,7 @@ func (tx *Tx) CreateIndex(name, pattern string, less ...func(a, b string) bool) 
 func (tx *Tx) CreateIndexOptions(name, pattern string, opts *buntdb.IndexOptions, less ...func(a, b string) bool) error {
 	span := tx.startSpan("CreateIndexOptions")
 	err := tx.Tx.CreateIndexOptions(name, pattern, opts, less...)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -176,7 +176,7 @@ func (tx *Tx) CreateIndexOptions(name, pattern string, opts *buntdb.IndexOptions
 func (tx *Tx) CreateSpatialIndex(name, pattern string, rect func(item string) (min, max []float64)) error {
 	span := tx.startSpan("CreateSpatialIndex")
 	err := tx.Tx.CreateSpatialIndex(name, pattern, rect)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -184,7 +184,7 @@ func (tx *Tx) CreateSpatialIndex(name, pattern string, rect func(item string) (m
 func (tx *Tx) CreateSpatialIndexOptions(name, pattern string, opts *buntdb.IndexOptions, rect func(item string) (min, max []float64)) error {
 	span := tx.startSpan("CreateSpatialIndexOptions")
 	err := tx.Tx.CreateSpatialIndexOptions(name, pattern, opts, rect)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -192,7 +192,7 @@ func (tx *Tx) CreateSpatialIndexOptions(name, pattern string, opts *buntdb.Index
 func (tx *Tx) Delete(key string) (val string, err error) {
 	span := tx.startSpan("Delete")
 	val, err = tx.Tx.Delete(key)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return val, err
 }
 
@@ -200,7 +200,7 @@ func (tx *Tx) Delete(key string) (val string, err error) {
 func (tx *Tx) DeleteAll() error {
 	span := tx.startSpan("DeleteAll")
 	err := tx.Tx.DeleteAll()
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -208,7 +208,7 @@ func (tx *Tx) DeleteAll() error {
 func (tx *Tx) Descend(index string, iterator func(key, value string) bool) error {
 	span := tx.startSpan("Descend")
 	err := tx.Tx.Descend(index, iterator)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -216,7 +216,7 @@ func (tx *Tx) Descend(index string, iterator func(key, value string) bool) error
 func (tx *Tx) DescendEqual(index, pivot string, iterator func(key, value string) bool) error {
 	span := tx.startSpan("DescendEqual")
 	err := tx.Tx.DescendEqual(index, pivot, iterator)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -224,7 +224,7 @@ func (tx *Tx) DescendEqual(index, pivot string, iterator func(key, value string)
 func (tx *Tx) DescendGreaterThan(index, pivot string, iterator func(key, value string) bool) error {
 	span := tx.startSpan("DescendGreaterThan")
 	err := tx.Tx.DescendGreaterThan(index, pivot, iterator)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -232,7 +232,7 @@ func (tx *Tx) DescendGreaterThan(index, pivot string, iterator func(key, value s
 func (tx *Tx) DescendKeys(pattern string, iterator func(key, value string) bool) error {
 	span := tx.startSpan("DescendKeys")
 	err := tx.Tx.DescendKeys(pattern, iterator)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -240,7 +240,7 @@ func (tx *Tx) DescendKeys(pattern string, iterator func(key, value string) bool)
 func (tx *Tx) DescendLessOrEqual(index, pivot string, iterator func(key, value string) bool) error {
 	span := tx.startSpan("DescendLessOrEqual")
 	err := tx.Tx.DescendLessOrEqual(index, pivot, iterator)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -248,7 +248,7 @@ func (tx *Tx) DescendLessOrEqual(index, pivot string, iterator func(key, value s
 func (tx *Tx) DescendRange(index, lessOrEqual, greaterThan string, iterator func(key, value string) bool) error {
 	span := tx.startSpan("DescendRange")
 	err := tx.Tx.DescendRange(index, lessOrEqual, greaterThan, iterator)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -256,7 +256,7 @@ func (tx *Tx) DescendRange(index, lessOrEqual, greaterThan string, iterator func
 func (tx *Tx) DropIndex(name string) error {
 	span := tx.startSpan("DropIndex")
 	err := tx.Tx.DropIndex(name)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -264,7 +264,7 @@ func (tx *Tx) DropIndex(name string) error {
 func (tx *Tx) Get(key string, ignoreExpired ...bool) (val string, err error) {
 	span := tx.startSpan("Get")
 	val, err = tx.Tx.Get(key, ignoreExpired...)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return val, err
 }
 
@@ -272,7 +272,7 @@ func (tx *Tx) Get(key string, ignoreExpired ...bool) (val string, err error) {
 func (tx *Tx) Indexes() ([]string, error) {
 	span := tx.startSpan("Indexes")
 	indexes, err := tx.Tx.Indexes()
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return indexes, err
 }
 
@@ -280,7 +280,7 @@ func (tx *Tx) Indexes() ([]string, error) {
 func (tx *Tx) Intersects(index, bounds string, iterator func(key, value string) bool) error {
 	span := tx.startSpan("Intersects")
 	err := tx.Tx.Intersects(index, bounds, iterator)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -288,7 +288,7 @@ func (tx *Tx) Intersects(index, bounds string, iterator func(key, value string) 
 func (tx *Tx) Len() (int, error) {
 	span := tx.startSpan("Len")
 	n, err := tx.Tx.Len()
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return n, err
 }
 
@@ -296,7 +296,7 @@ func (tx *Tx) Len() (int, error) {
 func (tx *Tx) Nearby(index, bounds string, iterator func(key, value string, dist float64) bool) error {
 	span := tx.startSpan("Nearby")
 	err := tx.Tx.Nearby(index, bounds, iterator)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -304,7 +304,7 @@ func (tx *Tx) Nearby(index, bounds string, iterator func(key, value string, dist
 func (tx *Tx) Set(key, value string, opts *buntdb.SetOptions) (previousValue string, replaced bool, err error) {
 	span := tx.startSpan("Set")
 	previousValue, replaced, err = tx.Tx.Set(key, value, opts)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return previousValue, replaced, err
 }
 
@@ -312,6 +312,6 @@ func (tx *Tx) Set(key, value string, opts *buntdb.SetOptions) (previousValue str
 func (tx *Tx) TTL(key string) (time.Duration, error) {
 	span := tx.startSpan("TTL")
 	duration, err := tx.Tx.TTL(key)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return duration, err
 }

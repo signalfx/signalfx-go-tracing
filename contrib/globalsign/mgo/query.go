@@ -32,7 +32,7 @@ func (q *Query) All(result interface{}) error {
 	q.tags = setTagsForCommand(q.tags, "query.all")
 	span := newChildSpanFromContext(q.cfg, q.tags)
 	err := q.Query.All(result)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -41,7 +41,7 @@ func (q *Query) Apply(change mgo.Change, result interface{}) (info *mgo.ChangeIn
 	q.tags = setTagsForCommand(q.tags, getChangeCommand(info))
 	span := newChildSpanFromContext(q.cfg, q.tags)
 	info, err = q.Query.Apply(change, result)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return info, err
 }
 
@@ -50,7 +50,7 @@ func (q *Query) Count() (n int, err error) {
 	q.tags = setTagsForCommand(q.tags, "query.count")
 	span := newChildSpanFromContext(q.cfg, q.tags)
 	n, err = q.Query.Count()
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return n, err
 }
 
@@ -59,7 +59,7 @@ func (q *Query) Distinct(key string, result interface{}) error {
 	q.tags = setTagsForCommand(q.tags, "query.distinct")
 	span := newChildSpanFromContext(q.cfg, q.tags)
 	err := q.Query.Distinct(key, result)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -68,7 +68,7 @@ func (q *Query) Explain(result interface{}) error {
 	q.tags = setTagsForCommand(q.tags, "query.explain")
 	span := newChildSpanFromContext(q.cfg, q.tags)
 	err := q.Query.Explain(result)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -77,7 +77,7 @@ func (q *Query) For(result interface{}, f func() error) error {
 	q.tags = setTagsForCommand(q.tags, "query.for")
 	span := newChildSpanFromContext(q.cfg, q.tags)
 	err := q.Query.For(result, f)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -86,7 +86,7 @@ func (q *Query) MapReduce(job *mgo.MapReduce, result interface{}) (info *mgo.Map
 	q.tags = setTagsForCommand(q.tags, "query.mapreduce")
 	span := newChildSpanFromContext(q.cfg, q.tags)
 	info, err = q.Query.MapReduce(job, result)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return info, err
 }
 
@@ -95,7 +95,7 @@ func (q *Query) One(result interface{}) error {
 	q.tags = setTagsForCommand(q.tags, "query.findone")
 	span := newChildSpanFromContext(q.cfg, q.tags)
 	err := q.Query.One(result)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 

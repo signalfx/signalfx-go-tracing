@@ -53,7 +53,7 @@ func (t *Tracer) TraceQuery(ctx context.Context, queryString string, operationNa
 		default:
 			err = fmt.Errorf("%s (and %d more errors)", errs[0], n-1)
 		}
-		span.Finish(tracer.WithError(err))
+		span.FinishWithOptionsExt(tracer.WithError(err))
 	}
 }
 
@@ -72,7 +72,7 @@ func (t *Tracer) TraceField(ctx context.Context, label string, typeName string, 
 	return ctx, func(err *errors.QueryError) {
 		// must explicitly check for nil, see issue golang/go#22729
 		if err != nil {
-			span.Finish(tracer.WithError(err))
+			span.FinishWithOptionsExt(tracer.WithError(err))
 		} else {
 			span.Finish()
 		}

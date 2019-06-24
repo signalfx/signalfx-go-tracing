@@ -34,7 +34,7 @@ func (p *Pipe) All(result interface{}) error {
 func (p *Pipe) One(result interface{}) (err error) {
 	p.tags = setTagsForCommand(p.tags, "pipe.findone")
 	span := newChildSpanFromContext(p.cfg, p.tags)
-	defer span.Finish(tracer.WithError(err))
+	defer span.FinishWithOptionsExt(tracer.WithError(err))
 	err = p.Pipe.One(result)
 	return
 }
@@ -43,7 +43,7 @@ func (p *Pipe) One(result interface{}) (err error) {
 func (p *Pipe) Explain(result interface{}) (err error) {
 	p.tags = setTagsForCommand(p.tags, "pipe.explain")
 	span := newChildSpanFromContext(p.cfg, p.tags)
-	defer span.Finish(tracer.WithError(err))
+	defer span.FinishWithOptionsExt(tracer.WithError(err))
 	err = p.Pipe.Explain(result)
 	return
 }

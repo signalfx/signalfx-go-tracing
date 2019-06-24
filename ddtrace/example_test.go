@@ -34,7 +34,7 @@ func Example_datadog() {
 
 	// We may finish the child span using the returned error. If it's
 	// nil, it will be disregarded.
-	child.Finish(tracer.WithError(err))
+	child.FinishWithOptionsExt(tracer.WithError(err))
 	if err != nil {
 		log.Fatal(err)
 	}

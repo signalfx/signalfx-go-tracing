@@ -2,6 +2,9 @@ package mocktracer // import "github.com/signalfx/signalfx-go-tracing/ddtrace/mo
 
 import (
 	"fmt"
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/log"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	"sync"
 	"time"
 
@@ -89,9 +92,9 @@ func newSpan(t *mocktracer, operationName string, cfg *ddtrace.StartSpanConfig) 
 
 type mockspan struct {
 	sync.RWMutex // guards below fields
-	name         string
-	tags         map[string]interface{}
-	finishTime   time.Time
+	name       string
+	tags       map[string]interface{}
+	finishTime time.Time
 
 	startTime time.Time
 	parentID  uint64
@@ -99,12 +102,36 @@ type mockspan struct {
 	tracer    *mocktracer
 }
 
+func (s *mockspan) Finish() {
+	s.FinishWithOptionsExt()
+}
+
+func (s *mockspan) FinishWithOptions(opts opentracing.FinishOptions) {
+	s.FinishWithOptionsExt(tracer.FinishTime(opts.FinishTime))
+}
+
+func (s *mockspan) LogKV(alternatingKeyValues ...interface{}) {
+}
+
+func (s *mockspan) Tracer() opentracing.Tracer {
+	panic("not implemented")
+}
+
+func (s *mockspan) LogEvent(event string) {
+}
+
+func (s *mockspan) LogEventWithPayload(event string, payload interface{}) {
+}
+
+func (s *mockspan) Log(data opentracing.LogData) {
+}
+
 // LogFields to span
-func (s *mockspan) LogFields(fields ...ddtrace.LogFieldEntry) {
+func (s *mockspan) LogFields(fields ...log.Field) {
 }
 
 // SetTag sets a given tag on the span.
-func (s *mockspan) SetTag(key string, value interface{}) {
+func (s *mockspan) SetTag(key string, value interface{}) opentracing.Span {
 	s.Lock()
 	defer s.Unlock()
 	if s.tags == nil {
@@ -119,6 +146,7 @@ func (s *mockspan) SetTag(key string, value interface{}) {
 		}
 	}
 	s.tags[key] = value
+	return s
 }
 
 func (s *mockspan) FinishTime() time.Time {
@@ -146,11 +174,11 @@ func (s *mockspan) Tags() map[string]interface{} {
 	return cp
 }
 
+func (s *mockspan) ParentID() uint64 { return s.parentID }
+
 func (s *mockspan) TraceID() uint64 { return s.context.traceID }
 
 func (s *mockspan) SpanID() uint64 { return s.context.spanID }
-
-func (s *mockspan) ParentID() uint64 { return s.parentID }
 
 func (s *mockspan) OperationName() string {
 	s.RLock()
@@ -159,11 +187,11 @@ func (s *mockspan) OperationName() string {
 }
 
 // SetOperationName resets the original operation name to the given one.
-func (s *mockspan) SetOperationName(operationName string) {
+func (s *mockspan) SetOperationName(operationName string) opentracing.Span {
 	s.Lock()
 	defer s.Unlock()
 	s.name = operationName
-	return
+	return s
 }
 
 // BaggageItem returns the baggage item with the given key.
@@ -173,13 +201,13 @@ func (s *mockspan) BaggageItem(key string) string {
 
 // SetBaggageItem sets a new baggage item at the given key. The baggage
 // item should propagate to all descendant spans, both in- and cross-process.
-func (s *mockspan) SetBaggageItem(key, val string) {
+func (s *mockspan) SetBaggageItem(key, val string) opentracing.Span {
 	s.context.setBaggageItem(key, val)
-	return
+	return s
 }
 
 // Finish finishes the current span with the given options.
-func (s *mockspan) Finish(opts ...ddtrace.FinishOption) {
+func (s *mockspan) FinishWithOptionsExt(opts ...ddtrace.FinishOption) {
 	var cfg ddtrace.FinishConfig
 	for _, fn := range opts {
 		fn(&cfg)
@@ -193,8 +221,12 @@ func (s *mockspan) Finish(opts ...ddtrace.FinishOption) {
 	if cfg.Error != nil {
 		s.SetTag(ext.Error, cfg.Error)
 	}
+	s.ddfinish(t)
+}
+
+func (s *mockspan) ddfinish(finishTime time.Time) {
 	s.Lock()
-	s.finishTime = t
+	s.finishTime = finishTime
 	s.Unlock()
 	s.tracer.addFinishedSpan(s)
 }
