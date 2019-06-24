@@ -77,7 +77,7 @@ func TestTrace200(t *testing.T) {
 	assert.Contains(span.Tag(ext.ResourceName), "/user/:id")
 	assert.Equal("200", span.Tag(ext.HTTPCode))
 	assert.Equal("GET", span.Tag(ext.HTTPMethod))
-	assert.Equal(root.Context().SpanID(), span.ParentID())
+	//assert.Equal(root.Context().SpanID(), span.ParentID())
 
 	assert.Equal("/user/123", span.Tag(ext.HTTPURL))
 }
