@@ -1,28 +1,15 @@
-package opentracer
+package tracing
 
 import (
 	"context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/log"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
-	"github.com/signalfx/signalfx-go-tracing/tracing"
 	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
-
-	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 )
-
-func TestStart(t *testing.T) {
-	assert := assert.New(t)
-	ot := New()
-	dd, ok := ddtrace.GetGlobalTracer().(ddtrace.Tracer)
-	assert.True(ok)
-	ott, ok := ot.(*opentracer)
-	assert.True(ok)
-	assert.Equal(ott.Tracer, dd)
-}
 
 func Test_span_LogFields(t *testing.T) {
 	assert := assert.New(t)
@@ -31,8 +18,7 @@ func Test_span_LogFields(t *testing.T) {
 	zipkin := zipkinserver.Start()
 	defer zipkin.Stop()
 
-	ot := New(tracing.WithEndpointURL(zipkin.URL()))
-	opentracing.SetGlobalTracer(ot)
+	Start(WithEndpointURL(zipkin.URL()))
 
 	span := opentracing.GlobalTracer().StartSpan("test-span")
 	span.LogFields(log.Int("int", 5), log.String("str", "value"))
@@ -56,7 +42,7 @@ func TestOpenTracingChildSpan(t *testing.T) {
 	zipkin := zipkinserver.Start()
 	defer zipkin.Stop()
 
-	_ = New(tracing.WithEndpointURL(zipkin.URL()))
+	Start(WithEndpointURL(zipkin.URL()))
 
 	span0, _ := tracer.StartSpanFromContext(context.Background(), "span-1")
 	span1 := opentracing.StartSpan("span-2", opentracing.ChildOf(span0.Context()))
@@ -77,8 +63,7 @@ func TestOpenTracingParentSpan(t *testing.T) {
 	zipkin := zipkinserver.Start()
 	defer zipkin.Stop()
 
-	ot := New(tracing.WithEndpointURL(zipkin.URL()))
-	opentracing.SetGlobalTracer(ot)
+	Start(WithEndpointURL(zipkin.URL()))
 
 	span0, ctxt := opentracing.StartSpanFromContext(context.Background(), "span-0")
 	span1, _ := tracer.StartSpanFromContext(ctxt, "span-1")
@@ -91,4 +76,16 @@ func TestOpenTracingParentSpan(t *testing.T) {
 
 	assert.Equal(spans[0].TraceID, spans[1].TraceID)
 	assert.Equal(spans[0].ID, *spans[1].ParentID)
+}
+
+func TestEmptyContext(t *testing.T) {
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	Start(WithEndpointURL(zipkin.URL()))
+
+	span, _ := opentracing.StartSpanFromContext(context.Background(), "session")
+	span.Finish()
+	tracer.ForceFlush()
+	zipkin.WaitForSpans(t, 1)
 }

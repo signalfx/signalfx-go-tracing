@@ -15,17 +15,14 @@
 package opentracer
 
 import (
+	"github.com/opentracing/opentracing-go"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
-	"github.com/signalfx/signalfx-go-tracing/tracing"
-
-	"github.com/opentracing/opentracing-go"
 )
 
 // New creates, instantiates and returns an Opentracing compatible version of the
 // tracer using the provided set of options.
-func New(opts ...tracing.StartOption) opentracing.Tracer {
-	tracing.Start(opts...)
+func New() opentracing.Tracer {
 	return &opentracer{ddtrace.GetGlobalTracer()}
 }
 
