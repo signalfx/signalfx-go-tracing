@@ -81,4 +81,5 @@ func Start(opts ...StartOption) {
 // Stop tracing globally
 func Stop() {
 	tracer.Stop()
+	opentracing.SetGlobalTracer(&opentracing.NoopTracer{})
 }
