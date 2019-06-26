@@ -163,7 +163,7 @@ func TestEchoTracer200Zipkin(t *testing.T) {
 	spans := zipkin.WaitForSpans(t, 1)
 	span := spans[0]
 
-	expected := map[string]interface{}{
+	expectedSpan := map[string]interface{}{
 		"kind": "SERVER",
 		"name": "/mock200",
 		"tags": map[string]string{
@@ -175,7 +175,7 @@ func TestEchoTracer200Zipkin(t *testing.T) {
 		},
 	}
 
-	testutil.AssertSpan(t, expected, span)
+	testutil.AssertSpanWithNoErrorEvent(t, expectedSpan, span)
 }
 
 func TestEchoTracer401Zipkin(t *testing.T) {
@@ -197,7 +197,7 @@ func TestEchoTracer401Zipkin(t *testing.T) {
 	spans := zipkin.WaitForSpans(t, 1)
 	span := spans[0]
 
-	expected := map[string]interface{}{
+	expectedSpan := map[string]interface{}{
 		"kind": "SERVER",
 		"name": "/mock401",
 		"tags": map[string]string{
@@ -209,7 +209,7 @@ func TestEchoTracer401Zipkin(t *testing.T) {
 		},
 	}
 
-	testutil.AssertSpan(t, expected, span)
+	testutil.AssertSpanWithNoErrorEvent(t, expectedSpan, span)
 }
 
 func TestEchoTracer500Zipkin(t *testing.T) {
@@ -244,14 +244,16 @@ func TestEchoTracer500Zipkin(t *testing.T) {
 		},
 	}
 
+	testutil.AssertSpanWithErrorEvent(t, expectedSpan, span)
+
 	ann := testutil.GetAnnotation(t, span, 0)
 
-	expectedAnnotation := map[string]string{
-		"event": "error",
-	}
-
-	testutil.AssertSpan(t, expectedSpan, span)
-	testutil.AssertSpanAnnotations(t, expectedAnnotation, ann)
+	assert.Equal(t, ann["event"], "error")
+	assert.Contains(t, ann["message"], "Internal Server Error")
+	assert.Greater(t, len(ann["stack"]), 50)
+	assert.Contains(t, ann["stack"], "goroutine")
+	assert.Equal(t, ann["error.kind"], "*echo.HTTPError")
+	assert.Contains(t, ann["error.object"], "&echo.HTTPError")
 }
 
 func mock200(c echo.Context) error {
@@ -263,7 +265,7 @@ func mock401(c echo.Context) error {
 }
 
 func mock500(c echo.Context) error {
-	err := &echo.HTTPError{Code: http.StatusInternalServerError, Message: ""}
+	err := &echo.HTTPError{Code: http.StatusInternalServerError, Message: "Internal Server Error"}
 	c.Error(err)
 	return err
 }

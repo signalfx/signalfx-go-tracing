@@ -45,6 +45,7 @@ func Middleware(opts ...Option) echo.MiddlewareFunc {
 			err := next(c)
 
 			span.SetTag(ext.HTTPCode, strconv.Itoa(c.Response().Status))
+
 			if err != nil {
 				span.SetTag(ext.Error, err)
 			}

@@ -4,7 +4,6 @@ import (
 	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
 	"github.com/signalfx/signalfx-go-tracing/tracing"
 	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -36,16 +35,20 @@ func TestHttpTracer200Zipkin(t *testing.T) {
 	spans := zipkin.WaitForSpans(t, 1)
 	span := spans[0]
 
-	assert.Equal("SERVER", *span.Kind)
-	assert.Equal("/200", *span.Name)
-	assert.Equal(map[string]string{
-		"component":        "web",
-		"foo":              "bar",
-		"http.url":         "http://example.com/200",
-		"http.method":      "GET",
-		"http.status_code": "200",
-		"span.kind":        "server",
-	}, span.Tags)
+	expectedSpan := map[string]interface{}{
+		"kind": "SERVER",
+		"name": "/200",
+		"tags": map[string]string{
+			"component":        "web",
+			"foo":              "bar",
+			"http.url":         "http://example.com/200",
+			"http.method":      "GET",
+			"http.status_code": "200",
+			"span.kind":        "server",
+		},
+	}
+
+	testutil.AssertSpanWithNoErrorEvent(t, expectedSpan, span)
 }
 
 func TestHttpTracer500Zipkin(t *testing.T) {
@@ -62,7 +65,6 @@ func TestHttpTracer500Zipkin(t *testing.T) {
 	router().ServeHTTP(w, r)
 
 	assert := assert.New(t)
-	require := require.New(t)
 	assert.Equal(500, w.Code)
 	assert.Equal("500!\n", w.Body.String())
 
@@ -70,21 +72,24 @@ func TestHttpTracer500Zipkin(t *testing.T) {
 	spans := zipkin.WaitForSpans(t, 1)
 	span := spans[0]
 
-	assert.Equal("SERVER", *span.Kind)
-	assert.Equal("/500", *span.Name)
-	assert.Equal(map[string]string{
-		"component":        "web",
-		"foo":              "bar",
-		"http.url":         "http://example.com/500",
-		"http.method":      "GET",
-		"http.status_code": "500",
-		"span.kind":        "server",
-		"error":            "true",
-	}, span.Tags)
+	expectedSpan := map[string]interface{}{
+		"kind": "SERVER",
+		"name": "/500",
+		"tags": map[string]string{
+			"component":        "web",
+			"foo":              "bar",
+			"http.url":         "http://example.com/500",
+			"http.method":      "GET",
+			"http.status_code": "500",
+			"span.kind":        "server",
+			"error":            "true",
+		},
+	}
 
-	require.Len(span.Annotations, 1)
+	testutil.AssertSpanWithErrorEvent(t, expectedSpan, span)
 
 	ann := testutil.GetAnnotation(t, span, 0)
+
 	assert.Equal(ann["event"], "error")
 	assert.Contains(ann["message"], "500: Internal Server Error")
 	assert.Greater(len(ann["stack"]), 50)
@@ -115,7 +120,7 @@ func TestHttpTracer200(t *testing.T) {
 	assert.Equal(url, s.Tag(ext.ResourceName))
 	assert.Equal("200", s.Tag(ext.HTTPCode))
 	assert.Equal("GET", s.Tag(ext.HTTPMethod))
-	assert.Equal("http://example.com" + url, s.Tag(ext.HTTPURL))
+	assert.Equal("http://example.com"+url, s.Tag(ext.HTTPURL))
 	assert.Equal(nil, s.Tag(ext.Error))
 	assert.Equal("bar", s.Tag("foo"))
 }
@@ -143,7 +148,7 @@ func TestHttpTracer500(t *testing.T) {
 	assert.Equal(url, s.Tag(ext.ResourceName))
 	assert.Equal("500", s.Tag(ext.HTTPCode))
 	assert.Equal("GET", s.Tag(ext.HTTPMethod))
-	assert.Equal("http://example.com" + url, s.Tag(ext.HTTPURL))
+	assert.Equal("http://example.com"+url, s.Tag(ext.HTTPURL))
 	assert.Equal("500: Internal Server Error", s.Tag(ext.Error).(error).Error())
 	assert.Equal("bar", s.Tag("foo"))
 }
@@ -172,7 +177,7 @@ func TestWrapHandler200(t *testing.T) {
 	assert.Equal("my-resource", s.Tag(ext.ResourceName))
 	assert.Equal("200", s.Tag(ext.HTTPCode))
 	assert.Equal("GET", s.Tag(ext.HTTPMethod))
-	assert.Equal("http://example.com" + url, s.Tag(ext.HTTPURL))
+	assert.Equal("http://example.com"+url, s.Tag(ext.HTTPURL))
 	assert.Equal(nil, s.Tag(ext.Error))
 	assert.Equal("bar", s.Tag("foo"))
 }
