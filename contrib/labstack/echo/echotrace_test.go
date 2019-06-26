@@ -12,7 +12,6 @@ import (
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/mocktracer"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
-	"github.com/signalfx/signalfx-go-tracing/internal/testutils"
 
 	"github.com/labstack/echo"
 	"github.com/stretchr/testify/assert"
@@ -176,7 +175,7 @@ func TestEchoTracer200Zipkin(t *testing.T) {
 		},
 	}
 
-	testutils.AssertSpan(t, expected, span)
+	testutil.AssertSpan(t, expected, span)
 }
 
 func TestEchoTracer401Zipkin(t *testing.T) {
@@ -210,7 +209,7 @@ func TestEchoTracer401Zipkin(t *testing.T) {
 		},
 	}
 
-	testutils.AssertSpan(t, expected, span)
+	testutil.AssertSpan(t, expected, span)
 }
 
 func TestEchoTracer500Zipkin(t *testing.T) {
@@ -248,11 +247,11 @@ func TestEchoTracer500Zipkin(t *testing.T) {
 	ann := testutil.GetAnnotation(t, span, 0)
 
 	expectedAnnotation := map[string]string{
-		"event" : "error",
+		"event": "error",
 	}
 
-	testutils.AssertSpan(t, expectedSpan, span)
-	testutils.AssertSpanAnnotations(t, expectedAnnotation, ann)
+	testutil.AssertSpan(t, expectedSpan, span)
+	testutil.AssertSpanAnnotations(t, expectedAnnotation, ann)
 }
 
 func mock200(c echo.Context) error {

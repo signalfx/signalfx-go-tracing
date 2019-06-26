@@ -1,4 +1,4 @@
-package testutils
+package testutil
 
 import (
 	"github.com/signalfx/golib/trace"
