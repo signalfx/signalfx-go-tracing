@@ -116,7 +116,7 @@ func (c *Pipeliner) execWithContext(ctx context.Context) ([]redis.Cmder, error) 
 	if err != redis.Nil {
 		finishOpts = append(finishOpts, tracer.WithError(err))
 	}
-	span.Finish(finishOpts...)
+	span.FinishWithOptionsExt(finishOpts...)
 
 	return cmds, err
 }
@@ -179,7 +179,7 @@ func createWrapperFromClient(tc *Client) func(oldProcess func(cmd redis.Cmder) e
 			if err != redis.Nil {
 				finishOpts = append(finishOpts, tracer.WithError(err))
 			}
-			span.Finish(finishOpts...)
+			span.FinishWithOptionsExt(finishOpts...)
 			return err
 		}
 	}

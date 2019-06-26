@@ -41,7 +41,7 @@ func (h *Handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	span, _ := startSpan(context.Background(), r.Opcode)
 	rw := &responseWriter{ResponseWriter: w}
 	h.Handler.ServeDNS(rw, r)
-	span.Finish(tracer.WithError(rw.err))
+	span.FinishWithOptionsExt(tracer.WithError(rw.err))
 }
 
 type responseWriter struct {
@@ -62,7 +62,7 @@ func (rw *responseWriter) WriteMsg(msg *dns.Msg) error {
 func Exchange(m *dns.Msg, addr string) (r *dns.Msg, err error) {
 	span, _ := startSpan(context.Background(), m.Opcode)
 	r, err = dns.Exchange(m, addr)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return r, err
 }
 
@@ -70,7 +70,7 @@ func Exchange(m *dns.Msg, addr string) (r *dns.Msg, err error) {
 func ExchangeConn(c net.Conn, m *dns.Msg) (r *dns.Msg, err error) {
 	span, _ := startSpan(context.Background(), m.Opcode)
 	r, err = dns.ExchangeConn(c, m)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return r, err
 }
 
@@ -78,7 +78,7 @@ func ExchangeConn(c net.Conn, m *dns.Msg) (r *dns.Msg, err error) {
 func ExchangeContext(ctx context.Context, m *dns.Msg, addr string) (r *dns.Msg, err error) {
 	span, ctx := startSpan(ctx, m.Opcode)
 	r, err = dns.ExchangeContext(ctx, m, addr)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return r, err
 }
 
@@ -91,7 +91,7 @@ type Client struct {
 func (c *Client) Exchange(m *dns.Msg, addr string) (r *dns.Msg, rtt time.Duration, err error) {
 	span, _ := startSpan(context.Background(), m.Opcode)
 	r, rtt, err = c.Client.Exchange(m, addr)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return r, rtt, err
 }
 
@@ -99,7 +99,7 @@ func (c *Client) Exchange(m *dns.Msg, addr string) (r *dns.Msg, rtt time.Duratio
 func (c *Client) ExchangeContext(ctx context.Context, m *dns.Msg, addr string) (r *dns.Msg, rtt time.Duration, err error) {
 	span, ctx := startSpan(ctx, m.Opcode)
 	r, rtt, err = c.Client.ExchangeContext(ctx, m, addr)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return r, rtt, err
 }
 

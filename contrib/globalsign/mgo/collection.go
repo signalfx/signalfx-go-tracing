@@ -20,7 +20,7 @@ func (c *Collection) Create(info *mgo.CollectionInfo) error {
 	c.tags = setTagsForCommand(c.tags, "collection.create")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.Create(info)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -29,7 +29,7 @@ func (c *Collection) DropCollection() error {
 	c.tags = setTagsForCommand(c.tags, "collection.dropcollection")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.DropCollection()
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -38,7 +38,7 @@ func (c *Collection) EnsureIndexKey(key ...string) error {
 	c.tags = setTagsForCommand(c.tags, "collection.ensureindexkey")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.EnsureIndexKey(key...)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -47,7 +47,7 @@ func (c *Collection) EnsureIndex(index mgo.Index) error {
 	c.tags = setTagsForCommand(c.tags, "collection.ensureindex")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.EnsureIndex(index)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -56,7 +56,7 @@ func (c *Collection) DropIndex(key ...string) error {
 	c.tags = setTagsForCommand(c.tags, "collection.dropindex")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.DropIndex(key...)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -65,7 +65,7 @@ func (c *Collection) DropIndexName(name string) error {
 	c.tags = setTagsForCommand(c.tags, "collection.dropindexname")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.DropIndexName(name)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -74,7 +74,7 @@ func (c *Collection) Indexes() (indexes []mgo.Index, err error) {
 	c.tags = setTagsForCommand(c.tags, "collection.indexes")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	indexes, err = c.Collection.Indexes()
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return indexes, err
 }
 
@@ -83,7 +83,7 @@ func (c *Collection) Insert(docs ...interface{}) error {
 	c.tags = setTagsForCommand(c.tags, "collection.insert")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.Insert(docs...)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -110,7 +110,7 @@ func (c *Collection) Count() (n int, err error) {
 	c.tags = setTagsForCommand(c.tags, "collection.count")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	n, err = c.Collection.Count()
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return n, err
 }
 
@@ -144,7 +144,7 @@ func (c *Collection) Update(selector interface{}, update interface{}) error {
 	c.tags = setTagsForCommand(c.tags, "collection.update")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.Update(selector, update)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -153,7 +153,7 @@ func (c *Collection) UpdateId(id interface{}, update interface{}) error { // nol
 	c.tags = setTagsForCommand(c.tags, "collection.updateid")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.UpdateId(id, update)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -162,7 +162,7 @@ func (c *Collection) UpdateAll(selector interface{}, update interface{}) (info *
 	c.tags = setTagsForCommand(c.tags, "collection.updateall")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	info, err = c.Collection.UpdateAll(selector, update)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return info, err
 }
 
@@ -171,7 +171,7 @@ func (c *Collection) Upsert(selector interface{}, update interface{}) (info *mgo
 	c.tags = setTagsForCommand(c.tags, "collection.upsert")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	info, err = c.Collection.Upsert(selector, update)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return info, err
 }
 
@@ -180,7 +180,7 @@ func (c *Collection) UpsertId(id interface{}, update interface{}) (info *mgo.Cha
 	c.tags = setTagsForCommand(c.tags, "collection.upsertid")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	info, err = c.Collection.UpsertId(id, update)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return info, err
 }
 
@@ -189,7 +189,7 @@ func (c *Collection) Remove(selector interface{}) error {
 	c.tags = setTagsForCommand(c.tags, "collection.remove")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.Remove(selector)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -198,7 +198,7 @@ func (c *Collection) RemoveId(id interface{}) error { // nolint
 	c.tags = setTagsForCommand(c.tags, "collection.removeid")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	err := c.Collection.RemoveId(id)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -207,7 +207,7 @@ func (c *Collection) RemoveAll(selector interface{}) (info *mgo.ChangeInfo, err 
 	c.tags = setTagsForCommand(c.tags, "collection.removeall")
 	span := newChildSpanFromContext(c.cfg, c.tags)
 	info, err = c.Collection.RemoveAll(selector)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return info, err
 }
 

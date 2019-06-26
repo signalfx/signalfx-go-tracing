@@ -54,7 +54,7 @@ func Example_context() {
 		log.Fatal(err)
 	}
 	rows.Close()
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 }
 
 func Example_sqlite() {
@@ -80,5 +80,5 @@ func Example_sqlite() {
 		log.Fatal(err)
 	}
 	rows.Close()
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 }

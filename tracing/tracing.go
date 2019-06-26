@@ -1,6 +1,8 @@
 package tracing
 
 import (
+	"github.com/opentracing/opentracing-go"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/opentracer"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	"os"
 )
@@ -73,9 +75,11 @@ func Start(opts ...StartOption) {
 	tracer.Start(
 		tracer.WithServiceName(c.serviceName),
 		tracer.WithZipkin(c.serviceName, c.url, c.accessToken))
+	opentracing.SetGlobalTracer(opentracer.New())
 }
 
 // Stop tracing globally
 func Stop() {
 	tracer.Stop()
+	opentracing.SetGlobalTracer(&opentracing.NoopTracer{})
 }

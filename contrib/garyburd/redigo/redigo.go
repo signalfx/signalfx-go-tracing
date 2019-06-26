@@ -123,7 +123,7 @@ func (tc Conn) Do(commandName string, args ...interface{}) (reply interface{}, e
 
 	span := tc.newChildSpan(ctx)
 	defer func() {
-		span.Finish(tracer.WithError(err))
+		span.FinishWithOptionsExt(tracer.WithError(err))
 	}()
 
 	span.SetTag("redis.args_length", strconv.Itoa(len(args)))

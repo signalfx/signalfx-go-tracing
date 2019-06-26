@@ -30,7 +30,7 @@ func UnaryServerInterceptor(opts ...InterceptorOption) grpc.UnaryServerIntercept
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		span, ctx := startSpanFromContext(ctx, info.FullMethod, cfg.serviceName, cfg.analyticsRate)
 		resp, err := handler(ctx, req)
-		span.Finish(tracer.WithError(err))
+		span.FinishWithOptionsExt(tracer.WithError(err))
 		return resp, err
 	}
 }
@@ -94,7 +94,7 @@ func UnaryClientInterceptor(opts ...InterceptorOption) grpc.UnaryClientIntercept
 			}
 		}
 		span.SetTag(tagCode, grpc.Code(err).String())
-		span.Finish(tracer.WithError(err))
+		span.FinishWithOptionsExt(tracer.WithError(err))
 		return err
 	}
 }

@@ -32,7 +32,7 @@ func (rt *roundTripper) RoundTrip(req *http.Request) (res *http.Response, err er
 		if rt.cfg.after != nil {
 			rt.cfg.after(res, span)
 		}
-		span.Finish(tracer.WithError(err))
+		span.FinishWithOptionsExt(tracer.WithError(err))
 	}()
 	if rt.cfg.before != nil {
 		rt.cfg.before(req, span)

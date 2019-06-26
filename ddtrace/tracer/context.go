@@ -2,17 +2,13 @@ package tracer
 
 import (
 	"context"
-
+	"github.com/opentracing/opentracing-go"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 )
 
-type contextKey struct{}
-
-var activeSpanKey = contextKey{}
-
 // ContextWithSpan returns a copy of the given context which includes the span s.
 func ContextWithSpan(ctx context.Context, s Span) context.Context {
-	return context.WithValue(ctx, activeSpanKey, s)
+	return opentracing.ContextWithSpan(ctx, s)
 }
 
 // SpanFromContext returns the span contained in the given context. A second return
@@ -22,9 +18,9 @@ func SpanFromContext(ctx context.Context) (Span, bool) {
 	if ctx == nil {
 		return &ddtrace.NoopSpan{}, false
 	}
-	v := ctx.Value(activeSpanKey)
-	if s, ok := v.(ddtrace.Span); ok {
-		return s, true
+	s := opentracing.SpanFromContext(ctx)
+	if s != nil {
+		return s.(ddtrace.Span), true
 	}
 	return &ddtrace.NoopSpan{}, false
 }

@@ -74,7 +74,7 @@ func (c *Client) startSpan(resourceName string) ddtrace.Span {
 func (c *Client) Add(item *memcache.Item) error {
 	span := c.startSpan("Add")
 	err := c.Client.Add(item)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -82,7 +82,7 @@ func (c *Client) Add(item *memcache.Item) error {
 func (c *Client) CompareAndSwap(item *memcache.Item) error {
 	span := c.startSpan("CompareAndSwap")
 	err := c.Client.CompareAndSwap(item)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -90,7 +90,7 @@ func (c *Client) CompareAndSwap(item *memcache.Item) error {
 func (c *Client) Decrement(key string, delta uint64) (newValue uint64, err error) {
 	span := c.startSpan("Decrement")
 	newValue, err = c.Client.Decrement(key, delta)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return newValue, err
 }
 
@@ -98,7 +98,7 @@ func (c *Client) Decrement(key string, delta uint64) (newValue uint64, err error
 func (c *Client) Delete(key string) error {
 	span := c.startSpan("Delete")
 	err := c.Client.Delete(key)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -106,7 +106,7 @@ func (c *Client) Delete(key string) error {
 func (c *Client) DeleteAll() error {
 	span := c.startSpan("DeleteAll")
 	err := c.Client.DeleteAll()
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -114,7 +114,7 @@ func (c *Client) DeleteAll() error {
 func (c *Client) FlushAll() error {
 	span := c.startSpan("FlushAll")
 	err := c.Client.FlushAll()
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -122,7 +122,7 @@ func (c *Client) FlushAll() error {
 func (c *Client) Get(key string) (item *memcache.Item, err error) {
 	span := c.startSpan("Get")
 	item, err = c.Client.Get(key)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return item, err
 }
 
@@ -130,7 +130,7 @@ func (c *Client) Get(key string) (item *memcache.Item, err error) {
 func (c *Client) GetMulti(keys []string) (map[string]*memcache.Item, error) {
 	span := c.startSpan("GetMulti")
 	items, err := c.Client.GetMulti(keys)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return items, err
 }
 
@@ -138,7 +138,7 @@ func (c *Client) GetMulti(keys []string) (map[string]*memcache.Item, error) {
 func (c *Client) Increment(key string, delta uint64) (newValue uint64, err error) {
 	span := c.startSpan("Increment")
 	newValue, err = c.Client.Increment(key, delta)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return newValue, err
 }
 
@@ -146,7 +146,7 @@ func (c *Client) Increment(key string, delta uint64) (newValue uint64, err error
 func (c *Client) Replace(item *memcache.Item) error {
 	span := c.startSpan("Replace")
 	err := c.Client.Replace(item)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -154,7 +154,7 @@ func (c *Client) Replace(item *memcache.Item) error {
 func (c *Client) Set(item *memcache.Item) error {
 	span := c.startSpan("Set")
 	err := c.Client.Set(item)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }
 
@@ -162,6 +162,6 @@ func (c *Client) Set(item *memcache.Item) error {
 func (c *Client) Touch(key string, seconds int32) error {
 	span := c.startSpan("Touch")
 	err := c.Client.Touch(key, seconds)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 	return err
 }

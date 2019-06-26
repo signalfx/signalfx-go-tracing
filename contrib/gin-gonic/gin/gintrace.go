@@ -59,7 +59,7 @@ func HTML(c *gin.Context, code int, name string, obj interface{}) {
 	defer func() {
 		if r := recover(); r != nil {
 			err := fmt.Errorf("error rendering tmpl:%s: %s", name, r)
-			span.Finish(tracer.WithError(err))
+			span.FinishWithOptionsExt(tracer.WithError(err))
 			panic(r)
 		} else {
 			span.Finish()

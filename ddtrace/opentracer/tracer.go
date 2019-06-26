@@ -15,17 +15,14 @@
 package opentracer
 
 import (
+	"github.com/opentracing/opentracing-go"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
-	"github.com/signalfx/signalfx-go-tracing/tracing"
-
-	"github.com/opentracing/opentracing-go"
 )
 
 // New creates, instantiates and returns an Opentracing compatible version of the
 // tracer using the provided set of options.
-func New(opts ...tracing.StartOption) opentracing.Tracer {
-	tracing.Start(opts...)
+func New() opentracing.Tracer {
 	return &opentracer{ddtrace.GetGlobalTracer()}
 }
 
@@ -50,10 +47,7 @@ func (t *opentracer) StartSpan(operationName string, options ...opentracing.Star
 	for k, v := range sso.Tags {
 		opts = append(opts, tracer.Tag(k, v))
 	}
-	return &span{
-		Span:       t.Tracer.StartSpan(operationName, opts...),
-		opentracer: t,
-	}
+	return t.Tracer.StartSpan(operationName, opts...)
 }
 
 // Inject implements opentracing.Tracer.

@@ -88,7 +88,7 @@ type Span = ddtrace.Span
 
 // StartSpan starts a new span with the given operation name and set of options.
 // If the tracer is not started, calling this function is a no-op.
-func StartSpan(operationName string, opts ...StartSpanOption) Span {
+func StartSpan(operationName string, opts ...StartSpanOption) ddtrace.Span {
 	return ddtrace.GetGlobalTracer().StartSpan(operationName, opts...)
 }
 

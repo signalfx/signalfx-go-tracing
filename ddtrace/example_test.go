@@ -1,16 +1,12 @@
 package ddtrace_test
 
 import (
-	"github.com/signalfx/signalfx-go-tracing/tracing"
 	"io/ioutil"
 	"log"
-
-	"github.com/opentracing/opentracing-go"
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/mocktracer"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
-	"github.com/signalfx/signalfx-go-tracing/opentracer"
 )
 
 // The below example illustrates a simple use case using the "tracer" package,
@@ -34,7 +30,7 @@ func Example_datadog() {
 
 	// We may finish the child span using the returned error. If it's
 	// nil, it will be disregarded.
-	child.Finish(tracer.WithError(err))
+	child.FinishWithOptionsExt(tracer.WithError(err))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,16 +38,17 @@ func Example_datadog() {
 
 // The below example illustrates how to set up an opentracing.Tracer using Datadog's
 // tracer.
-func Example_opentracing() {
-	// Start a Datadog tracer, optionally providing a set of options,
-	// returning an opentracing.Tracer which wraps it.
-	t := opentracer.New(tracing.WithEndpointURL("host:port"))
-	defer tracer.Stop() // important for data integrity (flushes any leftovers)
-
-	// Use it with the Opentracing API. The (already started) Datadog tracer
-	// may be used in parallel with the Opentracing API if desired.
-	opentracing.SetGlobalTracer(t)
-}
+// opentracing is now configured automatically with tracing.Start.
+//func Example_opentracing() {
+//	// Start a Datadog tracer, optionally providing a set of options,
+//	// returning an opentracing.Tracer which wraps it.
+//	t := opentracer.New(tracing.WithEndpointURL("host:port"))
+//	defer tracer.Stop() // important for data integrity (flushes any leftovers)
+//
+//	// Use it with the Opentracing API. The (already started) Datadog tracer
+//	// may be used in parallel with the Opentracing API if desired.
+//	opentracing.SetGlobalTracer(t)
+//}
 
 // The code below illustrates a scenario of how one could use a mock tracer in tests
 // to assert that spans are created correctly.

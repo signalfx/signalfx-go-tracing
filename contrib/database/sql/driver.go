@@ -79,7 +79,7 @@ func (tp *traceParams) tryTrace(ctx context.Context, resource string, query stri
 		span.SetTag(k, v)
 	}
 	span.SetTag(ext.DBType, tp.driverName)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 }
 
 // tracedDriverName returns the name of the traced version for the given driver name.

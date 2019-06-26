@@ -106,7 +106,7 @@ func TestSpanStartTime(t *testing.T) {
 func TestSpanFinishTime(t *testing.T) {
 	s := basicSpan("http.request")
 	finishTime := time.Now()
-	s.Finish(tracer.FinishTime(finishTime))
+	s.FinishWithOptionsExt(tracer.FinishTime(finishTime))
 
 	assert := assert.New(t)
 	assert.Equal(finishTime, s.finishTime)
@@ -164,7 +164,7 @@ func TestSpanContext(t *testing.T) {
 func TestSpanFinish(t *testing.T) {
 	s := basicSpan("http.request")
 	want := errors.New("some error")
-	s.Finish(tracer.WithError(want))
+	s.FinishWithOptionsExt(tracer.WithError(want))
 
 	assert := assert.New(t)
 	assert.False(s.FinishTime().IsZero())

@@ -260,5 +260,5 @@ func startProducerSpan(cfg *config, version sarama.KafkaVersion, msg *sarama.Pro
 func finishProducerSpan(span ddtrace.Span, partition int32, offset int64, err error) {
 	span.SetTag("partition", partition)
 	span.SetTag("offset", offset)
-	span.Finish(tracer.WithError(err))
+	span.FinishWithOptionsExt(tracer.WithError(err))
 }
