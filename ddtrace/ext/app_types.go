@@ -70,6 +70,9 @@ const (
 
 	// SpanTypeMessageProducer marks a span as a queue operation.
 	SpanTypeMessageProducer = "queue"
+
+	// SpanTypeEcho marks a span as a echo request
+	SpanTypeEcho = "echo"
 )
 
 // Span kinds have Either client or server for the appropriate roles in an RPC,
