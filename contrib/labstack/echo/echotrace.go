@@ -7,6 +7,7 @@ import (
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
+	"github.com/signalfx/signalfx-go-tracing/internal/utils"
 
 	"github.com/labstack/echo"
 )
@@ -21,19 +22,20 @@ func Middleware(opts ...Option) echo.MiddlewareFunc {
 		}
 		return func(c echo.Context) error {
 			request := c.Request()
-			resource := request.Method + " " + c.Path()
+			operationName := c.Path()
 			opts := []ddtrace.StartSpanOption{
 				tracer.ServiceName(cfg.serviceName),
-				tracer.ResourceName(resource),
-				tracer.SpanType(ext.SpanTypeWeb),
+				tracer.ResourceName(operationName),
+				tracer.SpanType(ext.SpanTypeEcho),
+				tracer.Tag(ext.SpanKind, ext.SpanKindServer),
 				tracer.Tag(ext.HTTPMethod, request.Method),
-				tracer.Tag(ext.HTTPURL, request.URL.Path),
+				tracer.Tag(ext.HTTPURL, utils.GetURL(request)),
 			}
 
 			if spanctx, err := tracer.Extract(tracer.HTTPHeadersCarrier(request.Header)); err == nil {
 				opts = append(opts, tracer.ChildOf(spanctx))
 			}
-			span, ctx := tracer.StartSpanFromContext(request.Context(), "http.request", opts...)
+			span, ctx := tracer.StartSpanFromContext(request.Context(), operationName, opts...)
 			defer span.Finish()
 
 			// pass the span through the request context
@@ -43,6 +45,7 @@ func Middleware(opts ...Option) echo.MiddlewareFunc {
 			err := next(c)
 
 			span.SetTag(ext.HTTPCode, strconv.Itoa(c.Response().Status))
+
 			if err != nil {
 				span.SetTag(ext.Error, err)
 			}

@@ -2,6 +2,10 @@ package echo
 
 import (
 	"errors"
+	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
+	"github.com/signalfx/signalfx-go-tracing/tracing"
+	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -70,8 +74,8 @@ func TestTrace200(t *testing.T) {
 	assert.Len(spans, 1)
 
 	span := spans[0]
-	assert.Equal("http.request", span.OperationName())
-	assert.Equal(ext.SpanTypeWeb, span.Tag(ext.SpanType))
+	assert.Equal("/user/:id", span.OperationName())
+	assert.Equal(ext.SpanTypeEcho, span.Tag(ext.SpanType))
 	assert.Equal("foobar", span.Tag(ext.ServiceName))
 	assert.Equal("echony", span.Tag("test.echo"))
 	assert.Contains(span.Tag(ext.ResourceName), "/user/:id")
@@ -79,7 +83,7 @@ func TestTrace200(t *testing.T) {
 	assert.Equal("GET", span.Tag(ext.HTTPMethod))
 	//assert.Equal(root.Context().SpanID(), span.ParentID())
 
-	assert.Equal("/user/123", span.Tag(ext.HTTPURL))
+	assert.Equal("http://example.com/user/123", span.Tag(ext.HTTPURL))
 }
 
 func TestError(t *testing.T) {
@@ -114,7 +118,7 @@ func TestError(t *testing.T) {
 	assert.Len(spans, 1)
 
 	span := spans[0]
-	assert.Equal("http.request", span.OperationName())
+	assert.Equal("/err", span.OperationName())
 	assert.Equal("foobar", span.Tag(ext.ServiceName))
 	assert.Equal("500", span.Tag(ext.HTTPCode))
 	assert.Equal(wantErr.Error(), span.Tag(ext.Error).(error).Error())
@@ -138,4 +142,130 @@ func TestGetSpanNotInstrumented(t *testing.T) {
 	router.ServeHTTP(w, r)
 	assert.True(called)
 	assert.False(traced)
+}
+
+func TestEchoTracer200Zipkin(t *testing.T) {
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	tracing.Start(tracing.WithEndpointURL(zipkin.URL()), tracing.WithServiceName("test-echo"))
+	defer tracing.Stop()
+
+	e := echo.New()
+	e.Use(Middleware(WithServiceName("test-echo")))
+	e.GET("/mock200", mock200)
+
+	r := httptest.NewRequest("GET", "/mock200", nil)
+	w := httptest.NewRecorder()
+	e.ServeHTTP(w, r)
+
+	tracer.ForceFlush()
+	spans := zipkin.WaitForSpans(t, 1)
+	span := spans[0]
+
+	expectedSpan := map[string]interface{}{
+		"kind": "SERVER",
+		"name": "/mock200",
+		"tags": map[string]string{
+			"component":        "echo",
+			"http.url":         "http://example.com/mock200",
+			"http.method":      "GET",
+			"http.status_code": "200",
+			"span.kind":        "server",
+		},
+	}
+
+	testutil.AssertSpanWithNoErrorEvent(t, expectedSpan, span)
+}
+
+func TestEchoTracer401Zipkin(t *testing.T) {
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	tracing.Start(tracing.WithEndpointURL(zipkin.URL()), tracing.WithServiceName("test-echo"))
+	defer tracing.Stop()
+
+	e := echo.New()
+	e.Use(Middleware(WithServiceName("test-echo")))
+	e.POST("/mock401", mock401)
+
+	r := httptest.NewRequest("POST", "/mock401", nil)
+	w := httptest.NewRecorder()
+	e.ServeHTTP(w, r)
+
+	tracer.ForceFlush()
+	spans := zipkin.WaitForSpans(t, 1)
+	span := spans[0]
+
+	expectedSpan := map[string]interface{}{
+		"kind": "SERVER",
+		"name": "/mock401",
+		"tags": map[string]string{
+			"component":        "echo",
+			"http.url":         "http://example.com/mock401",
+			"http.method":      "POST",
+			"http.status_code": "401",
+			"span.kind":        "server",
+		},
+	}
+
+	testutil.AssertSpanWithNoErrorEvent(t, expectedSpan, span)
+}
+
+func TestEchoTracer500Zipkin(t *testing.T) {
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	tracing.Start(tracing.WithEndpointURL(zipkin.URL()), tracing.WithServiceName("test-echo"))
+	defer tracing.Stop()
+
+	e := echo.New()
+	e.Use(Middleware(WithServiceName("test-echo")))
+	e.POST("/mock500", mock500)
+
+	r := httptest.NewRequest("POST", "/mock500", nil)
+	w := httptest.NewRecorder()
+	e.ServeHTTP(w, r)
+
+	tracer.ForceFlush()
+	spans := zipkin.WaitForSpans(t, 1)
+	span := spans[0]
+
+	expectedSpan := map[string]interface{}{
+		"kind": "SERVER",
+		"name": "/mock500",
+		"tags": map[string]string{
+			"component":        "echo",
+			"http.url":         "http://example.com/mock500",
+			"http.method":      "POST",
+			"http.status_code": "500",
+			"error":            "true",
+			"span.kind":        "server",
+		},
+	}
+
+	testutil.AssertSpanWithErrorEvent(t, expectedSpan, span)
+
+	ann := testutil.GetAnnotation(t, span, 0)
+
+	assert.Equal(t, ann["event"], "error")
+	assert.Contains(t, ann["message"], "Internal Server Error")
+	assert.Greater(t, len(ann["stack"]), 50)
+	assert.Contains(t, ann["stack"], "goroutine")
+	assert.Equal(t, ann["error.kind"], "*echo.HTTPError")
+	assert.Contains(t, ann["error.object"], "&echo.HTTPError")
+}
+
+func mock200(c echo.Context) error {
+	return c.JSON(http.StatusOK, "")
+}
+
+func mock401(c echo.Context) error {
+	return c.JSON(http.StatusUnauthorized, "")
+}
+
+func mock500(c echo.Context) error {
+	err := &echo.HTTPError{Code: http.StatusInternalServerError, Message: "Internal Server Error"}
+	c.Error(err)
+	return err
 }
