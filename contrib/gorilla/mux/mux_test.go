@@ -2,11 +2,9 @@ package mux
 
 import (
 	"fmt"
-	"github.com/signalfx/golib/trace"
 	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
 	"github.com/signalfx/signalfx-go-tracing/tracing"
 	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -195,22 +193,10 @@ func TestTracedGorillaMuxToZipKinServerHTTP405(t *testing.T) {
 }
 
 func TestTracedGorillaMuxToZipKinServerHTTP500(t *testing.T) {
-	span := testTracedGorillaMuxHelper(t, "GET", "500", 500, "/500")
-	require := require.New(t)
-	assert := assert.New(t)
-
-	require.Len(span.Annotations, 1)
-	ann := testutil.GetAnnotation(t, span, 0)
-
-	assert.Equal(ann["event"], "error")
-	assert.Contains(ann["message"], "500: Internal Server Error")
-	assert.Greater(len(ann["stack"]), 50)
-	assert.Contains(ann["stack"], "goroutine")
-	assert.Equal(ann["error.kind"], "*errors.errorString")
-	assert.Contains(ann["error.object"], "&errors.errorString")
+	testTracedGorillaMuxHelper(t, "GET", "500", 500, "/500")
 }
 
-func testTracedGorillaMuxHelper(t *testing.T, method string, path string, httpResponseCode int, expectedSpanName string) *trace.Span {
+func testTracedGorillaMuxHelper(t *testing.T, httpMethod string, path string, wantHTTPCode int, wantSpanName string) {
 	zipkin := zipkinserver.Start()
 	defer zipkin.Stop()
 
@@ -218,36 +204,39 @@ func testTracedGorillaMuxHelper(t *testing.T, method string, path string, httpRe
 	defer tracing.Stop()
 
 	url := "/" + path
-	r := httptest.NewRequest(method, url, nil)
+	r := httptest.NewRequest(httpMethod, url, nil)
 	w := httptest.NewRecorder()
 	router().ServeHTTP(w, r)
 
 	assert := assert.New(t)
-	assert.Equal(httpResponseCode, w.Code)
-	httpResponseCodeStr := strconv.Itoa(httpResponseCode)
-	assert.Equal(httpResponseCodeStr + "!\n", w.Body.String())
+	gotHTTPCode := w.Code
+	assert.Equal(wantHTTPCode, gotHTTPCode)
+	wantHTTPCodeStr := strconv.Itoa(wantHTTPCode)
+	assert.Equal(wantHTTPCodeStr+ "!\n", w.Body.String())
 
 	tracer.ForceFlush()
-	spans := zipkin.WaitForSpans(t, 1)
-	span := spans[0]
+	gotSpans := zipkin.WaitForSpans(t, 1)
+	gotSpan := gotSpans[0]
 
-	assert.Equal("SERVER", *span.Kind)
-	assert.Equal(expectedSpanName, *span.Name)
-	expectedSpanTags := map[string]string{
-		"component":        "web",
-		"http.url":         "http://example.com/" + path,
-		"http.method":      method,
-		"http.status_code": httpResponseCodeStr,
-		"span.kind":        "server",
+	wantSpan := map[string]interface{}{
+		"kind": "SERVER",
+		"name": wantSpanName,
+		"tags": map[string]string{
+			"component":        "web",
+			"http.url":         "http://example.com/" + path,
+			"http.method":      httpMethod,
+			"http.status_code": wantHTTPCodeStr,
+			"span.kind":        "server",
+		},
 	}
-	if httpResponseCode == 500 {
-		expectedSpanTags["error"] = "true"
-	}
-	assert.Equal(expectedSpanTags, span.Tags)
 
-	return span
+	if wantHTTPCode == 500 {
+		wantSpan["tags"].(map[string]string)["error"] = "true"
+		testutil.AssertSpanWithErrorEvent(t, wantSpan, gotSpan)
+	} else {
+		testutil.AssertSpanWithNoErrorEvent(t, wantSpan, gotSpan)
+	}
 }
-
 
 func router() http.Handler {
 	mux := NewRouter(WithServiceName("my-service"))
