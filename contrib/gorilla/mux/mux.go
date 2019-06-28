@@ -2,14 +2,13 @@
 package mux // import "github.com/signalfx/signalfx-go-tracing/contrib/gorilla/mux"
 
 import (
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/signalfx/signalfx-go-tracing/contrib/internal/httputil"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
-
-	"github.com/gorilla/mux"
 )
 
 // Router registers routes to be matched and dispatches a handler.
@@ -102,6 +101,5 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 	spanopts = append(spanopts, r.config.spanOpts...)
-	resource := req.Method + " " + route
-	httputil.TraceAndServe(r.Router, w, req, r.config.serviceName, resource, spanopts...)
+	httputil.TraceAndServe(r.Router, w, req, r.config.serviceName, route, spanopts...)
 }

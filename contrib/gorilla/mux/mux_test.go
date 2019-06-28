@@ -2,6 +2,9 @@ package mux
 
 import (
 	"fmt"
+	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
+	"github.com/signalfx/signalfx-go-tracing/tracing"
+	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -15,38 +18,38 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHttpTracer(t *testing.T) {
+func TestTracedGorillaMux(t *testing.T) {
 	for _, ht := range []struct {
-		code         int
-		method       string
-		url          string
-		resourceName string
-		errorStr     string
+		code     int
+		method   string
+		url      string
+		route    string
+		errorStr string
 	}{
 		{
-			code:         http.StatusOK,
-			method:       "GET",
-			url:          "http://localhost/200",
-			resourceName: "GET /200",
+			code:   http.StatusOK,
+			method: "GET",
+			url:    "http://localhost/200",
+			route:  "/200",
 		},
 		{
-			code:         http.StatusNotFound,
-			method:       "GET",
-			url:          "http://localhost/not_a_real_route",
-			resourceName: "GET unknown",
+			code:   http.StatusNotFound,
+			method: "GET",
+			url:    "http://localhost/not_a_real_route",
+			route:  "unknown",
 		},
 		{
-			code:         http.StatusMethodNotAllowed,
-			method:       "POST",
-			url:          "http://localhost/405",
-			resourceName: "POST unknown",
+			code:   http.StatusMethodNotAllowed,
+			method: "POST",
+			url:    "http://localhost/405",
+			route:  "unknown",
 		},
 		{
-			code:         http.StatusInternalServerError,
-			method:       "GET",
-			url:          "http://localhost/500",
-			resourceName: "GET /500",
-			errorStr:     "500: Internal Server Error",
+			code:     http.StatusInternalServerError,
+			method:   "GET",
+			url:      "http://localhost/500",
+			route:    "/500",
+			errorStr: "500: Internal Server Error",
 		},
 	} {
 		t.Run(http.StatusText(ht.code), func(t *testing.T) {
@@ -71,7 +74,7 @@ func TestHttpTracer(t *testing.T) {
 			assert.Equal(codeStr, s.Tag(ext.HTTPCode))
 			assert.Equal(ht.method, s.Tag(ext.HTTPMethod))
 			assert.Equal(ht.url, s.Tag(ext.HTTPURL))
-			assert.Equal(ht.resourceName, s.Tag(ext.ResourceName))
+			assert.Equal(ht.route, s.Tag(ext.ResourceName))
 			if ht.errorStr != "" {
 				assert.Equal(ht.errorStr, s.Tag(ext.Error).(error).Error())
 			}
@@ -175,6 +178,64 @@ func TestAnalyticsSettings(t *testing.T) {
 
 		assertRate(t, mt, 0.23, WithAnalyticsRate(0.23))
 	})
+}
+
+func TestTracedGorillaMuxToZipKinServerHTTP200(t *testing.T) {
+	testTracedGorillaMuxHelper(t, "GET", "200", 200, "/200")
+}
+
+func TestTracedGorillaMuxToZipKinServerHTTP404(t *testing.T) {
+	testTracedGorillaMuxHelper(t, "GET", "404", 404, "unknown")
+}
+
+func TestTracedGorillaMuxToZipKinServerHTTP405(t *testing.T) {
+	testTracedGorillaMuxHelper(t, "POST", "405", 405, "unknown")
+}
+
+func TestTracedGorillaMuxToZipKinServerHTTP500(t *testing.T) {
+	testTracedGorillaMuxHelper(t, "GET", "500", 500, "/500")
+}
+
+func testTracedGorillaMuxHelper(t *testing.T, httpMethod string, path string, wantHTTPCode int, wantSpanName string) {
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	tracing.Start(tracing.WithEndpointURL(zipkin.URL()), tracing.WithServiceName("test-mux-service"))
+	defer tracing.Stop()
+
+	url := "/" + path
+	r := httptest.NewRequest(httpMethod, url, nil)
+	w := httptest.NewRecorder()
+	router().ServeHTTP(w, r)
+
+	assert := assert.New(t)
+	gotHTTPCode := w.Code
+	assert.Equal(wantHTTPCode, gotHTTPCode)
+	wantHTTPCodeStr := strconv.Itoa(wantHTTPCode)
+	assert.Equal(wantHTTPCodeStr+ "!\n", w.Body.String())
+
+	tracer.ForceFlush()
+	gotSpans := zipkin.WaitForSpans(t, 1)
+	gotSpan := gotSpans[0]
+
+	wantSpan := map[string]interface{}{
+		"kind": "SERVER",
+		"name": wantSpanName,
+		"tags": map[string]string{
+			"component":        "web",
+			"http.url":         "http://example.com/" + path,
+			"http.method":      httpMethod,
+			"http.status_code": wantHTTPCodeStr,
+			"span.kind":        "server",
+		},
+	}
+
+	if wantHTTPCode == 500 {
+		wantSpan["tags"].(map[string]string)["error"] = "true"
+		testutil.AssertSpanWithErrorEvent(t, wantSpan, gotSpan)
+	} else {
+		testutil.AssertSpanWithNoErrorEvent(t, wantSpan, gotSpan)
+	}
 }
 
 func router() http.Handler {
