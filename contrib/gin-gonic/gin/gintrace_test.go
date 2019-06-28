@@ -110,7 +110,7 @@ func TestError(t *testing.T) {
 		t.Fatalf("no spans")
 	}
 	span := spans[0]
-	assert.Equal("/", span.OperationName())
+	assert.Equal("/err", span.OperationName())
 	assert.Equal("foobar", span.Tag(ext.ServiceName))
 	assert.Equal("500", span.Tag(ext.HTTPCode))
 	assert.Equal(wantErr.Error(), span.Tag(ext.Error).(error).Error())
@@ -303,7 +303,7 @@ func TestWithZipkin(t *testing.T) {
 
 		expectedSpan := map[string]interface{}{
 			"localEndpoint": expectedLocalEndpoint,
-			"name":          "/",
+			"name":          "/successful",
 			"kind":          "SERVER",
 			"tags": map[string]string{
 				"component":        "gin",
@@ -337,7 +337,7 @@ func TestWithZipkin(t *testing.T) {
 
 		expectedSpan := map[string]interface{}{
 			"localEndpoint": expectedLocalEndpoint,
-			"name":          "/",
+			"name":          "/unsuccessful",
 			"kind":          "SERVER",
 			"tags": map[string]string{
 				"component":        "gin",
