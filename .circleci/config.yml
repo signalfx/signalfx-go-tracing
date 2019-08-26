@@ -90,7 +90,7 @@ commands:
       version:
         description: rdkafka branch, tag, or commit id
         type: string
-        default: 0d525ba1252074732aac575f88f04831f2656b8f
+        default: v1.1.0
       dest:
         description: git clone destination directory
         type: string
