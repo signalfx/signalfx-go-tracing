@@ -105,7 +105,7 @@ commands:
             if [ ! -d << parameters.dest >> ] ; then
                 echo "building librdkafka"
                 git clone -n https://github.com/edenhill/librdkafka.git << parameters.dest >>
-                cd << parameters.dest >> && git checkout -b << parameters.version >> && ./configure && make
+                cd << parameters.dest >> && git checkout << parameters.version >> && ./configure && make
             fi
             echo "installing librdkafka"
             cd << parameters.dest >> && sudo make install
