@@ -4,6 +4,7 @@ import (
 	context "golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 )
 
 type serverStream struct {
@@ -34,6 +35,9 @@ func (ss *serverStream) RecvMsg(m interface{}) (err error) {
 			ss.cfg.serverServiceName(),
 			ss.cfg.analyticsRate,
 		)
+
+		span.SetTag(ext.SpanKind, ext.SpanKindServer)
+
 		defer func() { finishWithError(span, err, ss.cfg) }()
 	}
 	err = ss.ServerStream.RecvMsg(m)
@@ -49,6 +53,9 @@ func (ss *serverStream) SendMsg(m interface{}) (err error) {
 			ss.cfg.serverServiceName(),
 			ss.cfg.analyticsRate,
 		)
+
+		span.SetTag(ext.SpanKind, ext.SpanKindServer)
+
 		defer func() { finishWithError(span, err, ss.cfg) }()
 	}
 	err = ss.ServerStream.SendMsg(m)
@@ -78,6 +85,9 @@ func StreamServerInterceptor(opts ...Option) grpc.StreamServerInterceptor {
 				cfg.serviceName,
 				cfg.analyticsRate,
 			)
+
+			span.SetTag(ext.SpanKind, ext.SpanKindServer)
+
 			defer func() { finishWithError(span, err, cfg) }()
 		}
 
@@ -109,6 +119,9 @@ func UnaryServerInterceptor(opts ...Option) grpc.UnaryServerInterceptor {
 			cfg.serverServiceName(),
 			cfg.analyticsRate,
 		)
+
+		span.SetTag(ext.SpanKind, ext.SpanKindServer)
+
 		resp, err := handler(ctx, req)
 		finishWithError(span, err, cfg)
 		return resp, err
