@@ -30,8 +30,6 @@ func (cs *clientStream) RecvMsg(m interface{}) (err error) {
 			cs.cfg.analyticsRate,
 		)
 
-		span.SetTag(ext.SpanKind, ext.SpanKindClient)
-
 		if p, ok := peer.FromContext(cs.Context()); ok {
 			setSpanTargetFromPeer(span, *p)
 		}
@@ -50,8 +48,6 @@ func (cs *clientStream) SendMsg(m interface{}) (err error) {
 			cs.cfg.clientServiceName(),
 			cs.cfg.analyticsRate,
 		)
-
-		span.SetTag(ext.SpanKind, ext.SpanKindClient)
 
 		if p, ok := peer.FromContext(cs.Context()); ok {
 			setSpanTargetFromPeer(span, *p)

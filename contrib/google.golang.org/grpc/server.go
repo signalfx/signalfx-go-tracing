@@ -36,8 +36,6 @@ func (ss *serverStream) RecvMsg(m interface{}) (err error) {
 			ss.cfg.analyticsRate,
 		)
 
-		span.SetTag(ext.SpanKind, ext.SpanKindServer)
-
 		defer func() { finishWithError(span, err, ss.cfg) }()
 	}
 	err = ss.ServerStream.RecvMsg(m)
@@ -53,8 +51,6 @@ func (ss *serverStream) SendMsg(m interface{}) (err error) {
 			ss.cfg.serverServiceName(),
 			ss.cfg.analyticsRate,
 		)
-
-		span.SetTag(ext.SpanKind, ext.SpanKindServer)
 
 		defer func() { finishWithError(span, err, ss.cfg) }()
 	}
