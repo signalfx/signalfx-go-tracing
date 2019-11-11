@@ -2,13 +2,12 @@
 [![GoDoc](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing?status.svg)](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing)
 
 ### Installing
-```bash
-go get github.com/signalfx/signalfx-go-tracing
-```
+Add `github.com/signalfx/signalfx-go-tracing` to your `go mod` or `dep` dependencies.
 
 Requires:
 
 * Go 1.12+
+* mod or dep
 
 ### Configuration
 Configuration values can be set either from environmental variables or code:
