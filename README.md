@@ -53,7 +53,7 @@ These are the currently supported instrumentations with the minimum version requ
 | ------- | ------- |
 | [database/sql](contrib/database/sql) | Standard Library |
 | [net/http](contrib/net/http) | Standard Library |
-| [gin-gonic/gin](contrib/gin-gonic/gin) | 1.4 |
+| [gin-gonic/gin](contrib/gin-gonic/gin) | 1.5.0 |
 | [globalsign/mgo](contrib/globalsign/mgo) | r2018.06.15 |
 | [mongodb/mongo-go-driver](contrib/mongodb/mongo-go-driver) | 1.0 |
 
