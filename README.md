@@ -52,10 +52,12 @@ These are the currently supported instrumentations with the minimum version requ
 | Library | Version |
 | ------- | ------- |
 | [database/sql](contrib/database/sql) | Standard Library |
-| [net/http](contrib/net/http) | Standard Library |
 | [gin-gonic/gin](contrib/gin-gonic/gin) | 1.5.0 |
-| [globalsign/mgo](contrib/globalsign/mgo) | r2018.06.15 |
-| [mongodb/mongo-go-driver](contrib/mongodb/mongo-go-driver) | 1.0 |
+| [globalsign/mgo](contrib/globalsign/mgo) | r2018.06.15+ |
+| [gorilla/mux](contrib/gorilla/mux) | 1.7+ |
+| [labstack/echo](contrib/labstack/echo) | 4.0+ |
+| [mongodb/mongo-go-driver](contrib/mongodb/mongo-go-driver) | 1.0+ |
+| [net/http](contrib/net/http) | Standard Library |
 
 ### API
 The API is documented on [godoc](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing).
