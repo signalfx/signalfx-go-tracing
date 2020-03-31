@@ -1,3 +1,4 @@
+// Modified by SignalFx
 package tracer
 
 import (
@@ -98,7 +99,7 @@ type PropagatorConfig struct {
 	ParentHeader string
 
 	// PriorityHeader specifies the map key that will be used to store the sampling priority.
-	// It deafults to DefaultPriorityHeader.
+	// It defaults to DefaultPriorityHeader.
 	PriorityHeader string
 }
 
@@ -139,25 +140,25 @@ type chainedPropagator struct {
 // given environment variable. If the list doesn't contain a value or has invalid
 // values, the default propagator will be returned.
 func getPropagators(cfg *PropagatorConfig, env string) []Propagator {
-	dd := &propagator{cfg}
+	b3 := &propagatorB3{}
 	ps := os.Getenv(env)
 	if ps == "" {
-		return []Propagator{dd}
+		return []Propagator{b3}
 	}
 	var list []Propagator
 	for _, v := range strings.Split(ps, ",") {
 		switch strings.ToLower(v) {
 		case "datadog":
-			list = append(list, dd)
+			list = append(list, &propagator{cfg})
 		case "b3":
-			list = append(list, &propagatorB3{})
+			list = append(list, b3)
 		default:
 			// TODO(cgilmour): consider logging something for invalid/unknown styles.
 		}
 	}
 	if len(list) == 0 {
 		// return the default
-		return []Propagator{dd}
+		return []Propagator{b3}
 	}
 	return list
 }
@@ -309,6 +310,10 @@ func (*propagatorB3) injectTextMap(spanCtx ddtrace.SpanContext, writer TextMapWr
 			writer.Set(b3SampledHeader, "0")
 		}
 	}
+	// propagate OpenTracing baggage
+	for k, v := range ctx.baggage {
+		writer.Set(DefaultBaggageHeaderPrefix+k, v)
+	}
 	return nil
 }
 
@@ -344,6 +349,9 @@ func (*propagatorB3) extractTextMap(reader TextMapReader) (ddtrace.SpanContext, 
 			}
 			ctx.setSamplingPriority(priority)
 		default:
+			if strings.HasPrefix(key, DefaultBaggageHeaderPrefix) {
+				ctx.setBaggageItem(strings.TrimPrefix(key, DefaultBaggageHeaderPrefix), v)
+			}
 		}
 		return nil
 	})

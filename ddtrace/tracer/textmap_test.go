@@ -1,3 +1,4 @@
+// Modified by SignalFx
 package tracer
 
 import (
@@ -77,6 +78,10 @@ func TestTextMapCarrierForeachKeyError(t *testing.T) {
 }
 
 func TestTextMapPropagatorErrors(t *testing.T) {
+	os.Setenv("DD_PROPAGATION_STYLE_INJECT", "datadog")
+	os.Setenv("DD_PROPAGATION_STYLE_EXTRACT", "datadog")
+	defer os.Unsetenv("DD_PROPAGATION_STYLE_INJECT")
+	defer os.Unsetenv("DD_PROPAGATION_STYLE_EXTRACT")
 	propagator := NewPropagator(nil)
 	assert := assert.New(t)
 
@@ -112,6 +117,8 @@ func TestTextMapPropagatorErrors(t *testing.T) {
 }
 
 func TestTextMapPropagatorInjectHeader(t *testing.T) {
+	os.Setenv("DD_PROPAGATION_STYLE_INJECT", "datadog")
+	defer os.Unsetenv("DD_PROPAGATION_STYLE_INJECT")
 	assert := assert.New(t)
 
 	propagator := NewPropagator(&PropagatorConfig{
@@ -141,6 +148,10 @@ func TestTextMapPropagatorInjectHeader(t *testing.T) {
 }
 
 func TestTextMapPropagatorOrigin(t *testing.T) {
+	os.Setenv("DD_PROPAGATION_STYLE_INJECT", "datadog")
+	os.Setenv("DD_PROPAGATION_STYLE_EXTRACT", "datadog")
+	defer os.Unsetenv("DD_PROPAGATION_STYLE_INJECT")
+	defer os.Unsetenv("DD_PROPAGATION_STYLE_EXTRACT")
 	src := TextMapCarrier(map[string]string{
 		originHeader:          "synthetics",
 		DefaultTraceIDHeader:  "1",
@@ -168,6 +179,10 @@ func TestTextMapPropagatorOrigin(t *testing.T) {
 }
 
 func TestTextMapPropagatorInjectExtract(t *testing.T) {
+	os.Setenv("DD_PROPAGATION_STYLE_INJECT", "datadog")
+	os.Setenv("DD_PROPAGATION_STYLE_EXTRACT", "datadog")
+	defer os.Unsetenv("DD_PROPAGATION_STYLE_INJECT")
+	defer os.Unsetenv("DD_PROPAGATION_STYLE_EXTRACT")
 	propagator := NewPropagator(&PropagatorConfig{
 		BaggagePrefix: "bg-",
 		TraceHeader:   "tid",
@@ -197,9 +212,6 @@ func TestTextMapPropagatorInjectExtract(t *testing.T) {
 
 func TestB3(t *testing.T) {
 	t.Run("inject", func(t *testing.T) {
-		os.Setenv("DD_PROPAGATION_STYLE_INJECT", "B3")
-		defer os.Unsetenv("DD_PROPAGATION_STYLE_INJECT")
-
 		tracer := newTracer()
 		root := tracer.StartSpan("web.request").(*span)
 		root.SetTag(ext.SamplingPriority, -1)
@@ -217,9 +229,6 @@ func TestB3(t *testing.T) {
 	})
 
 	t.Run("extract", func(t *testing.T) {
-		os.Setenv("DD_PROPAGATION_STYLE_EXTRACT", "b3")
-		defer os.Unsetenv("DD_PROPAGATION_STYLE_EXTRACT")
-
 		headers := TextMapCarrier(map[string]string{
 			b3TraceIDHeader: "1",
 			b3SpanIDHeader:  "1",
