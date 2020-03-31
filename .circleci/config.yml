@@ -1,4 +1,5 @@
 ---
+# Modified by SignalFx
 version: 2.1
 
 references:
@@ -84,6 +85,13 @@ executors:
           POSTGRES_DB: postgres
 
 commands:
+  prepare_go_mod:
+    description: Sets project to act as go module
+    steps:
+      - run:
+          name: Go mod
+          command: go mod init
+
   install_rdkafka:
     description: Install rdkafka
     parameters:
@@ -155,11 +163,6 @@ commands:
         default: 3
     steps:
       - run:
-          name: Prefetch and remove conflicting golib vendored libraries
-          command: |
-            go get -v github.com/signalfx/golib/trace/...
-            rm -rf $(go env GOPATH)/src/github.com/signalfx/golib/vendor
-      - run:
           name: Fetching dependencies
           command: |
             RETRIES=<< parameters.retries >>
@@ -168,19 +171,6 @@ commands:
                 sleep 5
             done
             exit 1
-
-  get_redis:
-    parameters:
-      version:
-        type: string
-        default: master
-    steps:
-      - go_get:
-          packages: github.com/go-redis/redis
-      - run:
-          command: |
-            cd $GOPATH/src/github.com/go-redis/redis
-            git checkout << parameters.version >>
 
   get_deps:
     description: Get project dependencies
@@ -192,10 +182,20 @@ commands:
         type: string
         default: ./...
     steps:
-      - install_rdkafka
+      - prepare_go_mod
+      - install_rdkafka:
+          version: 4ffe54b4f59ee5ae3767f9f25dc14651a3384d62
       - get_grpc
-      - get_redis:
-          version: v6.15.3  # workaround for https://github.com/go-redis/redis/commit/17480c545e170cdb82762d9b0ea5733ec0c750f6
+      - go_get:
+          # workaround for https://github.com/go-redis/redis/commit/17480c545e170cdb82762d9b0ea5733ec0c750f6
+          packages: github.com/go-redis/redis@75795aa4236dc7341eefac3bbe945e68c99ef9df
+      - go_get:
+          # workaround for https://github.com/mongodb/mongo-go-driver/commit/2e90dce643ffac9852213072213ab457b6bbb62f
+          packages: go.mongodb.org/mongo-driver@0d1270edf53072da4da781b76d2e1db58831152f
+      - go_get:
+          packages: github.com/Shopify/sarama@b3a812117be917e2dd4f8cbcf4ff861e3ae7ef38
+      - go_get:
+          packages: google.golang.org/grpc@v1.2.1
       - go_get:
           options: << parameters.options >>
           packages: << parameters.packages >>
