@@ -1,3 +1,4 @@
+// Modified by SignalFx
 package tracer
 
 import (
@@ -241,6 +242,10 @@ func TestTracerBaggagePropagation(t *testing.T) {
 }
 
 func TestStartSpanOrigin(t *testing.T) {
+	os.Setenv("DD_PROPAGATION_STYLE_INJECT", "Datadog")
+	os.Setenv("DD_PROPAGATION_STYLE_EXTRACT", "Datadog")
+	defer os.Unsetenv("DD_PROPAGATION_STYLE_INJECT")
+	defer os.Unsetenv("DD_PROPAGATION_STYLE_EXTRACT")
 	assert := assert.New(t)
 
 	tracer := newTracer()
@@ -283,13 +288,13 @@ func TestPropagationDefaults(t *testing.T) {
 	err := tracer.Inject(ctx, carrier)
 	assert.Nil(err)
 
-	tid := strconv.FormatUint(root.TraceID, 10)
-	pid := strconv.FormatUint(root.SpanID, 10)
+	tid := strconv.FormatUint(root.TraceID, 16)
+	pid := strconv.FormatUint(root.SpanID, 16)
 
-	assert.Equal(headers.Get(DefaultTraceIDHeader), tid)
-	assert.Equal(headers.Get(DefaultParentIDHeader), pid)
+	assert.Equal(headers.Get(b3TraceIDHeader), tid)
+	assert.Equal(headers.Get(b3SpanIDHeader), pid)
 	assert.Equal(headers.Get(DefaultBaggageHeaderPrefix+"x"), "y")
-	assert.Equal(headers.Get(DefaultPriorityHeader), "-1")
+	assert.Equal(headers.Get(b3SampledHeader), "0")
 
 	// retrieve the spanContext
 	propagated, err := tracer.Extract(carrier)
@@ -309,7 +314,7 @@ func TestPropagationDefaults(t *testing.T) {
 	assert.NotEqual(uint64(0), child.SpanID)
 	assert.Equal(root.SpanID, child.ParentID)
 	assert.Equal(root.TraceID, child.ParentID)
-	assert.Equal(*child.context.trace.priority, -1.)
+	assert.Equal(*child.context.trace.priority, 0.)
 }
 
 func TestTracerSamplingPriorityPropagation(t *testing.T) {

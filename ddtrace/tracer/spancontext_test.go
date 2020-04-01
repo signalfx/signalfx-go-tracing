@@ -1,3 +1,4 @@
+// Modified by SignalFx
 package tracer
 
 import (
@@ -244,13 +245,13 @@ func TestSpanFinishPriority(t *testing.T) {
 
 func TestTracePriorityLocked(t *testing.T) {
 	assert := assert.New(t)
-	ddHeaders := TextMapCarrier(map[string]string{
-		DefaultTraceIDHeader:  "2",
-		DefaultParentIDHeader: "2",
-		DefaultPriorityHeader: "2",
+	b3Headers := TextMapCarrier(map[string]string{
+		b3TraceIDHeader:  "2",
+		b3SpanIDHeader: "2",
+		b3SampledHeader: "2",
 	})
 
-	ctx, err := NewPropagator(nil).Extract(ddHeaders)
+	ctx, err := NewPropagator(nil).Extract(b3Headers)
 	assert.Nil(err)
 	sctx, ok := ctx.(*spanContext)
 	assert.True(ok)
@@ -297,9 +298,9 @@ func TestNewSpanContext(t *testing.T) {
 		defer stop()
 		assert := assert.New(t)
 		ctx, err := NewPropagator(nil).Extract(TextMapCarrier(map[string]string{
-			DefaultTraceIDHeader:  "1",
-			DefaultParentIDHeader: "2",
-			DefaultPriorityHeader: "3",
+			b3TraceIDHeader:  "1",
+			b3SpanIDHeader: "2",
+			b3SampledHeader: "3",
 		}))
 		assert.Nil(err)
 		sctx, ok := ctx.(*spanContext)
