@@ -148,7 +148,7 @@ func TestStreaming(t *testing.T) {
 				fallthrough
 			case "grpc.server", "grpc.message":
 				wantCode := codes.OK
-				if errTag := span.Tag("error"); errTag != nil {
+				if errTag := span.Tag(ext.Error); errTag != nil {
 					if err, ok := errTag.(error); ok {
 						wantCode = status.Convert(err).Code()
 					}

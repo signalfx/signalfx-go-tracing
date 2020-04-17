@@ -218,23 +218,19 @@ func testTracedGorillaMuxHelper(t *testing.T, httpMethod string, path string, wa
 	gotSpans := zipkin.WaitForSpans(t, 1)
 	gotSpan := gotSpans[0]
 
-	wantSpan := map[string]interface{}{
-		"kind": "SERVER",
-		"name": wantSpanName,
-		"tags": map[string]string{
-			"component":        "web",
-			"http.url":         "http://example.com/" + path,
-			"http.method":      httpMethod,
-			"http.status_code": wantHTTPCodeStr,
-			"span.kind":        "server",
-		},
-	}
+	assert.Equal(*gotSpan.Kind, "SERVER")
+	assert.Equal(*gotSpan.Name, wantSpanName)
 
 	if wantHTTPCode == 500 {
-		wantSpan["tags"].(map[string]string)["error"] = "true"
-		testutil.AssertSpanWithErrorEvent(t, wantSpan, gotSpan)
+		testutil.AssertSpanWithError(t, gotSpan, testutil.ErrorAssertion{
+			KindEquals:      "*errors.errorString",
+			MessageContains: fmt.Sprintf("%d: Internal Server Error", wantHTTPCode),
+			ObjectContains:  fmt.Sprintf("%d: Internal Server Error", wantHTTPCode),
+			StackContains:   []string{"goroutine"},
+			StackMinLength:  100,
+		})
 	} else {
-		testutil.AssertSpanWithNoErrorEvent(t, wantSpan, gotSpan)
+		testutil.AssertSpanWithNoError(t, gotSpan)
 	}
 }
 

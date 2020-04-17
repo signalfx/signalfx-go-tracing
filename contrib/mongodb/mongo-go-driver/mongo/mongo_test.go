@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"fmt"
+	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
 	"io"
 	"net"
 	"strings"
@@ -120,7 +121,7 @@ func TestWithZipkin(t *testing.T) {
 		assert.Equal(strings.ToLower(ext.SpanKindClient), span.Tags[ext.SpanKind])
 		assert.Contains(span.Tags[ext.DBStatement], `"test-item":"test-value"`)
 
-		assert.Len(span.Annotations, 0)
+		testutil.AssertSpanWithNoError(t, span)
 	})
 }
 

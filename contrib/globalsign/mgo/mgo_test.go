@@ -482,7 +482,7 @@ func TestWithZipkin(t *testing.T) {
 			"db.statement":  "collection.insert my_db",
 			"span.kind":     strings.ToLower(ext.SpanKindClient),
 		})
-		assert.Len(span.Annotations, 0)
+		testutil.AssertSpanWithNoError(t, span)
 	})
 
 	t.Run("test error", func(t *testing.T) {
@@ -511,23 +511,21 @@ func TestWithZipkin(t *testing.T) {
 		assert.Equal("mongo.collection.insert", *span.Name)
 		assert.Equal(ext.SpanKindClient, *span.Kind)
 
-		assert.Equal(span.Tags, map[string]string{
+		testutil.AssertSpanWithTags(t, span, map[string]string{
 			"component":     "mongodb",
 			"peer.hostname": "localhost:27017",
 			"db.instance":   "my_db",
 			"db.type":       "mongo",
 			"db.statement":  "collection.insert my_db",
-			"error":         "true",
 			"span.kind":     strings.ToLower(ext.SpanKindClient),
 		})
 
-		ann := testutil.GetAnnotation(t, span, 0)
-
-		assert.Equal(ann["event"], "error")
-		assert.Contains(ann["message"], "Invalid namespace")
-		assert.Greater(len(ann["stack"]), 50)
-		assert.Contains(ann["stack"], "goroutine")
-		assert.Equal(ann["error.kind"], "*mgo.QueryError")
-		assert.Contains(ann["error.object"], "&mgo.QueryError{")
+		testutil.AssertSpanWithError(t, span, testutil.ErrorAssertion{
+			KindEquals: "*mgo.QueryError",
+			MessageContains: "Invalid namespace",
+			ObjectContains:  "&mgo.QueryError{",
+			StackContains:  []string{"goroutine"},
+			StackMinLength:  50,
+		})
 	})
 }

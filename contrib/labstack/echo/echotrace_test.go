@@ -163,19 +163,16 @@ func TestEchoTracer200Zipkin(t *testing.T) {
 	spans := zipkin.WaitForSpans(t, 1)
 	span := spans[0]
 
-	expectedSpan := map[string]interface{}{
-		"kind": "SERVER",
-		"name": "/mock200",
-		"tags": map[string]string{
-			"component":        "echo",
-			"http.url":         "http://example.com/mock200",
-			"http.method":      "GET",
-			"http.status_code": "200",
-			"span.kind":        "server",
-		},
-	}
-
-	testutil.AssertSpanWithNoErrorEvent(t, expectedSpan, span)
+	assert.Equal(t, *span.Name, "/mock200")
+	assert.Equal(t, *span.Kind, "SERVER")
+	testutil.AssertSpanWithTags(t,span, map[string]string{
+		"component":        "echo",
+		"http.url":         "http://example.com/mock200",
+		"http.method":      "GET",
+		"http.status_code": "200",
+		"span.kind":        "server",
+	})
+	testutil.AssertSpanWithNoError(t, span)
 }
 
 func TestEchoTracer401Zipkin(t *testing.T) {
@@ -197,19 +194,16 @@ func TestEchoTracer401Zipkin(t *testing.T) {
 	spans := zipkin.WaitForSpans(t, 1)
 	span := spans[0]
 
-	expectedSpan := map[string]interface{}{
-		"kind": "SERVER",
-		"name": "/mock401",
-		"tags": map[string]string{
-			"component":        "echo",
-			"http.url":         "http://example.com/mock401",
-			"http.method":      "POST",
-			"http.status_code": "401",
-			"span.kind":        "server",
-		},
-	}
-
-	testutil.AssertSpanWithNoErrorEvent(t, expectedSpan, span)
+	assert.Equal(t, *span.Name, "/mock401")
+	assert.Equal(t, *span.Kind, "SERVER")
+	testutil.AssertSpanWithTags(t, span, map[string]string{
+		"component":        "echo",
+		"http.url":         "http://example.com/mock401",
+		"http.method":      "POST",
+		"http.status_code": "401",
+		"span.kind":        "server",
+	})
+	testutil.AssertSpanWithNoError(t, span)
 }
 
 func TestEchoTracer500Zipkin(t *testing.T) {
@@ -231,29 +225,26 @@ func TestEchoTracer500Zipkin(t *testing.T) {
 	spans := zipkin.WaitForSpans(t, 1)
 	span := spans[0]
 
-	expectedSpan := map[string]interface{}{
-		"kind": "SERVER",
-		"name": "/mock500",
-		"tags": map[string]string{
-			"component":        "echo",
-			"http.url":         "http://example.com/mock500",
-			"http.method":      "POST",
-			"http.status_code": "500",
-			"error":            "true",
-			"span.kind":        "server",
-		},
-	}
+	assert.Equal(t, *span.Kind, "SERVER")
+	assert.Equal(t, *span.Name, "/mock500")
 
-	testutil.AssertSpanWithErrorEvent(t, expectedSpan, span)
+	testutil.AssertSpanWithTags(t, span, map[string]string{
+		"component":        "echo",
+		"http.url":         "http://example.com/mock500",
+		"http.method":      "POST",
+		"http.status_code": "500",
+		"span.kind":        "server",
+		ext.Error:            "true",
+		ext.ErrorKind: "*echo.HTTPError",
+	})
 
-	ann := testutil.GetAnnotation(t, span, 0)
-
-	assert.Equal(t, ann["event"], "error")
-	assert.Contains(t, ann["message"], "Internal Server Error")
-	assert.Greater(t, len(ann["stack"]), 50)
-	assert.Contains(t, ann["stack"], "goroutine")
-	assert.Equal(t, ann["error.kind"], "*echo.HTTPError")
-	assert.Contains(t, ann["error.object"], "&echo.HTTPError")
+	testutil.AssertSpanWithError(t, span, testutil.ErrorAssertion{
+		KindEquals:      "*echo.HTTPError",
+		MessageContains: "Internal Server Error",
+		ObjectContains:  "&echo.HTTPError",
+		StackContains:   []string{"goroutine"},
+		StackMinLength:  50,
+	})
 }
 
 func mock200(c echo.Context) error {

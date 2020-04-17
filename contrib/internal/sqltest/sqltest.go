@@ -4,16 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
-	"github.com/signalfx/signalfx-go-tracing/tracing"
-	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
 	"log"
 	"strconv"
 	"testing"
 
+	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/mocktracer"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
+	"github.com/signalfx/signalfx-go-tracing/tracing"
+	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -89,7 +89,7 @@ func testZipkin(cfg *Config) func(t *testing.T) {
 
 			assert.Equal("CLIENT", *span.Kind)
 			assert.Equal("Query", *span.Name)
-			assert.Equal(map[string]string{
+			testutil.AssertSpanWithTags(t, span, map[string]string{
 				"component":     "sql",
 				"db.type":       cfg.DriverName,
 				"db.instance":   cfg.DBName,
@@ -98,28 +98,26 @@ func testZipkin(cfg *Config) func(t *testing.T) {
 				"peer.hostname": "127.0.0.1",
 				"peer.port":     strconv.Itoa(cfg.DBPort),
 				"span.kind":     "client",
-				"error":         "true",
-			}, span.Tags)
+			})
 
-			require.Len(span.Annotations, 1)
-
-			ann := testutil.GetAnnotation(t, span, 0)
-			assert.Equal(ann["event"], "error")
-			assert.Greater(len(ann["stack"]), 50)
-			assert.Contains(ann["stack"], "goroutine")
+			ea := testutil.ErrorAssertion{
+				StackContains: []string{"goroutine"},
+				StackMinLength: 50,
+			}
 
 			switch cfg.DriverName {
 			case "mysql":
-				assert.Contains(ann["message"], "You have an error in your SQL syntax")
-				assert.Equal(ann["error.kind"], "*mysql.MySQLError")
-				assert.Contains(ann["error.object"], "&mysql.MySQLError")
+				ea.KindEquals = "*mysql.MySQLError"
+				ea.MessageContains = "You have an error in your SQL syntax"
+				ea.ObjectContains = "&mysql.MySQLError"
 			case "postgres":
-				assert.Contains(ann["message"], `pq: syntax error at or near "invalid"`)
-				assert.Equal(ann["error.kind"], "*pq.Error")
-				assert.Contains(ann["error.object"], "&pq.Error")
+				ea.KindEquals = "*pq.Error"
+				ea.MessageContains = `pq: syntax error at or near "invalid"`
+				ea.ObjectContains = "&pq.Error"
 			default:
 				panic(cfg.DriverName + "unsupported")
 			}
+			testutil.AssertSpanWithError(t, span, ea)
 		})
 
 		t.Run("query", func(t *testing.T) {

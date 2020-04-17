@@ -174,23 +174,18 @@ func (s *span) setTagError(value interface{}, cfg *errorConfig) {
 		// and provide all the benefits.
 		s.Error = 1
 
-		fields := []log.Field{
-			log.String(ext.Event, "error"),
-			log.String(ext.ErrorKind, reflect.TypeOf(v).String()),
-			log.String(ext.ErrorObject, fmt.Sprintf("%#v", v)),
-			log.String(ext.Message, v.Error()),
-		}
+		s.setTagString(ext.ErrorKind, reflect.TypeOf(v).String())
+		s.setTagString(ext.ErrorObject, fmt.Sprintf("%#v", v))
+		s.setTagString(ext.ErrorMsg, v.Error())
 
 		if !cfg.noDebugStack {
 			if cfg.stackFrames == 0 {
 				// TODO: maybe support xerrors and/or https://godoc.org/github.com/pkg/errors?
-				fields = append(fields, log.String(ext.Stack, string(debug.Stack())))
+				s.setTagString(ext.ErrorStack, string(debug.Stack()))
 			} else {
-				fields = append(fields, log.String(ext.Stack, takeStacktrace(cfg.stackFrames, cfg.stackSkip)))
+				s.setTagString(ext.ErrorStack, takeStacktrace(cfg.stackFrames, cfg.stackSkip))
 			}
 		}
-
-		s.LogFields(fields...)
 	case nil:
 		// no error
 		s.Error = 0
