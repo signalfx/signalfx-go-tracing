@@ -121,8 +121,8 @@ func TestEnvironmentVariables(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	// `bob` won't be added as a key value tag because there is no value for that key.
-	err := os.Setenv(signalfxSpanTags, "a:b, c :d  , bob:")
+	// There will be no "  " key with value "silentjay" as Zipkin states empty keys are not valid.
+	err := os.Setenv(signalfxSpanTags, "a:b, c :d  , bob:,  : silentjay")
 	require.Nil(err)
 	defer os.Unsetenv(signalfxSpanTags)
 
@@ -143,9 +143,10 @@ func TestEnvironmentVariables(t *testing.T) {
 	assert.Equal("MyService", *spans[0].LocalEndpoint.ServiceName)
 
 	tags := spans[0].Tags
-	require.Equal(4, len(tags))
+	require.Equal(5, len(tags))
 	assert.Equal("value",tags["test"])
 	assert.Equal("1234", tags["abc-test"])
 	assert.Equal("b", tags["a"])
 	assert.Equal("d", tags["c"])
+	assert.Equal("", tags["bob"])
 }

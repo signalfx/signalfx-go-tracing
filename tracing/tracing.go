@@ -40,7 +40,6 @@ func defaultConfig() *config {
 		accessToken: envOrDefault(signalfxAccessToken),
 		url:         envOrDefault(signalfxEndpointURL),
 		globalTags:  envGlobalTags(),
-
 	}
 }
 
@@ -48,20 +47,30 @@ func defaultConfig() *config {
 // key1:value1,
 func envGlobalTags() []tracer.StartOption {
 	var globalTags []tracer.StartOption
-	if val := os.Getenv(signalfxSpanTags); val != "" {
-		tags := strings.Split(val, ",")
-		for _, tag := range tags {
-			pair :=strings.Split(tag, ":")
-			if len(pair) == 2 {
-				key := strings.TrimSpace(pair[0])
-				value := strings.TrimSpace(pair[1])
-				if key != "" && value != "" {
-					globalTag := tracer.WithGlobalTag(key, value)
-					globalTags = append(globalTags, globalTag)
-				}
+	var val string
+
+	if val = os.Getenv(signalfxSpanTags); val == "" {
+		return globalTags
+	}
+
+	tags := strings.Split(val, ",")
+	for _, tag := range tags {
+		// TODO: Currently this assumes "<stringb>" where "<stringa>:<stringb>" has no ":" in the
+		// string. The TODO is to fix this logic to allow for "<stringb> to have colons, ":', in it.
+		pair :=strings.Split(tag, ":")
+		if len(pair) == 2 {
+			key := strings.TrimSpace(pair[0])
+			value := strings.TrimSpace(pair[1])
+			// Empty keys aren't valid in Zipkin.
+			// https://github.com/openzipkin/zipkin-api/blob/d3324ac79d1aa8f5c6f0ea4febb299402e50480f/zipkin-jsonv2.proto#L50-L51
+			if key == "" {
+				continue
 			}
+			globalTag := tracer.WithGlobalTag(key, value)
+			globalTags = append(globalTags, globalTag)
 		}
 	}
+
 	return globalTags
 }
 
@@ -94,8 +103,8 @@ func WithEndpointURL(url string) StartOption {
 	}
 }
 
-// WithGlobalTag sets a key/value pair which will be set as a tag on all spans
-// created by tracer. This option may be used multiple times.
+// WithGlobalTag sets a tag with the given key/value on all spans created by the
+// tracer. This option may be used multiple times.
 // Note: Since the underlying transport is Zipkin, only values with strings
 // are accepted.
 func WithGlobalTag(k string, v string) StartOption {
