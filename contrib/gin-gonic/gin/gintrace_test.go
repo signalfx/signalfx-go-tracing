@@ -297,23 +297,17 @@ func TestWithZipkin(t *testing.T) {
 
 		span := spans[0]
 
-		expectedLocalEndpoint := map[string]interface{}{
-			"serviceName": "test-gin-service",
-		}
-
-		expectedSpan := map[string]interface{}{
-			"localEndpoint": expectedLocalEndpoint,
-			"name":          "/successful",
-			"kind":          "SERVER",
-			"tags": map[string]string{
-				"component":        "gin",
-				"http.method":      "GET",
-				"http.status_code": "200",
-				"http.url":         "http://example.com/successful",
-				"span.kind":        strings.ToLower(ext.SpanKindServer),
-			},
-		}
-		testutil.AssertSpanWithNoErrorEvent(t, expectedSpan, span)
+		assert.Equal(*span.Name, "/successful")
+		assert.Equal(*span.Kind, "SERVER")
+		assert.Equal(*span.LocalEndpoint.ServiceName, "test-gin-service")
+		testutil.AssertSpanWithTags(t, span, map[string]string{
+			"component":        "gin",
+			"http.method":      "GET",
+			"http.status_code": "200",
+			"http.url":         "http://example.com/successful",
+			"span.kind":        strings.ToLower(ext.SpanKindServer),
+		})
+		testutil.AssertSpanWithNoError(t, span)
 	})
 
 	t.Run("unsuccessful request", func(t *testing.T) {
@@ -331,30 +325,22 @@ func TestWithZipkin(t *testing.T) {
 
 		span := spans[0]
 
-		expectedLocalEndpoint := map[string]interface{}{
-			"serviceName": "test-gin-service",
-		}
-
-		expectedSpan := map[string]interface{}{
-			"localEndpoint": expectedLocalEndpoint,
-			"name":          "/unsuccessful",
-			"kind":          "SERVER",
-			"tags": map[string]string{
-				"component":        "gin",
-				"http.method":      "POST",
-				"http.status_code": "400",
-				"http.url":         "http://example.com/unsuccessful",
-				"error":            "true",
-				"span.kind":        strings.ToLower(ext.SpanKindServer),
-			},
-		}
-		testutil.AssertSpanWithErrorEvent(t, expectedSpan, span)
-
-		ann := testutil.GetAnnotation(t, span, 0)
-		assert.Equal(ann["event"], "error")
-		assert.Contains(ann["message"], "Gin Error")
-		assert.Contains(ann["stack"], "goroutine")
-		assert.Equal(ann["error.kind"], "*gin.Error")
-		assert.Contains(ann["error.object"], "&gin.Error{")
+		assert.Equal(*span.LocalEndpoint.ServiceName, "test-gin-service")
+		assert.Equal(*span.Kind, "SERVER")
+		assert.Equal(*span.Name, "/unsuccessful")
+		testutil.AssertSpanWithTags(t, span, map[string]string{
+			"component":        "gin",
+			"http.method":      "POST",
+			"http.status_code": "400",
+			"http.url":         "http://example.com/unsuccessful",
+			"span.kind":        strings.ToLower(ext.SpanKindServer),
+		})
+		testutil.AssertSpanWithError(t, span, testutil.ErrorAssertion{
+			KindEquals:      "*gin.Error",
+			MessageContains: "Gin Error",
+			ObjectContains:  "&gin.Error{",
+			StackContains:   []string{"goroutine"},
+			StackMinLength:  50,
+		})
 	})
 }

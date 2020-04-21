@@ -57,15 +57,20 @@ const (
 	// Error specifies the error tag. It's value is usually of type "error".
 	Error = "error"
 
-	// TODO: these should be removed once everything is migrated to logs.
-	// Deprecated: ErrorMsg specifies the error message.
-	ErrorMsg = "error.msg"
+	// ErrorMsg specifies the error message.
+	ErrorMsg = "sfx.error.message"
 
-	// Deprecated: ErrorType specifies the error type.
-	ErrorType = "error.type"
+	// DEPRECATED: ErrorType specifies the error type.
+	ErrorType = "sfx.error.kind"
 
-	// Deprecated: ErrorStack specifies the stack dump.
-	ErrorStack = "error.stack"
+	// ErrorKind is the error kind
+	ErrorKind = "sfx.error.kind"
+
+	// ErrorStack specifies the stack dump.
+	ErrorStack = "sfx.error.stack"
+
+	// ErrorObject is the error object string
+	ErrorObject = "sfx.error.object"
 
 	// Environment specifies the environment to use with a trace.
 	Environment = "env"
@@ -88,12 +93,6 @@ const (
 
 	// Event is the log event (usually error)
 	Event = "event"
-
-	// ErrorKind is the error type
-	ErrorKind = "error.kind"
-
-	// ErrorObject is the error object string
-	ErrorObject = "error.object"
 
 	// Message is an error message
 	Message = "message"
