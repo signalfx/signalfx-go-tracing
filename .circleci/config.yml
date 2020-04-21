@@ -95,10 +95,7 @@ commands:
             cp .circleci/go.sum .
             cp .circleci/grpcv12_go.mod contrib/google.golang.org/grpc.v12/go.mod
             cp .circleci/grpcv12_go.sum contrib/google.golang.org/grpc.v12/go.sum
-<<<<<<< HEAD
-=======
 
->>>>>>> master
   install_rdkafka:
     description: Install rdkafka
     parameters:
