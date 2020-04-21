@@ -15,6 +15,3 @@ bin/
 .idea
 
 /contrib/google.golang.org/grpc.v12/vendor/
-
-go.mod
-go.sum

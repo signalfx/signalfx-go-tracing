@@ -7,7 +7,7 @@ references:
     image: circleci/golang:latest
 
   workdir: &workdir
-    working_directory: /go/src/github.com/signalfx/signalfx-go-tracing
+    working_directory: /home/circleci/signalfx-go-tracing
 
 executors:
   go:
@@ -89,9 +89,12 @@ commands:
     description: Sets project to act as go module
     steps:
       - run:
-          name: Go mod
-          command: go mod init
-
+          name: Setup Go mod
+          command: |
+            cp .circleci/go.mod .
+            cp .circleci/go.sum .
+            cp .circleci/grpcv12_go.mod contrib/google.golang.org/grpc.v12/go.mod
+            cp .circleci/grpcv12_go.sum contrib/google.golang.org/grpc.v12/go.sum
   install_rdkafka:
     description: Install rdkafka
     parameters:
@@ -123,33 +126,6 @@ commands:
           paths:
             - << parameters.dest >>
 
-  get_grpc:
-    description: Get gRPC
-    parameters:
-      version:
-        description: gRPC branch or tag
-        type: string
-        default: v1.2.0
-      dest:
-        description: git clone destination directory
-        type: string
-        default: contrib/google.golang.org/grpc.v12/vendor/google.golang.org/grpc
-    steps:
-      - restore_cache:
-          keys:
-            - v1-grpc-<< parameters.version >>
-      - run:
-          name: Vendor gRPC << parameters.version >>
-          command: |
-            if [ ! -d << parameters.dest >> ]; then
-                mkdir -p << parameters.dest >>
-                git clone --branch << parameters.version >> https://github.com/grpc/grpc-go << parameters.dest >>
-            fi
-      - save_cache:
-          key: v1-grpc-<< parameters.version >>
-          paths:
-            - << parameters.dest >>
-
   go_get:
     parameters:
       options:
@@ -171,34 +147,26 @@ commands:
                 sleep 5
             done
             exit 1
-
   get_deps:
     description: Get project dependencies
-    parameters:
-      options:
-        type: string
-        default: -v -t
-      packages:
-        type: string
-        default: ./...
     steps:
       - prepare_go_mod
+      - restore_cache:
+          keys:
+            - v1-gomod-{{ checksum ".circleci/go.mod" }}-{{ checksum ".circleci/grpcv12_go.mod" }}
+            - v1-gomod-
+      - run:
+          name: Download packages
+          command: |
+            go mod download
+            cd contrib/google.golang.org/grpc.v12; go mod download
+            go install github.com/tebeka/go2xunit
       - install_rdkafka:
           version: 4ffe54b4f59ee5ae3767f9f25dc14651a3384d62
-      - get_grpc
-      - go_get:
-          # workaround for https://github.com/go-redis/redis/commit/17480c545e170cdb82762d9b0ea5733ec0c750f6
-          packages: github.com/go-redis/redis@75795aa4236dc7341eefac3bbe945e68c99ef9df
-      - go_get:
-          # workaround for https://github.com/mongodb/mongo-go-driver/commit/2e90dce643ffac9852213072213ab457b6bbb62f
-          packages: go.mongodb.org/mongo-driver@0d1270edf53072da4da781b76d2e1db58831152f
-      - go_get:
-          packages: github.com/Shopify/sarama@b3a812117be917e2dd4f8cbcf4ff861e3ae7ef38
-      - go_get:
-          packages: google.golang.org/grpc@v1.2.1
-      - go_get:
-          options: << parameters.options >>
-          packages: << parameters.packages >>
+      - save_cache:
+          key: v1-gomod-{{ checksum ".circleci/go.mod" }}-{{ checksum ".circleci/grpcv12_go.mod" }}
+          paths:
+            - /go/pkg/
 
   dockerize_wait:
     description: Wait for docker service to be ready
@@ -250,14 +218,12 @@ jobs:
     steps:
       - checkout
       - steps: << parameters.before_deps >>
-      - get_deps:
-          packages: << parameters.packages >>
+      - get_deps
       - steps: << parameters.after_deps >>
       - run:
           name: Run go tests
           command: |
             mkdir ~/testresults
-            (cd /tmp; GO111MODULE=on go get github.com/tebeka/go2xunit)
             export INTEGRATION=<< parameters.integration >>
             bash -euo pipefail -c "go test << parameters.options >> << parameters.packages >> | tee /dev/stderr | grep -v '\[no test files\]' | go2xunit" > ~/testresults/unit.xml
       - save_test_results
@@ -270,9 +236,8 @@ jobs:
       - run:
           name: Run linter
           command: |
-            curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sudo sh -s -- -b $(go env GOPATH)/bin v1.17.0
+            curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sudo sh -s -- -b $(go env GOPATH)/bin v1.24.0
             GOGC=40 golangci-lint run --deadline 5m
-
 workflows:
   build_test:
     jobs:
@@ -288,7 +253,9 @@ workflows:
       - go_test:
           # test all remaining contrib tests not included in the other jobs
           name: test_contrib
-          packages: "`go list ./contrib/... | grep -v -P 'gocql|elastic|Shopify|kafka|memcache|globalsign|mongo|redis|redigo|sql|gorm' | xargs`"
+          # disable checkptr until this issue gets resolved: https://github.com/tidwall/buntdb/issues/62
+          options: -v -race -gcflags=all=-d=checkptr=0
+          packages: "`go list ./contrib/... | grep -v -P 'gocql|elastic|kafka|memcache|globalsign|mongo|redis|redigo|sql|gorm' | sed 's|github.com/signalfx/signalfx-go-tracing|.|g' | xargs`"
       - go_test:
           name: test_ddtrace
           packages: "./ddtrace/..."
