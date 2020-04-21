@@ -2,20 +2,38 @@ package testutil
 
 import (
 	"github.com/signalfx/golib/trace"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"testing"
 )
 
-func AssertSpanWithErrorEvent(t *testing.T, expected map[string]interface{}, actualSpan *trace.Span) {
-	AssertSpan(t, expected, actualSpan)
-	require.Len(t, actualSpan.Annotations, 1)
+type ErrorAssertion struct {
+	KindEquals      string
+	MessageContains string
+	ObjectContains  string
+	StackContains   []string
+	StackMinLength  int
 }
 
-func AssertSpanWithNoErrorEvent(t *testing.T, expected map[string]interface{}, actualSpan *trace.Span) {
-	AssertSpan(t, expected, actualSpan)
-	assert.Len(t, actualSpan.Annotations, 0)
+func AssertSpanWithTags(t *testing.T, span *trace.Span, expected map[string]string) {
+	for k,v := range expected {
+		assert.Equal(t, span.Tags[k], v)
+	}
+}
 
+func AssertSpanWithError(t *testing.T, span *trace.Span, err ErrorAssertion) {
+	assert.Equal(t, "true", span.Tags[ext.Error])
+	assert.Equal(t, err.KindEquals, span.Tags[ext.ErrorKind])
+	assert.Contains(t, span.Tags[ext.ErrorMsg], err.MessageContains)
+	assert.Contains(t, span.Tags[ext.ErrorObject], err.ObjectContains)
+	assert.Greater(t, len(span.Tags[ext.ErrorStack]), err.StackMinLength)
+	for _, s := range err.StackContains {
+		assert.Contains(t, span.Tags[ext.ErrorStack], s)
+	}
+}
+
+func AssertSpanWithNoError(t *testing.T, span *trace.Span) {
+	assert.NotContains(t, span.Tags, ext.Error)
 }
 
 func AssertSpan(t *testing.T, expected map[string]interface{}, actualSpan *trace.Span) {

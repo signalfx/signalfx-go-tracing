@@ -35,20 +35,18 @@ func TestHttpTracer200Zipkin(t *testing.T) {
 	spans := zipkin.WaitForSpans(t, 1)
 	span := spans[0]
 
-	expectedSpan := map[string]interface{}{
-		"kind": "SERVER",
-		"name": "/200",
-		"tags": map[string]string{
-			"component":        "web",
-			"foo":              "bar",
-			"http.url":         "http://example.com/200",
-			"http.method":      "GET",
-			"http.status_code": "200",
-			"span.kind":        "server",
-		},
-	}
+	assert.Equal(*span.Kind, "SERVER")
+	assert.Equal(*span.Name, "/200")
 
-	testutil.AssertSpanWithNoErrorEvent(t, expectedSpan, span)
+	testutil.AssertSpanWithTags(t, span, map[string]string{
+		"component":        "web",
+		"foo":              "bar",
+		"http.url":         "http://example.com/200",
+		"http.method":      "GET",
+		"http.status_code": "200",
+		"span.kind":        "server",
+	})
+	testutil.AssertSpanWithNoError(t, span)
 }
 
 func TestHttpTracer500Zipkin(t *testing.T) {
@@ -72,30 +70,24 @@ func TestHttpTracer500Zipkin(t *testing.T) {
 	spans := zipkin.WaitForSpans(t, 1)
 	span := spans[0]
 
-	expectedSpan := map[string]interface{}{
-		"kind": "SERVER",
-		"name": "/500",
-		"tags": map[string]string{
-			"component":        "web",
-			"foo":              "bar",
-			"http.url":         "http://example.com/500",
-			"http.method":      "GET",
-			"http.status_code": "500",
-			"span.kind":        "server",
-			"error":            "true",
-		},
-	}
+	assert.Equal(*span.Kind, "SERVER")
+	assert.Equal(*span.Name, "/500")
 
-	testutil.AssertSpanWithErrorEvent(t, expectedSpan, span)
-
-	ann := testutil.GetAnnotation(t, span, 0)
-
-	assert.Equal(ann["event"], "error")
-	assert.Contains(ann["message"], "500: Internal Server Error")
-	assert.Greater(len(ann["stack"]), 50)
-	assert.Contains(ann["stack"], "goroutine")
-	assert.Equal(ann["error.kind"], "*errors.errorString")
-	assert.Contains(ann["error.object"], "&errors.errorString")
+	testutil.AssertSpanWithTags(t, span, map[string]string{
+		"component":        "web",
+		"foo":              "bar",
+		"http.url":         "http://example.com/500",
+		"http.method":      "GET",
+		"http.status_code": "500",
+		"span.kind":        "server",
+	})
+	testutil.AssertSpanWithError(t, span, testutil.ErrorAssertion{
+		KindEquals:      "*errors.errorString",
+		MessageContains: "500: Internal Server Error",
+		ObjectContains:  "&errors.errorString",
+		StackContains:   []string{"goroutine"},
+		StackMinLength:  50,
+	})
 }
 
 func TestHttpTracer200(t *testing.T) {

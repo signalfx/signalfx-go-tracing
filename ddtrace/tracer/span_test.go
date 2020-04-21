@@ -113,15 +113,13 @@ func TestSpanFinishWithError(t *testing.T) {
 	assert.Equal(int32(1), span.Error)
 	assert.Equal("true", span.Meta[ext.Error])
 
-	assert.Len(span.Logs, 1)
+	assert.Len(span.Meta, 5)
 
-	fields := span.Logs[0].fields
-
-	assert.Equal("error", fields[ext.Event])
-	assert.Contains(fields[ext.ErrorObject], "errorString")
-	assert.Equal("test error", fields[ext.Message])
-	assert.Equal("*errors.errorString", fields[ext.ErrorKind])
-	assert.Contains(fields[ext.Stack], "goroutine")
+	assert.Equal("true", span.Meta[ext.Error])
+	assert.Contains(span.Meta[ext.ErrorObject], "errorString")
+	assert.Equal("test error", span.Meta[ext.ErrorMsg])
+	assert.Equal("*errors.errorString", span.Meta[ext.ErrorKind])
+	assert.Contains(span.Meta[ext.ErrorStack], "goroutine")
 }
 
 func TestSpanFinishWithErrorNoDebugStack(t *testing.T) {
@@ -133,14 +131,13 @@ func TestSpanFinishWithErrorNoDebugStack(t *testing.T) {
 
 	assert.Equal(int32(1), span.Error)
 	assert.Equal("true", span.Meta[ext.Error])
-	assert.Len(span.Logs, 1)
-	fields := span.Logs[0].fields
+	assert.Len(span.Meta, 4)
 
-	assert.Equal("error", fields[ext.Event])
-	assert.Contains(fields[ext.ErrorObject], "errorString")
-	assert.Equal("test error", fields[ext.Message])
-	assert.Equal("*errors.errorString", fields[ext.ErrorKind])
-	assert.Empty(fields[ext.Stack])
+	assert.Equal("true", span.Meta[ext.Error])
+	assert.Contains(span.Meta[ext.ErrorObject], "errorString")
+	assert.Equal("test error", span.Meta[ext.ErrorMsg])
+	assert.Equal("*errors.errorString", span.Meta[ext.ErrorKind])
+	assert.Empty(span.Meta[ext.ErrorStack])
 }
 
 func TestSpanFinishWithErrorStackFrames(t *testing.T) {
@@ -153,17 +150,15 @@ func TestSpanFinishWithErrorStackFrames(t *testing.T) {
 	assert.Equal(int32(1), span.Error)
 	assert.Equal("true", span.Meta[ext.Error])
 
-	assert.Len(span.Logs, 1)
+	assert.Len(span.Meta, 5)
 
-	fields := span.Logs[0].fields
-
-	assert.Equal("error", fields[ext.Event])
-	assert.Contains(fields[ext.ErrorObject], "errorString")
-	assert.Equal("test error", fields[ext.Message])
-	assert.Equal("*errors.errorString", fields[ext.ErrorKind])
-	assert.Contains(fields[ext.Stack], "tracer.TestSpanFinishWithErrorStackFrames")
-	assert.Contains(fields[ext.Stack], "tracer.(*span).Finish")
-	assert.Equal(2, strings.Count(fields[ext.Stack].(string), "\n\t"))
+	assert.Equal("true", span.Meta["error"])
+	assert.Contains(span.Meta[ext.ErrorObject], "errorString")
+	assert.Equal("test error", span.Meta[ext.ErrorMsg])
+	assert.Equal("*errors.errorString", span.Meta[ext.ErrorKind])
+	assert.Contains(span.Meta[ext.ErrorStack], "tracer.TestSpanFinishWithErrorStackFrames")
+	assert.Contains(span.Meta[ext.ErrorStack], "tracer.(*span).Finish")
+	assert.Equal(2, strings.Count(span.Meta[ext.ErrorStack], "\n\t"))
 }
 
 func TestSpanSetTag(t *testing.T) {
@@ -190,14 +185,12 @@ func TestSpanSetTag(t *testing.T) {
 
 	span.SetTag(ext.Error, errors.New("abc"))
 	assert.Equal(int32(1), span.Error)
-	assert.Len(span.Logs, 1)
-	fields := span.Logs[0].fields
 
-	assert.Equal("error", fields[ext.Event])
-	assert.Equal("abc", fields[ext.Message])
-	assert.Equal("*errors.errorString", fields[ext.ErrorKind])
-	assert.Contains(fields[ext.ErrorObject], "&errors.errorString")
-	assert.NotEmpty(fields[ext.Stack])
+	assert.Equal("true", span.Meta[ext.Error])
+	assert.Equal("abc", span.Meta[ext.ErrorMsg])
+	assert.Equal("*errors.errorString", span.Meta[ext.ErrorKind])
+	assert.Contains(span.Meta[ext.ErrorObject], "&errors.errorString")
+	assert.NotEmpty(span.Meta[ext.ErrorStack])
 
 	span.SetTag(ext.Error, "something else")
 	assert.Equal(int32(1), span.Error)
@@ -292,15 +285,12 @@ func TestSpanError(t *testing.T) {
 
 	assert.Equal("true", span.Meta[ext.Error])
 	assert.Equal(int32(1), span.Error)
-	assert.Len(span.Logs, 1)
 
-	fields := span.Logs[0].fields
-
-	assert.Equal("error", fields[ext.Event])
-	assert.Contains(fields[ext.ErrorObject], "errorString")
-	assert.Equal("Something wrong", fields[ext.Message])
-	assert.Equal("*errors.errorString", fields[ext.ErrorKind])
-	assert.Contains(fields[ext.Stack], "goroutine")
+	assert.Equal("true", span.Meta[ext.Error])
+	assert.Contains(span.Meta[ext.ErrorObject], "errorString")
+	assert.Equal("Something wrong", span.Meta[ext.ErrorMsg])
+	assert.Equal("*errors.errorString", span.Meta[ext.ErrorKind])
+	assert.Contains(span.Meta[ext.ErrorStack], "goroutine")
 
 	// operating on a finished span is a no-op
 	span = tracer.newRootSpan("flask.request", "flask", "/")
@@ -323,14 +313,11 @@ func TestSpanError_Typed(t *testing.T) {
 	assert.Equal("true", span.Meta[ext.Error])
 	assert.Equal(int32(1), span.Error)
 
-	assert.Len(span.Logs, 1)
-	fields := span.Logs[0].fields
-
-	assert.Equal("error", fields[ext.Event])
-	assert.Contains(fields[ext.ErrorObject], "&tracer.boomError")
-	assert.Equal("boom", fields[ext.Message])
-	assert.Equal("*tracer.boomError", fields[ext.ErrorKind])
-	assert.NotEmpty(fields[ext.Stack])
+	assert.Equal("true", span.Meta[ext.Error])
+	assert.Contains(span.Meta[ext.ErrorObject], "&tracer.boomError")
+	assert.Equal("boom", span.Meta[ext.ErrorMsg])
+	assert.Equal("*tracer.boomError", span.Meta[ext.ErrorKind])
+	assert.NotEmpty(span.Meta[ext.ErrorStack])
 }
 
 func TestSpanErrorNil(t *testing.T) {

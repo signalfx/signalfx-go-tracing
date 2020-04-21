@@ -82,7 +82,7 @@ func TestRoundTripperZipkin(t *testing.T) {
 			"span.kind":        "client",
 			"http.status_code": "200",
 		}, s1.Tags)
-		assert.Len(s1.Annotations, 0)
+		testutil.AssertSpanWithNoError(t, s1)
 	})
 
 	t.Run("500 error", func(t *testing.T) {
@@ -113,9 +113,6 @@ func TestRoundTripperZipkin(t *testing.T) {
 			"span.kind":        "client",
 			"http.status_code": "500",
 		}, tags)
-
-		assert.Len(s1.Annotations, 0)
-		assert.Equal(tags["error"], "true")
 	})
 
 	t.Run("host connect error", func(t *testing.T) {
@@ -135,28 +132,21 @@ func TestRoundTripperZipkin(t *testing.T) {
 		if assert.NotNil(s0.LocalEndpoint.ServiceName) {
 			assert.Equal("test-http-service", *s0.LocalEndpoint.ServiceName)
 		}
-		tags := s0.Tags
 
 		assert.Equal("GET", *s0.Name)
-		assert.Equal(map[string]string{
+		testutil.AssertSpanWithTags(t, s0,map[string]string{
 			"component":   "http",
-			"error":       "true",
 			"http.method": "GET",
 			"http.url":    "http://localhost:1/query",
 			"span.kind":   "client",
-		}, tags)
-
-
-		assert.Len(s0.Annotations, 1)
-		ann := testutil.GetAnnotation(t, s0, 0)
-
-		assert.Equal(tags["error"], "true")
-		assert.Equal(ann["event"], "error")
-		assert.Contains(ann["message"], "connection refused")
-		assert.Greater(len(ann["stack"]), 50)
-		assert.Contains(ann["stack"], "goroutine")
-		assert.Equal(ann["error.kind"], "*net.OpError")
-		assert.Contains(ann["error.object"], "&net.OpError{")
+		})
+		testutil.AssertSpanWithError(t, s0, testutil.ErrorAssertion{
+			KindEquals:      "*net.OpError",
+			MessageContains: "connection refused",
+			ObjectContains:  "&net.OpError{",
+			StackContains:   []string{"goroutine"},
+			StackMinLength:  50,
+		})
 	})
 }
 
