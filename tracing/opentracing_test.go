@@ -8,6 +8,7 @@ import (
 	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"os"
 	"testing"
 )
 
@@ -79,13 +80,73 @@ func TestOpenTracingParentSpan(t *testing.T) {
 }
 
 func TestEmptyContext(t *testing.T) {
+	assert := assert.New(t)
 	zipkin := zipkinserver.Start()
 	defer zipkin.Stop()
 
 	Start(WithEndpointURL(zipkin.URL()))
 
-	span, _ := opentracing.StartSpanFromContext(context.Background(), "session")
+	sessionName := "session"
+	span, _ := opentracing.StartSpanFromContext(context.Background(), sessionName)
 	span.Finish()
+
 	tracer.ForceFlush()
-	zipkin.WaitForSpans(t, 1)
+	spans := zipkin.WaitForSpans(t, 1)
+	assert.Equal(sessionName, *spans[0].Name)
+}
+
+func TestWithGlobalTags(t *testing.T) {
+	require := require.New(t)
+
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	Start(WithEndpointURL(zipkin.URL()),
+		WithGlobalTag("abc-test", "1234"),
+		WithGlobalTag("test", "value"))
+
+	span := tracer.StartSpan("test")
+	span.Finish()
+
+	tracer.ForceFlush()
+	spans := zipkin.WaitForSpans(t, 1)
+
+	tags := spans[0].Tags
+	require.Equal(2, len(tags))
+	require.Equal("value",tags["test"], )
+	require.Equal("1234", tags["abc-test"])
+}
+
+func TestEnvironmentVariables(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	// There will be no "  " key with value "silentjay" as Zipkin states empty keys are not valid.
+	err := os.Setenv(signalfxSpanTags, "a:b, c :d  , bob:,  : silentjay")
+	require.Nil(err)
+	defer os.Unsetenv(signalfxSpanTags)
+
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	Start(WithServiceName("MyService"),
+		WithEndpointURL(zipkin.URL()),
+		WithGlobalTag("abc-test", "1234"),
+		WithGlobalTag("test", "value"))
+
+	span := tracer.StartSpan("test")
+	span.Finish()
+
+	tracer.ForceFlush()
+	spans := zipkin.WaitForSpans(t, 1)
+
+	assert.Equal("MyService", *spans[0].LocalEndpoint.ServiceName)
+
+	tags := spans[0].Tags
+	require.Equal(5, len(tags))
+	assert.Equal("value",tags["test"])
+	assert.Equal("1234", tags["abc-test"])
+	assert.Equal("b", tags["a"])
+	assert.Equal("d", tags["c"])
+	assert.Equal("", tags["bob"])
 }

@@ -12,11 +12,14 @@ Requires:
 ### Configuration
 Configuration values can be set either from environmental variables or code:
 
-`SIGNALFX_SERVICE_NAME` / [WithServiceName](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#WithServiceName) Name identifying the service as a whole (defaults to `SignalFx-Tracing`)
+| Code | Environment Variable | Default Value | Notes |
+| ---  | ---                  | ---           | ---   |
+| [WithServiceName](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#WithServiceName) | `SIGNALFX_SERVICE_NAME` | `SignalFx-Tracing` | The name of the service. |
+| [WithEndpointURL](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#WithEndpointURL) | `SIGNALFX_ENDPOINT_URL` | `http://localhost:9080/v1/trace` | The URL to send traces to.  |
+| [WithAccessToken](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#WithAccessToken) | `SIGNALFX_ACCESS_TOKEN` | none | |
+| [WithGlobalTag](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#WithGlobalTag) | `SIGNALFX_SPAN_TAGS` | none | Comma-separated list of tags included in every reported span. For example, "key1:val1,key2:val2". Note: The current transport format is Zipkin which only supports string values for tags.|
 
-`SIGNALFX_ENDPOINT_URL` / [WithEndpointURL](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#WithEndpointURL) URL to send traces to (defaults to `http://localhost:9080/v1/trace`)
-
-`SIGNALFX_ACCESS_TOKEN` / [WithAccessToken](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#WithAccessToken) (no default)
+Note: The current transport format is Zipkin which only supports string values for tags.
 
 ### Getting Started
 When your application starts enable tracing globally with
