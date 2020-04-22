@@ -66,3 +66,4 @@ replace (
     github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.4.0
     go.mongodb.org/mongo-driver => github.com/mongodb/mongo-go-driver v1.0.4
 )
+

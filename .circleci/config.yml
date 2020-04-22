@@ -148,6 +148,7 @@ commands:
                 sleep 5
             done
             exit 1
+
   get_deps:
     description: Get project dependencies
     steps:
@@ -239,6 +240,7 @@ jobs:
           command: |
             curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sudo sh -s -- -b $(go env GOPATH)/bin v1.24.0
             GOGC=40 golangci-lint run --deadline 5m
+
 workflows:
   build_test:
     jobs:
