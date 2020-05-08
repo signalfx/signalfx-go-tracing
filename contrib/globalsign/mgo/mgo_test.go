@@ -475,12 +475,14 @@ func TestWithZipkin(t *testing.T) {
 		assert.Equal(ext.SpanKindClient, *span.Kind)
 
 		assert.Equal(span.Tags, map[string]string{
-			"component":     "mongodb",
-			"peer.hostname": "localhost:27017",
-			"db.instance":   "my_db",
-			"db.type":       "mongo",
-			"db.statement":  "collection.insert my_db",
-			"span.kind":     strings.ToLower(ext.SpanKindClient),
+			"component":                "mongodb",
+			"peer.hostname":            "localhost:27017",
+			"db.instance":              "my_db",
+			"db.type":                  "mongo",
+			"db.statement":             "collection.insert my_db",
+			"span.kind":                strings.ToLower(ext.SpanKindClient),
+			tracing.SignalfxLibraryKey: tracing.SignalfxLibraryValue,
+			tracing.SignalfxVersionKey: tracing.SignalfxVersionValue,
 		})
 		testutil.AssertSpanWithNoError(t, span)
 	})

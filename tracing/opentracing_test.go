@@ -115,8 +115,8 @@ func TestWithGlobalTags(t *testing.T) {
 	require.Equal(4, len(tags))
 	assert.Equal(t, "value",tags["test"], )
 	assert.Equal(t, "1234", tags["abc-test"])
-	assert.Equal(t, signalfxVersionValue, tags[signalfxVersionKey])
-	assert.Equal(t, signalfxLibraryValue,tags[signalfxLibraryKey])
+	assert.Equal(t, SignalfxVersionValue, tags[SignalfxVersionKey])
+	assert.Equal(t, SignalfxLibraryKey, tags[SignalfxLibraryKey])
 }
 
 func TestEnvironmentVariables(t *testing.T) {
@@ -151,6 +151,6 @@ func TestEnvironmentVariables(t *testing.T) {
 	assert.Equal("b", tags["a"])
 	assert.Equal("d", tags["c"])
 	assert.Equal("", tags["bob"])
-	assert.Equal(signalfxVersionValue, tags[signalfxVersionKey])
-	assert.Equal(signalfxLibraryValue,tags[signalfxLibraryKey])
+	assert.Equal(SignalfxVersionValue, tags[SignalfxVersionKey])
+	assert.Equal(SignalfxLibraryKey, tags[SignalfxLibraryKey])
 }

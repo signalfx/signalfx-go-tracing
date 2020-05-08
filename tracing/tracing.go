@@ -15,11 +15,11 @@ const (
 	signalfxSpanTags    = "SIGNALFX_SPAN_TAGS"
 
 	// Set of default keys added to every span.
-	signalfxLibraryKey  = "signalfx.tracing.library"
-	signalfxLibraryValue= "go.tracing"
+	SignalfxLibraryKey  = "signalfx.tracing.library"
+	SignalfxLibraryValue= "go.tracing"
 	// When cutting a new release, update the version value.
-	signalfxVersionKey  = "signalfx.tracing.version"
-	signalfxVersionValue = "v1.1.0"
+	SignalfxVersionKey   = "signalfx.tracing.version"
+	SignalfxVersionValue = "v1.1.0"
 )
 
 var defaults = map[string]string{
@@ -57,9 +57,9 @@ func envDefaultAndGlobalTags() []tracer.StartOption {
 	var globalTags []tracer.StartOption
 
 	// Add the default Library and Version tags.
-	defaultLibraryTag := tracer.WithGlobalTag(signalfxLibraryKey, signalfxLibraryValue)
+	defaultLibraryTag := tracer.WithGlobalTag(SignalfxLibraryKey, SignalfxLibraryKey)
 	globalTags = append(globalTags, defaultLibraryTag)
-	defaultVersionTag := tracer.WithGlobalTag(signalfxVersionKey, signalfxVersionValue)
+	defaultVersionTag := tracer.WithGlobalTag(SignalfxVersionKey, SignalfxVersionValue)
 	globalTags = append(globalTags, defaultVersionTag)
 
 	// Add environment tags if they are passed in.
