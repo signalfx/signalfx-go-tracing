@@ -13,10 +13,17 @@ const (
 	signalfxEndpointURL = "SIGNALFX_ENDPOINT_URL"
 	signalfxAccessToken = "SIGNALFX_ACCESS_TOKEN"
 	signalfxSpanTags    = "SIGNALFX_SPAN_TAGS"
+
+	// Set of default keys added to every span.
+	signalfxLibraryKey  = "signalfx.tracing.library"
+	signalfxLibraryValue= "go.tracing"
+	// When cutting a new release, update the version value.
+	signalfxVersionKey  = "signalfx.tracing.version"
+	signalfxVersionValue = "v1.1.0"
 )
 
 var defaults = map[string]string{
-	signalfxServiceName: "SignalFx-Tracing",
+	signalfxServiceName: "unnamed-go-service",
 	signalfxEndpointURL: "http://localhost:9080/v1/trace",
 	signalfxAccessToken: "",
 }
@@ -39,16 +46,24 @@ func defaultConfig() *config {
 		serviceName: envOrDefault(signalfxServiceName),
 		accessToken: envOrDefault(signalfxAccessToken),
 		url:         envOrDefault(signalfxEndpointURL),
-		globalTags:  envGlobalTags(),
+		globalTags:  envDefaultAndGlobalTags(),
 	}
 }
 
-// envGlobalTags extract global tags from the environment variable and parses the value in the expected format
-// key1:value1,
-func envGlobalTags() []tracer.StartOption {
+// envDefaultAndGlobalTags extract global tags from the environment variable and parses the
+// value in the expected format key1:value1, ...
+// Also, it adds the Version and Library tags
+func envDefaultAndGlobalTags() []tracer.StartOption {
 	var globalTags []tracer.StartOption
-	var val string
 
+	// Add the default Library and Version tags.
+	defaultLibraryTag := tracer.WithGlobalTag(signalfxLibraryKey, signalfxLibraryValue)
+	globalTags = append(globalTags, defaultLibraryTag)
+	defaultVersionTag := tracer.WithGlobalTag(signalfxVersionKey, signalfxVersionValue)
+	globalTags = append(globalTags, defaultVersionTag)
+
+	// Add environment tags if they are passed in.
+	var val string
 	if val = os.Getenv(signalfxSpanTags); val == "" {
 		return globalTags
 	}

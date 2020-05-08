@@ -112,9 +112,11 @@ func TestWithGlobalTags(t *testing.T) {
 	spans := zipkin.WaitForSpans(t, 1)
 
 	tags := spans[0].Tags
-	require.Equal(2, len(tags))
-	require.Equal("value",tags["test"], )
-	require.Equal("1234", tags["abc-test"])
+	require.Equal(4, len(tags))
+	assert.Equal(t, "value",tags["test"], )
+	assert.Equal(t, "1234", tags["abc-test"])
+	assert.Equal(t, signalfxVersionValue, tags[signalfxVersionKey])
+	assert.Equal(t, signalfxLibraryValue,tags[signalfxLibraryKey])
 }
 
 func TestEnvironmentVariables(t *testing.T) {
@@ -143,10 +145,12 @@ func TestEnvironmentVariables(t *testing.T) {
 	assert.Equal("MyService", *spans[0].LocalEndpoint.ServiceName)
 
 	tags := spans[0].Tags
-	require.Equal(5, len(tags))
+	require.Equal(7, len(tags))
 	assert.Equal("value",tags["test"])
 	assert.Equal("1234", tags["abc-test"])
 	assert.Equal("b", tags["a"])
 	assert.Equal("d", tags["c"])
 	assert.Equal("", tags["bob"])
+	assert.Equal(signalfxVersionValue, tags[signalfxVersionKey])
+	assert.Equal(signalfxLibraryValue,tags[signalfxLibraryKey])
 }
