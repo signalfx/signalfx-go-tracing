@@ -136,7 +136,7 @@ func testZipkin(cfg *Config) func(t *testing.T) {
 
 			assert.Equal("CLIENT", *span.Kind)
 			assert.Equal("Query", *span.Name)
-			assert.Equal(map[string]string{
+			testutil.AssertSpanWithTags (t, span,map[string]string{
 				"component":     "sql",
 				"db.type":       cfg.DriverName,
 				"db.instance":   cfg.DBName,
@@ -145,7 +145,7 @@ func testZipkin(cfg *Config) func(t *testing.T) {
 				"peer.hostname": "127.0.0.1",
 				"peer.port":     strconv.Itoa(cfg.DBPort),
 				"span.kind":     "client",
-			}, span.Tags)
+			})
 		})
 	}
 }

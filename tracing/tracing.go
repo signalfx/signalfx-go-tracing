@@ -57,7 +57,7 @@ func envDefaultAndGlobalTags() []tracer.StartOption {
 	var globalTags []tracer.StartOption
 
 	// Add the default Library and Version tags.
-	defaultLibraryTag := tracer.WithGlobalTag(SignalfxLibraryKey, SignalfxLibraryKey)
+	defaultLibraryTag := tracer.WithGlobalTag(SignalfxLibraryKey, SignalfxLibraryValue)
 	globalTags = append(globalTags, defaultLibraryTag)
 	defaultVersionTag := tracer.WithGlobalTag(SignalfxVersionKey, SignalfxVersionValue)
 	globalTags = append(globalTags, defaultVersionTag)
