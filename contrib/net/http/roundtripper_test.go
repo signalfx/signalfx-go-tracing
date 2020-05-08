@@ -102,7 +102,6 @@ func TestRoundTripperZipkin(t *testing.T) {
 		if assert.NotNil(s1.LocalEndpoint.ServiceName) {
 			assert.Equal("test-http-service", *s1.LocalEndpoint.ServiceName)
 		}
-		tags := s1.Tags
 
 		assert.Equal("POST", *s1.Name)
 		testutil.AssertSpanWithTags(t, s1 ,map[string]string{
