@@ -4,7 +4,7 @@
 # SignalFx Tracing Library for Go
 
 The SignalFx Tracing Library for Go helps you instrument Go applications
-with the OpenTracing API 2.0 to capture and report distributed traces to
+with the OpenTracing API to capture and report distributed traces to
 SignalFx.
 
 ## Requirements and supported software
@@ -43,12 +43,12 @@ Set configuration values from environment variables or directly in your code:
 
 ## Instrument a Go application
 
-Follow these steps to instrument target libraries with provided wrapper libraries. 
+Follow these steps to instrument target libraries with provided instrumentors. 
 
 For more information about how to instrument a Go application, see the
 [examples](https://github.com/signalfx/tracing-examples/tree/master/signalfx-tracing/signalfx-go-tracing).
 
-1. Add `github.com/signalfx/signalfx-go-tracing` to your `go mod` or `dep`
+1. Import `github.com/signalfx/signalfx-go-tracing` to your `go mod` or `dep`
 dependencies.
 2. Specify the name of the service you're instrumenting:
    ```bash
@@ -64,13 +64,13 @@ OpenTelemetry Collector, set the access token for your SignalFx organization:
    ```bash
    $ export SIGNALFX_ACCESS_TOKEN = "your_access_token"
    ```
-5. Import the wrapper library for the target library you want to instrument and
+1. Import the instrumentor for the target library you want to instrument and
 replace utilities with their traced equivalents. 
 
-   Find a wrapper library for each supported target library in the [contrib](contrib)
-   directory. Each wrapper library has a `example_test.go` file that demonstrates
-   how to instrument a target library. Don't use the example in your application.
-6. Enable tracing globally with
+   Find an instrumentor for each supported target library in the [contrib](contrib)
+   directory. Each instrumentor has an `example_test.go` file that demonstrates
+   how to instrument a target library. Don't import examples directly in your application.
+1. Enable tracing globally with
 [tracing.Start()](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#Start).
 This creates a tracer and registers it as the OpenTracing global tracer. 
 
