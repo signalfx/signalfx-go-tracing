@@ -3,8 +3,9 @@
 
 # SignalFx Tracing Library for Go
 
-The SignalFx Tracing Library for Go instruments Go applications
-with OpenTracing API 2.0 to capture and report distributed traces to SignalFx.
+The SignalFx Tracing Library for Go helps you instrument. Go applications
+with the OpenTracing API 2.0 to capture and report distributed traces to
+SignalFx.
 
 ## Requirements and supported software
 
@@ -25,11 +26,13 @@ These are the supported libraries you can instrument:
 | [mongodb/mongo-go-driver](contrib/mongodb/mongo-go-driver) | 1.0+ |
 | [net/http](contrib/net/http) | Standard Library |
 
+Other libraries are available to instrument, but are in beta and aren't
+officially supported. You can view all the libraries in the
+[contrib](contrib) directory.
+
 ## Configuration values
 
 Set configuration values from environment variables or directly in your code:
-
-<!--why is every library in [contrib](contrib) not included?-->
 
 | Code | Environment Variable | Default Value | Notes |
 | ---  | ---                  | ---           | ---   |
@@ -40,14 +43,19 @@ Set configuration values from environment variables or directly in your code:
 
 ## Instrument a Go application
 
+Follow these steps to instrument target libraries with provided wrapper libraries. 
+
+For more information about how to instrument a Go application, see the
+[examples](https://github.com/signalfx/tracing-examples/tree/master/signalfx-tracing/signalfx-go-tracing).
+
 1. Add `github.com/signalfx/signalfx-go-tracing` to your `go mod` or `dep`
 dependencies.
 2. Specify the name of the service you're instrumenting:
    ```bash
     $ export SIGNALFX_SERVICE_NAME = "your_service"
    ```
-3. If you're sending trace data to an endpoint different than `localhost`,
-enter the endpoint URL.
+3. If you're sending trace data to an endpoint different than `http://localhost:9080/v1/trace`,
+set the endpoint URL:
    ```bash
    $ export SIGNALFX_ENDPOINT_URL = "your_endpoint"
    ```
@@ -56,32 +64,15 @@ OpenTelemetry Collector, set the access token for your SignalFx organization:
    ```bash
    $ export SIGNALFX_ACCESS_TOKEN = "your_access_token"
    ```
-5. When your application starts, enable tracing globally with
-[tracing.Start](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#Start).
-For Go or 3rd party libraries, use the wrapper libraries in [contrib](contrib)
-to have traces automatically emitted.
+5. Import the wrapper library for the target library you want to instrument and
+replace utilities with their traced equivalents. 
 
-Here's a basic example to show what instrumenting Redis looks like:
-
-```go
-package main
-
-import (
-	"github.com/go-redis/redis"
-	redistrace "github.com/signalfx/signalfx-go-tracing/contrib/go-redis/redis"
-	"github.com/signalfx/signalfx-go-tracing/tracing"
-)
-
-func main() {
-	tracing.Start()
-	defer tracing.Stop()
-
-	opts := &redis.Options{Addr: "127.0.0.1:6379", Password: "", DB: 0}
-	c := redistrace.NewClient(opts)
-
-	c.Set("test_key", "test_value", 0)
-}
-```
+   Find a wrapper library for each supported target library in the [contrib](contrib)
+   directory. Each wrapper library has a `example_test.go` file that demonstrates
+   how to instrument a target library. Don't use the example in your application.
+6. Enable tracing globally with
+[tracing.Start()](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#Start).
+This creates a tracer and registers it as the OpenTracing global tracer. 
 
 ## API
 
@@ -96,8 +87,6 @@ vendor this version of the library inside the integration. Under normal
 circumstances this is not something that we want to do, because users using
 this integration might be running versions different from the vendored one,
 creating hard to debug conflicts.
-
-<!--why is the `INTEGRATION` env. variable not listed above?-->
 
 To run integration tests locally, you should set the `INTEGRATION` environment
 variable. The dependencies of the integration tests are best run via Docker.
