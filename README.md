@@ -3,7 +3,7 @@
 
 # SignalFx Tracing Library for Go
 
-The SignalFx Tracing Library for Go helps you instrument. Go applications
+The SignalFx Tracing Library for Go helps you instrument Go applications
 with the OpenTracing API 2.0 to capture and report distributed traces to
 SignalFx.
 
