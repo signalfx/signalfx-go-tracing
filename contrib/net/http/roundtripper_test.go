@@ -1,6 +1,11 @@
 package http
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
@@ -11,17 +16,17 @@ import (
 	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 func TestRoundTripperZipkin(t *testing.T) {
 	zipkin := zipkinserver.Start()
 	defer zipkin.Stop()
 
-	tracing.Start(tracing.WithEndpointURL(zipkin.URL()), tracing.WithServiceName("test-http-service"))
+	tracing.Start(
+		tracing.WithEndpointURL(zipkin.URL()),
+		tracing.WithServiceName("test-http-service"),
+		tracing.WithoutLibraryTags(),
+	)
 	defer tracing.Stop()
 
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -134,7 +139,7 @@ func TestRoundTripperZipkin(t *testing.T) {
 		}
 
 		assert.Equal("GET", *s0.Name)
-		testutil.AssertSpanWithTags(t, s0,map[string]string{
+		testutil.AssertSpanWithTags(t, s0, map[string]string{
 			"component":   "http",
 			"http.method": "GET",
 			"http.url":    "http://localhost:1/query",
@@ -193,7 +198,7 @@ func TestRoundTripper(t *testing.T) {
 	assert.Equal(t, "http.request", s1.Tag(ext.ResourceName))
 	assert.Equal(t, "200", s1.Tag(ext.HTTPCode))
 	assert.Equal(t, "GET", s1.Tag(ext.HTTPMethod))
-	assert.Equal(t, s.URL + "/hello/world", s1.Tag(ext.HTTPURL))
+	assert.Equal(t, s.URL+"/hello/world", s1.Tag(ext.HTTPURL))
 	assert.Equal(t, true, s1.Tag("CalledBefore"))
 	assert.Equal(t, true, s1.Tag("CalledAfter"))
 }

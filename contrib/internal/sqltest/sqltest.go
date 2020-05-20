@@ -70,7 +70,11 @@ func testZipkin(cfg *Config) func(t *testing.T) {
 		zipkin := zipkinserver.Start()
 		defer zipkin.Stop()
 
-		tracing.Start(tracing.WithEndpointURL(zipkin.URL()), tracing.WithServiceName("sql-service"))
+		tracing.Start(
+			tracing.WithEndpointURL(zipkin.URL()),
+			tracing.WithServiceName("sql-service"),
+			tracing.WithoutLibraryTags(),
+		)
 		defer tracing.Stop()
 
 		t.Run("error", func(t *testing.T) {
@@ -101,7 +105,7 @@ func testZipkin(cfg *Config) func(t *testing.T) {
 			})
 
 			ea := testutil.ErrorAssertion{
-				StackContains: []string{"goroutine"},
+				StackContains:  []string{"goroutine"},
 				StackMinLength: 50,
 			}
 

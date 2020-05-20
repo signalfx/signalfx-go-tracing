@@ -1,11 +1,12 @@
 package tracing
 
 import (
+	"os"
+	"strings"
+
 	"github.com/opentracing/opentracing-go"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/opentracer"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
-	"os"
-	"strings"
 )
 
 const (
@@ -16,7 +17,7 @@ const (
 )
 
 var defaults = map[string]string{
-	signalfxServiceName: "SignalFx-Tracing",
+	signalfxServiceName: "unnamed-go-service",
 	signalfxEndpointURL: "http://localhost:9080/v1/trace",
 	signalfxAccessToken: "",
 }
@@ -29,6 +30,9 @@ type config struct {
 	// or calls to WithGlobalTag, store them in the required StartOption format to
 	// call tracer.Start() in the variadic format.
 	globalTags []tracer.StartOption
+
+	// flag to disable injecting library tags
+	disableLibraryTags bool
 }
 
 // StartOption is a function that configures an option for Start
@@ -57,7 +61,7 @@ func envGlobalTags() []tracer.StartOption {
 	for _, tag := range tags {
 		// TODO: Currently this assumes "<stringb>" where "<stringa>:<stringb>" has no ":" in the
 		// string. The TODO is to fix this logic to allow for "<stringb> to have colons, ":', in it.
-		pair :=strings.Split(tag, ":")
+		pair := strings.Split(tag, ":")
 		if len(pair) == 2 {
 			key := strings.TrimSpace(pair[0])
 			value := strings.TrimSpace(pair[1])
@@ -103,6 +107,14 @@ func WithEndpointURL(url string) StartOption {
 	}
 }
 
+// WithoutLibraryTags prevents the tracer from injecting
+// tracing library metadata as span tags.
+func WithoutLibraryTags() StartOption {
+	return func(c *config) {
+		c.disableLibraryTags = true
+	}
+}
+
 // WithGlobalTag sets a tag with the given key/value on all spans created by the
 // tracer. This option may be used multiple times.
 // Note: Since the underlying transport is Zipkin, only values with strings
@@ -123,8 +135,11 @@ func Start(opts ...StartOption) {
 
 	startOptions := append(c.globalTags, tracer.WithServiceName(c.serviceName))
 	startOptions = append(startOptions, tracer.WithZipkin(c.serviceName, c.url, c.accessToken))
+	if c.disableLibraryTags {
+		startOptions = append(startOptions, tracer.WithoutLibraryTags())
+	}
 	tracer.Start(
-		startOptions...
+		startOptions...,
 	)
 
 	opentracing.SetGlobalTracer(opentracer.New())

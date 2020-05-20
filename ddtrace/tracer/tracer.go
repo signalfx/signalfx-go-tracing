@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	sfxtracing "github.com/signalfx/signalfx-go-tracing"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 )
@@ -279,6 +280,10 @@ func (t *tracer) StartSpan(operationName string, options ...ddtrace.StartSpanOpt
 		span.SetTag(ext.Pid, t.pid)
 		if t.hostname != "" {
 			span.SetTag(keyHostname, t.hostname)
+		}
+		if !t.config.disableLibraryTags {
+			span.SetTag(ext.SFXTracingLibrary, sfxtracing.LibraryName)
+			span.SetTag(ext.SFXTracingVersion, sfxtracing.Version)
 		}
 	}
 	// add tags from options
