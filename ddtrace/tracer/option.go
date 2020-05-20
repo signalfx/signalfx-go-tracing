@@ -46,6 +46,9 @@ type config struct {
 
 	// payload holds the encoder instance
 	payload encoder
+
+	// flag to disable injecting library tags
+	disableLibraryTags bool
 }
 
 // StartOption represents a function that can be provided as a parameter to Start.
@@ -156,6 +159,14 @@ func WithAnalytics(on bool) StartOption {
 func WithAnalyticsRate(rate float64) StartOption {
 	return func(_ *config) {
 		globalconfig.SetAnalyticsRate(rate)
+	}
+}
+
+// WithoutLibraryTags prevents the tracer from injecting
+// tracing library metadata as span tags.
+func WithoutLibraryTags() StartOption {
+	return func(c *config) {
+		c.disableLibraryTags = true
 	}
 }
 

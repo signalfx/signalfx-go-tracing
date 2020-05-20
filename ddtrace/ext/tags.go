@@ -99,4 +99,10 @@ const (
 
 	// Stack is a stack trace
 	Stack = "stack"
+
+	// SFXTracingLibrary specifies the SignalFx tracing library that generated the span.
+	SFXTracingLibrary = "signalfx.tracing.library"
+
+	// SFXTracingVersion specifies the SignalFx tracing library version.
+	SFXTracingVersion = "signalfx.tracing.version"
 )

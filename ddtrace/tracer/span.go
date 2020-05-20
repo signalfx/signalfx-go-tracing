@@ -4,8 +4,6 @@ package tracer
 
 import (
 	"fmt"
-	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/log"
 	"reflect"
 	"runtime"
 	"runtime/debug"
@@ -14,9 +12,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/log"
+	"github.com/tinylib/msgp/msgp"
+
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
-	"github.com/tinylib/msgp/msgp"
 )
 
 type (

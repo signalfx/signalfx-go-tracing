@@ -15,3 +15,12 @@ Fixes #113
 ```
 Please apply the same logic for Pull Requests, start with the package name, followed by a colon and a description of the change, just like
 the official [Go language](https://github.com/golang/go/pulls).
+
+
+### Releasing a new version
+
+1. Bump version number in `version.go`.
+2. Commit the change and if applicable, add release notes as the commit message.
+3. Tag the commit with the new version number prefixed by `v`. For example, if version.go container `Version = 1.2.3` then the git tag should be `v1.2.3`.
+4. Push the commit and the tag to Github. At this point the library will be published and can be downloaded by users.
+5. To document the new release, create a new release on Github for the newly pushed tag.

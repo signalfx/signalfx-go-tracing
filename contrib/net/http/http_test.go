@@ -1,18 +1,19 @@
 package http
 
 import (
-	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
-	"github.com/signalfx/signalfx-go-tracing/tracing"
-	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
+	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/mocktracer"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	"github.com/signalfx/signalfx-go-tracing/internal/globalconfig"
-	"github.com/stretchr/testify/assert"
+	"github.com/signalfx/signalfx-go-tracing/tracing"
+	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
 )
 
 func TestHttpTracer200Zipkin(t *testing.T) {

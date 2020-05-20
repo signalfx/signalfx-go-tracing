@@ -438,7 +438,11 @@ func TestWithZipkin(t *testing.T) {
 	zipkin := zipkinserver.Start()
 	defer zipkin.Stop()
 
-	tracing.Start(tracing.WithEndpointURL(zipkin.URL()), tracing.WithServiceName("test-mgo-service"))
+	tracing.Start(
+		tracing.WithEndpointURL(zipkin.URL()),
+		tracing.WithServiceName("test-mgo-service"),
+		tracing.WithoutLibraryTags(),
+	)
 	defer tracing.Stop()
 
 	session, err := Dial("localhost:27017", WithServiceName("test-mgo-service"), WithContext(context.Background()))
@@ -521,10 +525,10 @@ func TestWithZipkin(t *testing.T) {
 		})
 
 		testutil.AssertSpanWithError(t, span, testutil.ErrorAssertion{
-			KindEquals: "*mgo.QueryError",
+			KindEquals:      "*mgo.QueryError",
 			MessageContains: "Invalid namespace",
 			ObjectContains:  "&mgo.QueryError{",
-			StackContains:  []string{"goroutine"},
+			StackContains:   []string{"goroutine"},
 			StackMinLength:  50,
 		})
 	})

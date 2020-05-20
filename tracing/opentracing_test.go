@@ -2,14 +2,18 @@ package tracing
 
 import (
 	"context"
-	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/log"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
-	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
+
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/log"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	sfxtracing "github.com/signalfx/signalfx-go-tracing"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
+	"github.com/signalfx/signalfx-go-tracing/zipkinserver"
 )
 
 func Test_span_LogFields(t *testing.T) {
@@ -35,7 +39,6 @@ func Test_span_LogFields(t *testing.T) {
 	assert.Equal(`{"int":5,"str":"value"}`, *annotations[0].Value)
 	assert.Equal(`{"bool":true}`, *annotations[1].Value)
 }
-
 
 func TestOpenTracingChildSpan(t *testing.T) {
 	assert := assert.New(t)
@@ -95,6 +98,39 @@ func TestEmptyContext(t *testing.T) {
 	assert.Equal(sessionName, *spans[0].Name)
 }
 
+func TestLibraryMetadata(t *testing.T) {
+	require := require.New(t)
+
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	Start(WithEndpointURL(zipkin.URL()))
+
+	span := tracer.StartSpan("root")
+	{
+		span2 := tracer.StartSpan("inner", tracer.ChildOf(span.Context()))
+		{
+			span3 := tracer.StartSpan("inner-most", tracer.ChildOf(span2.Context()))
+			span3.Finish()
+		}
+		span2.Finish()
+	}
+	span.Finish()
+
+	tracer.ForceFlush()
+	spans := zipkin.WaitForSpans(t, 3)
+
+	rootSpan := spans[0]
+	require.Equal("root", *rootSpan.Name)
+	require.Equal(2, len(rootSpan.Tags))
+	require.Equal(sfxtracing.LibraryName, rootSpan.Tags[ext.SFXTracingLibrary])
+	require.Equal(sfxtracing.Version, rootSpan.Tags[ext.SFXTracingVersion])
+
+	for _, span := range spans[1:] {
+		require.Equal(0, len(span.Tags))
+	}
+}
+
 func TestWithGlobalTags(t *testing.T) {
 	require := require.New(t)
 
@@ -112,8 +148,8 @@ func TestWithGlobalTags(t *testing.T) {
 	spans := zipkin.WaitForSpans(t, 1)
 
 	tags := spans[0].Tags
-	require.Equal(2, len(tags))
-	require.Equal("value",tags["test"], )
+	require.Equal(4, len(tags))
+	require.Equal("value", tags["test"])
 	require.Equal("1234", tags["abc-test"])
 }
 
@@ -143,8 +179,8 @@ func TestEnvironmentVariables(t *testing.T) {
 	assert.Equal("MyService", *spans[0].LocalEndpoint.ServiceName)
 
 	tags := spans[0].Tags
-	require.Equal(5, len(tags))
-	assert.Equal("value",tags["test"])
+	require.Equal(7, len(tags))
+	assert.Equal("value", tags["test"])
 	assert.Equal("1234", tags["abc-test"])
 	assert.Equal("b", tags["a"])
 	assert.Equal("d", tags["c"])
