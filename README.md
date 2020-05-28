@@ -32,12 +32,12 @@ officially supported. You can view all the libraries in the
 
 ## Configuration values
 
-Set configuration values from environment variables or directly in your code:
+If the default configuration values don't apply for your environment, override them before running the process you instrument.
 
 | Code | Environment Variable | Default Value | Notes |
 | ---  | ---                  | ---           | ---   |
 | [WithServiceName](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#WithServiceName) | `SIGNALFX_SERVICE_NAME` | `SignalFx-Tracing` | The name of the service. |
-| [WithEndpointURL](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#WithEndpointURL) | `SIGNALFX_ENDPOINT_URL` | `http://localhost:9080/v1/trace` | The URL to send traces to.  |
+| [WithEndpointURL](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#WithEndpointURL) | `SIGNALFX_ENDPOINT_URL` | `http://localhost:9080/v1/trace` | The URL to send traces to. Send spans to a Smart Agent, OpenTelemetry Collector, or a SignalFx ingest endpoint.  |
 | [WithAccessToken](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#WithAccessToken) | `SIGNALFX_ACCESS_TOKEN` | none | The access token for your SignalFx organization. |
 | [WithGlobalTag](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#WithGlobalTag) | `SIGNALFX_SPAN_TAGS` | none | Comma-separated list of tags included in every reported span. For example, "key1:val1,key2:val2". Use only string values for tags.|
 
@@ -50,27 +50,13 @@ For more information about how to instrument a Go application, see the
 
 1. Import `github.com/signalfx/signalfx-go-tracing` to your `go mod` or `dep`
 dependencies.
-2. Specify the name of the service you're instrumenting:
-   ```bash
-    $ export SIGNALFX_SERVICE_NAME = "your_service"
-   ```
-3. If you're sending trace data to an endpoint different than `http://localhost:9080/v1/trace`,
-set the endpoint URL:
-   ```bash
-   $ export SIGNALFX_ENDPOINT_URL = "your_endpoint"
-   ```
-4. If you're sending trace data directly to a SignalFx ingest endpoint or to an
-OpenTelemetry Collector, set the access token for your SignalFx organization:
-   ```bash
-   $ export SIGNALFX_ACCESS_TOKEN = "your_access_token"
-   ```
-1. Import the instrumentor for the target library you want to instrument and
+2. Import the instrumentor for the target library you want to instrument and
 replace utilities with their traced equivalents. 
 
    Find an instrumentor for each supported target library in the [contrib](contrib)
    directory. Each instrumentor has an `example_test.go` file that demonstrates
    how to instrument a target library. Don't import examples directly in your application.
-1. Enable tracing globally with
+3. Enable tracing globally with
 [tracing.Start()](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#Start).
 This creates a tracer and registers it as the OpenTracing global tracer. 
 
