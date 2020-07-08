@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
+	"strings"
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
@@ -40,6 +42,14 @@ func TraceAndServe(h http.Handler, w http.ResponseWriter, r *http.Request, servi
 	defer span.Finish()
 
 	w = wrapResponseWriter(w, span)
+
+	if strings.EqualFold("true", os.Getenv("SIGNALFX_SERVER_TIMING_CONTEXT")) {
+		traceParent,ok := tracer.FormatAsTraceParent(span.Context())
+		if ok {
+			w.Header().Add("Access-Control-Expose-Headers", "Server-Timing")
+			w.Header().Add("Server-Timing", traceParent)
+		}
+	}
 
 	h.ServeHTTP(w, r.WithContext(ctx))
 }
