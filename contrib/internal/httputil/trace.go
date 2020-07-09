@@ -48,6 +48,7 @@ func TraceAndServe(h http.Handler, w http.ResponseWriter, r *http.Request, servi
 			w.Header().Add("Access-Control-Expose-Headers", "Server-Timing")
 			w.Header().Add("Server-Timing", traceParent)
 		}
+	}
 
 	h.ServeHTTP(w, r.WithContext(ctx))
 }
