@@ -177,12 +177,7 @@ type StartSpanOption = ddtrace.StartSpanOption
 
 // Tag sets the given key/value pair as a tag on the started Span.
 func Tag(k string, v interface{}) StartSpanOption {
-	return func(cfg *ddtrace.StartSpanConfig) {
-		if cfg.Tags == nil {
-			cfg.Tags = map[string]interface{}{}
-		}
-		cfg.Tags[k] = v
-	}
+	return ddtrace.WithTag(k, v)
 }
 
 // ServiceName sets the given service name on the started span. For example "http.server".
@@ -214,17 +209,13 @@ func WithSpanID(id uint64) StartSpanOption {
 // ChildOf tells StartSpan to use the given span context as a parent for the
 // created span.
 func ChildOf(ctx ddtrace.SpanContext) StartSpanOption {
-	return func(cfg *ddtrace.StartSpanConfig) {
-		cfg.Parent = ctx
-	}
+	return ddtrace.WithChildOf(ctx)
 }
 
 // StartTime sets a custom time as the start time for the created span. By
 // default a span is started using the creation time.
 func StartTime(t time.Time) StartSpanOption {
-	return func(cfg *ddtrace.StartSpanConfig) {
-		cfg.StartTime = t
-	}
+	return ddtrace.WithStartTime(t)
 }
 
 // FinishOption is a configuration option for FinishSpan. It is aliased in order

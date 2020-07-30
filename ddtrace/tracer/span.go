@@ -18,6 +18,7 @@ import (
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/opentracer"
 )
 
 type (
@@ -82,7 +83,9 @@ func (s *span) LogKV(alternatingKeyValues ...interface{}) {
 
 // Tracer returns the global tracer
 func (s *span) Tracer() opentracing.Tracer {
-	return ddtrace.GetGlobalTracer().(opentracing.Tracer)
+	// return ddtrace.GetGlobalTracer() wrapped to make it
+	// a compatible opentracing Tracer
+	return opentracer.New()
 }
 
 // LogFields field to span
