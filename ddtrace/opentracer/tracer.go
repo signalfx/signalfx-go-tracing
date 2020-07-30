@@ -17,7 +17,6 @@ package opentracer
 import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 )
 
 // New creates, instantiates and returns an Opentracing compatible version of the
@@ -37,15 +36,15 @@ func (t *opentracer) StartSpan(operationName string, options ...opentracing.Star
 	for _, o := range options {
 		o.Apply(&sso)
 	}
-	opts := []ddtrace.StartSpanOption{tracer.StartTime(sso.StartTime)}
+	opts := []ddtrace.StartSpanOption{ddtrace.WithStartTime(sso.StartTime)}
 	for _, ref := range sso.References {
 		if v, ok := ref.ReferencedContext.(ddtrace.SpanContext); ok && ref.Type == opentracing.ChildOfRef {
-			opts = append(opts, tracer.ChildOf(v))
+			opts = append(opts, ddtrace.WithChildOf(v))
 			break // can only have one parent
 		}
 	}
 	for k, v := range sso.Tags {
-		opts = append(opts, tracer.Tag(k, v))
+		opts = append(opts, ddtrace.WithTag(k, v))
 	}
 	return t.Tracer.StartSpan(operationName, opts...)
 }
