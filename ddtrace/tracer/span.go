@@ -82,7 +82,7 @@ func (s *span) LogKV(alternatingKeyValues ...interface{}) {
 
 // Tracer returns the global tracer
 func (s *span) Tracer() opentracing.Tracer {
-	return ddtrace.GetGlobalTracer().(opentracing.Tracer)
+	return opentracing.GlobalTracer()
 }
 
 // LogFields field to span
