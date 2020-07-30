@@ -27,7 +27,7 @@ type Tracer interface {
 	Extract(format, carrier interface{}) (SpanContext, error)
 
 	// Inject injects a span context into the given carrier.
-	Inject(context SpanContext, carrier interface{}) error
+	Inject(context SpanContext, format interface{}, carrier interface{}) error
 
 	// Stop stops the active tracer and sets the global tracer to a no-op. Calls to
 	// Stop should be idempotent.

@@ -139,7 +139,7 @@ func (t *mocktracer) Extract(format, carrier interface{}) (ddtrace.SpanContext, 
 	return &sc, err
 }
 
-func (t *mocktracer) Inject(context ddtrace.SpanContext, carrier interface{}) error {
+func (t *mocktracer) Inject(context ddtrace.SpanContext, format interface{}, carrier interface{}) error {
 	writer, ok := carrier.(tracer.TextMapWriter)
 	if !ok {
 		return tracer.ErrInvalidCarrier

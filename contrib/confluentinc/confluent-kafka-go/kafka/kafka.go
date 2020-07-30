@@ -98,7 +98,7 @@ func (c *Consumer) startSpan(msg *kafka.Message) ddtrace.Span {
 	}
 	span, _ := tracer.StartSpanFromContext(c.cfg.ctx, "kafka.consume", opts...)
 	// reinject the span context so consumers can pick it up
-	tracer.Inject(span.Context(), carrier)
+	tracer.Inject(span.Context(), opentracing.TextMap, carrier)
 	return span
 }
 
@@ -183,7 +183,7 @@ func (p *Producer) startSpan(msg *kafka.Message) ddtrace.Span {
 	carrier := NewMessageCarrier(msg)
 	span, _ := tracer.StartSpanFromContext(p.cfg.ctx, "kafka.produce", opts...)
 	// inject the span context so consumers can pick it up
-	tracer.Inject(span.Context(), carrier)
+	tracer.Inject(span.Context(), opentracing.TextMap, carrier)
 	return span
 }
 

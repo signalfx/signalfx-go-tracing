@@ -137,7 +137,7 @@ func TestTextMapPropagatorInjectHeader(t *testing.T) {
 	headers := http.Header{}
 
 	carrier := HTTPHeadersCarrier(headers)
-	err := tracer.Inject(ctx, carrier)
+	err := tracer.Inject(ctx, opentracing.TextMap, carrier)
 	assert.Nil(err)
 
 	tid := strconv.FormatUint(root.TraceID, 10)
@@ -172,7 +172,7 @@ func TestTextMapPropagatorOrigin(t *testing.T) {
 		t.Fatalf("didn't propagate origin, got: %q", sctx.origin)
 	}
 	dst := map[string]string{}
-	if err := tracer.Inject(ctx, TextMapCarrier(dst)); err != nil {
+	if err := tracer.Inject(ctx, opentracing.TextMap, TextMapCarrier(dst)); err != nil {
 		t.Fatal(err)
 	}
 	if dst[originHeader] != "synthetics" {
@@ -196,7 +196,7 @@ func TestTextMapPropagatorInjectExtract(t *testing.T) {
 	root.SetBaggageItem("item", "x")
 	ctx := root.Context().(*spanContext)
 	headers := TextMapCarrier(map[string]string{})
-	err := tracer.Inject(ctx, headers)
+	err := tracer.Inject(ctx, opentracing.TextMap, headers)
 
 	assert := assert.New(t)
 	assert.Nil(err)
@@ -220,7 +220,7 @@ func TestB3(t *testing.T) {
 		root.SetBaggageItem("item", "x")
 		ctx := root.Context().(*spanContext)
 		headers := TextMapCarrier(map[string]string{})
-		err := tracer.Inject(ctx, headers)
+		err := tracer.Inject(ctx, opentracing.TextMap, headers)
 
 		assert := assert.New(t)
 		assert.Nil(err)

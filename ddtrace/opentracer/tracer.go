@@ -58,7 +58,7 @@ func (t *opentracer) Inject(ctx opentracing.SpanContext, format interface{}, car
 	}
 	switch format {
 	case opentracing.TextMap, opentracing.HTTPHeaders:
-		return t.Tracer.Inject(sctx, carrier)
+		return t.Tracer.Inject(sctx, format, carrier)
 	default:
 		return opentracing.ErrUnsupportedFormat
 	}

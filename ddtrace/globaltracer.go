@@ -57,7 +57,9 @@ func (NoopTracer) Extract(format, carrier interface{}) (SpanContext, error) {
 }
 
 // Inject implements ddtrace.Tracer.
-func (NoopTracer) Inject(context SpanContext, carrier interface{}) error { return nil }
+func (NoopTracer) Inject(context SpanContext, format interface{}, carrier interface{}) error {
+	return nil
+}
 
 // Stop implements ddtrace.Tracer.
 func (NoopTracer) Stop() {}

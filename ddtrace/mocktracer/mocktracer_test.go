@@ -104,16 +104,16 @@ func TestTracerInject(t *testing.T) {
 		var mt mocktracer
 		assert := assert.New(t)
 
-		err := mt.Inject(&spanContext{}, 2)
+		err := mt.Inject(&spanContext{}, opentracing.TextMap, 2)
 		assert.Equal(tracer.ErrInvalidCarrier, err) // 2 is not a carrier
 
-		err = mt.Inject(&spanContext{}, tracer.TextMapCarrier(map[string]string{}))
+		err = mt.Inject(&spanContext{}, opentracing.TextMap, tracer.TextMapCarrier(map[string]string{}))
 		assert.Equal(tracer.ErrInvalidSpanContext, err) // no traceID and spanID
 
-		err = mt.Inject(&spanContext{traceID: 2}, tracer.TextMapCarrier(map[string]string{}))
+		err = mt.Inject(&spanContext{traceID: 2}, opentracing.TextMap, tracer.TextMapCarrier(map[string]string{}))
 		assert.Equal(tracer.ErrInvalidSpanContext, err) // no spanID
 
-		err = mt.Inject(&spanContext{traceID: 2, spanID: 1}, tracer.TextMapCarrier(map[string]string{}))
+		err = mt.Inject(&spanContext{traceID: 2, spanID: 1}, opentracing.TextMap, tracer.TextMapCarrier(map[string]string{}))
 		assert.Nil(err) // ok
 	})
 
@@ -126,7 +126,7 @@ func TestTracerInject(t *testing.T) {
 			baggage:     map[string]string{"A": "B", "C": "D"},
 		}
 		carrier := make(map[string]string)
-		err := (&mocktracer{}).Inject(sctx, tracer.TextMapCarrier(carrier))
+		err := (&mocktracer{}).Inject(sctx, opentracing.TextMap, tracer.TextMapCarrier(carrier))
 
 		assert := assert.New(t)
 		assert.Nil(err)
@@ -223,7 +223,7 @@ func TestTracerExtract(t *testing.T) {
 		assert := assert.New(t)
 		want := &spanContext{traceID: 1, spanID: 2, baggage: map[string]string{"a": "B", "C": "D"}}
 		mc := tracer.TextMapCarrier(make(map[string]string))
-		err := mt.Inject(want, mc)
+		err := mt.Inject(want, opentracing.TextMap, opentracing.TextMap, mc)
 		assert.Nil(err)
 		sc, err := mt.Extract(opentracing.TextMap, mc)
 		assert.Nil(err)

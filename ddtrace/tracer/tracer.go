@@ -105,8 +105,8 @@ func Extract(format, carrier interface{}) (ddtrace.SpanContext, error) {
 // Inject injects the given SpanContext into the carrier. The carrier is
 // expected to implement TextMapWriter, otherwise an error is returned.
 // If the tracer is not started, calling this function is a no-op.
-func Inject(ctx ddtrace.SpanContext, carrier interface{}) error {
-	return ddtrace.GetGlobalTracer().Inject(ctx, carrier)
+func Inject(ctx ddtrace.SpanContext, format interface{}, carrier interface{}) error {
+	return ddtrace.GetGlobalTracer().Inject(ctx, format, carrier)
 }
 
 const (
@@ -315,8 +315,13 @@ func (t *tracer) Stop() {
 }
 
 // Inject uses the configured or default TextMap Propagator.
-func (t *tracer) Inject(ctx ddtrace.SpanContext, carrier interface{}) error {
-	return t.config.propagator.Inject(ctx, carrier)
+func (t *tracer) Inject(ctx ddtrace.SpanContext, format interface{}, carrier interface{}) error {
+	if f, ok := format.(opentracing.BuiltinFormat); ok {
+		if f == opentracing.TextMap {
+			return t.config.propagator.Inject(ctx, carrier)
+		}
+	}
+	return fmt.Errorf("Inject only supports opentracing.TextMap format at the moment")
 }
 
 // Extract uses the configured or default TextMap Propagator.

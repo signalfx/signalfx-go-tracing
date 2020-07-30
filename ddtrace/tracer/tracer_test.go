@@ -269,7 +269,7 @@ func TestStartSpanOrigin(t *testing.T) {
 
 	// but injecting its context marks origin
 	carrier2 := TextMapCarrier(map[string]string{})
-	err = tracer.Inject(child2.Context(), carrier2)
+	err = tracer.Inject(child2.Context(), opentracing.TextMap, carrier2)
 	assert.Nil(err)
 	assert.Equal("synthetics", carrier2[originHeader])
 }
@@ -313,7 +313,7 @@ func TestSupportedPropagationFormat(t *testing.T) {
 
 	// but injecting its context marks origin
 	carrier2 := TextMapCarrier(map[string]string{})
-	err = tracer.Inject(child2.Context(), carrier2)
+	err = tracer.Inject(child2.Context(), opentracing.TextMap, carrier2)
 	assert.Nil(err)
 	assert.Equal("synthetics", carrier2[originHeader])
 }
@@ -533,7 +533,7 @@ func TestTracerPrioritySampler(t *testing.T) {
 
 		// injectable
 		h := make(http.Header)
-		tr.Inject(s.Context(), HTTPHeadersCarrier(h))
+		tr.Inject(s.Context(), opentracing.TextMap, HTTPHeadersCarrier(h))
 		assert.Equal(strconv.Itoa(int(prio)), h.Get(DefaultPriorityHeader))
 	}
 }
@@ -980,7 +980,7 @@ func TestTracerFlush(t *testing.T) {
 		assert := assert.New(t)
 		root := tracer.StartSpan("root")
 		h := HTTPHeadersCarrier(http.Header{})
-		if err := tracer.Inject(root.Context(), h); err != nil {
+		if err := tracer.Inject(root.Context(), opentracing.TextMap, h); err != nil {
 			t.Fatal(err)
 		}
 		sctx, err := tracer.Extract(opentracing.TextMap, h)
