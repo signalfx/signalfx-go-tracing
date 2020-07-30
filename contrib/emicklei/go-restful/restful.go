@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/emicklei/go-restful"
+	"github.com/opentracing/opentracing-go"
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
@@ -28,7 +29,7 @@ func FilterFunc(configOpts ...Option) restful.FilterFunction {
 		if cfg.analyticsRate > 0 {
 			opts = append(opts, tracer.Tag(ext.EventSampleRate, cfg.analyticsRate))
 		}
-		if spanctx, err := tracer.Extract(tracer.HTTPHeadersCarrier(req.Request.Header)); err == nil {
+		if spanctx, err := tracer.Extract(opentracing.TextMap, tracer.HTTPHeadersCarrier(req.Request.Header)); err == nil {
 			opts = append(opts, tracer.ChildOf(spanctx))
 		}
 		span, ctx := tracer.StartSpanFromContext(req.Request.Context(), "http.request", opts...)
@@ -52,7 +53,7 @@ func Filter(req *restful.Request, resp *restful.Response, chain *restful.FilterC
 		tracer.Tag(ext.HTTPMethod, req.Request.Method),
 		tracer.Tag(ext.HTTPURL, req.Request.URL.Path),
 	}
-	if spanctx, err := tracer.Extract(tracer.HTTPHeadersCarrier(req.Request.Header)); err == nil {
+	if spanctx, err := tracer.Extract(opentracing.TextMap, tracer.HTTPHeadersCarrier(req.Request.Header)); err == nil {
 		opts = append(opts, tracer.ChildOf(spanctx))
 	}
 	span, ctx := tracer.StartSpanFromContext(req.Request.Context(), "http.request", opts...)

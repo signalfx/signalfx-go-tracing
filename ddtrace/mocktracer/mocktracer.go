@@ -95,7 +95,7 @@ const (
 	baggagePrefix  = tracer.DefaultBaggageHeaderPrefix
 )
 
-func (t *mocktracer) Extract(carrier interface{}) (ddtrace.SpanContext, error) {
+func (t *mocktracer) Extract(format, carrier interface{}) (ddtrace.SpanContext, error) {
 	reader, ok := carrier.(tracer.TextMapReader)
 	if !ok {
 		return nil, tracer.ErrInvalidCarrier

@@ -5,10 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/opentracing/opentracing-go"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/mocktracer"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
+	"github.com/stretchr/testify/assert"
 	sarama "gopkg.in/Shopify/sarama.v1"
 )
 
@@ -59,7 +60,7 @@ func TestConsumer(t *testing.T) {
 	assert.Len(t, spans, 2)
 	{
 		s := spans[0]
-		spanctx, err := tracer.Extract(NewConsumerMessageCarrier(msg1))
+		spanctx, err := tracer.Extract(opentracing.TextMap, NewConsumerMessageCarrier(msg1))
 		assert.NotNil(t, spanctx)
 		assert.NoError(t, err)
 		//assert.Equal(t, spanctx.TraceID(), s.TraceID(),
@@ -74,7 +75,7 @@ func TestConsumer(t *testing.T) {
 	}
 	{
 		s := spans[1]
-		spanctx, err := tracer.Extract(NewConsumerMessageCarrier(msg2))
+		spanctx, err := tracer.Extract(opentracing.TextMap, NewConsumerMessageCarrier(msg2))
 		assert.NoError(t, err)
 		assert.NotNil(t, spanctx)
 		//assert.Equal(t, spanctx.TraceID(), s.TraceID(),

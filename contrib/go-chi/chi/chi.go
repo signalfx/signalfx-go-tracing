@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/opentracing/opentracing-go"
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
@@ -32,7 +33,7 @@ func Middleware(opts ...Option) func(next http.Handler) http.Handler {
 			if cfg.analyticsRate > 0 {
 				opts = append(opts, tracer.Tag(ext.EventSampleRate, cfg.analyticsRate))
 			}
-			if spanctx, err := tracer.Extract(tracer.HTTPHeadersCarrier(r.Header)); err == nil {
+			if spanctx, err := tracer.Extract(opentracing.TextMap, tracer.HTTPHeadersCarrier(r.Header)); err == nil {
 				opts = append(opts, tracer.ChildOf(spanctx))
 			}
 			opts = append(opts, cfg.spanOpts...)

@@ -2,11 +2,13 @@ package tracer
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
 	"time"
 
+	"github.com/opentracing/opentracing-go"
 	sfxtracing "github.com/signalfx/signalfx-go-tracing"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
@@ -96,8 +98,8 @@ func StartSpan(operationName string, opts ...StartSpanOption) ddtrace.Span {
 // Extract extracts a SpanContext from the carrier. The carrier is expected
 // to implement TextMapReader, otherwise an error is returned.
 // If the tracer is not started, calling this function is a no-op.
-func Extract(carrier interface{}) (ddtrace.SpanContext, error) {
-	return ddtrace.GetGlobalTracer().Extract(carrier)
+func Extract(format, carrier interface{}) (ddtrace.SpanContext, error) {
+	return ddtrace.GetGlobalTracer().Extract(format, carrier)
 }
 
 // Inject injects the given SpanContext into the carrier. The carrier is
@@ -318,8 +320,13 @@ func (t *tracer) Inject(ctx ddtrace.SpanContext, carrier interface{}) error {
 }
 
 // Extract uses the configured or default TextMap Propagator.
-func (t *tracer) Extract(carrier interface{}) (ddtrace.SpanContext, error) {
-	return t.config.propagator.Extract(carrier)
+func (t *tracer) Extract(format, carrier interface{}) (ddtrace.SpanContext, error) {
+	if f, ok := format.(opentracing.BuiltinFormat); ok {
+		if f == opentracing.TextMap {
+			return t.config.propagator.Extract(carrier)
+		}
+	}
+	return nil, fmt.Errorf("Extract only supports opentracing.TextMap format at the moment")
 }
 
 // flushTraces will push any currently buffered traces to the server.

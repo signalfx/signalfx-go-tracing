@@ -9,8 +9,9 @@
 package ddtrace // import "github.com/signalfx/signalfx-go-tracing/ddtrace"
 
 import (
-	"github.com/opentracing/opentracing-go"
 	"time"
+
+	"github.com/opentracing/opentracing-go"
 )
 
 // Tracer specifies an implementation of the Datadog tracer which allows starting
@@ -23,7 +24,7 @@ type Tracer interface {
 	// Extract extracts a span context from a given carrier. Note that baggage item
 	// keys will always be lower-cased to maintain consistency. It is impossible to
 	// maintain the original casing due to MIME header canonicalization standards.
-	Extract(carrier interface{}) (SpanContext, error)
+	Extract(format, carrier interface{}) (SpanContext, error)
 
 	// Inject injects a span context into the given carrier.
 	Inject(context SpanContext, carrier interface{}) error

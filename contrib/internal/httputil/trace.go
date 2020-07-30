@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
@@ -18,10 +19,10 @@ import (
 // TraceAndServe will apply tracing to the given http.Handler using the passed tracer under the given service and resource.
 func TraceAndServe(h http.Handler, w http.ResponseWriter, r *http.Request, service, resource string, spanopts ...ddtrace.StartSpanOption) {
 	originalURL := url.URL{
-		Scheme: "http",
-		Host: r.Host,
-		RawPath: r.URL.RawPath,
-		Path: r.URL.Path,
+		Scheme:   "http",
+		Host:     r.Host,
+		RawPath:  r.URL.RawPath,
+		Path:     r.URL.Path,
 		RawQuery: r.URL.RawQuery,
 	}
 	if r.TLS != nil {
@@ -35,7 +36,7 @@ func TraceAndServe(h http.Handler, w http.ResponseWriter, r *http.Request, servi
 		tracer.Tag(ext.HTTPMethod, r.Method),
 		tracer.Tag(ext.HTTPURL, originalURL.String()),
 	}, spanopts...)
-	if spanctx, err := tracer.Extract(tracer.HTTPHeadersCarrier(r.Header)); err == nil {
+	if spanctx, err := tracer.Extract(opentracing.TextMap, tracer.HTTPHeadersCarrier(r.Header)); err == nil {
 		opts = append(opts, tracer.ChildOf(spanctx))
 	}
 	span, ctx := tracer.StartSpanFromContext(r.Context(), "http.request", opts...)

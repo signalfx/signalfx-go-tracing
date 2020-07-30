@@ -7,6 +7,7 @@ import (
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/opentracing/opentracing-go"
 )
 
 // NewConsumer calls kafka.NewConsumer and wraps the resulting Consumer.
@@ -92,7 +93,7 @@ func (c *Consumer) startSpan(msg *kafka.Message) ddtrace.Span {
 	}
 	// kafka supports headers, so try to extract a span context
 	carrier := NewMessageCarrier(msg)
-	if spanctx, err := tracer.Extract(carrier); err == nil {
+	if spanctx, err := tracer.Extract(opentracing.TextMap, carrier); err == nil {
 		opts = append(opts, tracer.ChildOf(spanctx))
 	}
 	span, _ := tracer.StartSpanFromContext(c.cfg.ctx, "kafka.consume", opts...)

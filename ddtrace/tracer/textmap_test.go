@@ -3,11 +3,13 @@ package tracer
 
 import (
 	"errors"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"net/http"
 	"os"
 	"strconv"
 	"testing"
+
+	"github.com/opentracing/opentracing-go"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/stretchr/testify/assert"
@@ -158,7 +160,7 @@ func TestTextMapPropagatorOrigin(t *testing.T) {
 		DefaultParentIDHeader: "1",
 	})
 	tracer := newTracer()
-	ctx, err := tracer.Extract(src)
+	ctx, err := tracer.Extract(opentracing.TextMap, src)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -199,7 +201,7 @@ func TestTextMapPropagatorInjectExtract(t *testing.T) {
 	assert := assert.New(t)
 	assert.Nil(err)
 
-	sctx, err := tracer.Extract(headers)
+	sctx, err := tracer.Extract(opentracing.TextMap, headers)
 	assert.Nil(err)
 
 	xctx, ok := sctx.(*spanContext)
@@ -236,7 +238,7 @@ func TestB3(t *testing.T) {
 
 		tracer := newTracer()
 		assert := assert.New(t)
-		ctx, err := tracer.Extract(headers)
+		ctx, err := tracer.Extract(opentracing.TextMap, headers)
 		assert.Nil(err)
 		sctx, ok := ctx.(*spanContext)
 		assert.True(ok)
@@ -258,7 +260,7 @@ func TestB3(t *testing.T) {
 		tracer := newTracer()
 		assert := assert.New(t)
 
-		ctx, err := tracer.Extract(b3Headers)
+		ctx, err := tracer.Extract(opentracing.TextMap, b3Headers)
 		assert.Nil(err)
 		sctx, ok := ctx.(*spanContext)
 		assert.True(ok)
@@ -274,7 +276,7 @@ func TestB3(t *testing.T) {
 			DefaultPriorityHeader: "2",
 		})
 
-		ctx, err = tracer.Extract(ddHeaders)
+		ctx, err = tracer.Extract(opentracing.TextMap, ddHeaders)
 		assert.Nil(err)
 		sctx, ok = ctx.(*spanContext)
 		assert.True(ok)

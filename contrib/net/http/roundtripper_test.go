@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
@@ -30,7 +31,7 @@ func TestRoundTripperZipkin(t *testing.T) {
 	defer tracing.Stop()
 
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		spanctx, err := tracer.Extract(tracer.HTTPHeadersCarrier(r.Header))
+		spanctx, err := tracer.Extract(opentracing.TextMap, tracer.HTTPHeadersCarrier(r.Header))
 		if err != nil {
 			// Can't call test functions from different goroutine.
 			panic("inject failed: " + err.Error())
@@ -160,7 +161,7 @@ func TestRoundTripper(t *testing.T) {
 	defer mt.Stop()
 
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		spanctx, err := tracer.Extract(tracer.HTTPHeadersCarrier(r.Header))
+		spanctx, err := tracer.Extract(opentracing.TextMap, tracer.HTTPHeadersCarrier(r.Header))
 		assert.NoError(t, err)
 
 		span := tracer.StartSpan("test",

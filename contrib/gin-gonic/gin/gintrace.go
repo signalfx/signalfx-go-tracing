@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
@@ -32,7 +33,7 @@ func Middleware(service string, opts ...Option) gin.HandlerFunc {
 		if cfg.analyticsRate > 0 {
 			opts = append(opts, tracer.Tag(ext.EventSampleRate, cfg.analyticsRate))
 		}
-		if spanctx, err := tracer.Extract(tracer.HTTPHeadersCarrier(c.Request.Header)); err == nil {
+		if spanctx, err := tracer.Extract(opentracing.TextMap, tracer.HTTPHeadersCarrier(c.Request.Header)); err == nil {
 			opts = append(opts, tracer.ChildOf(spanctx))
 		}
 		span, ctx := tracer.StartSpanFromContext(c.Request.Context(), operationName, opts...)

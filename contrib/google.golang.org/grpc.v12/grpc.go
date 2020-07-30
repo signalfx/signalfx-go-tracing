@@ -6,6 +6,7 @@ package grpc // import "github.com/signalfx/signalfx-go-tracing/contrib/google.g
 import (
 	"net"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/internal/grpcutil"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
@@ -46,7 +47,7 @@ func startSpanFromContext(ctx context.Context, method, service string, rate floa
 		opts = append(opts, tracer.Tag(ext.EventSampleRate, rate))
 	}
 	md, _ := metadata.FromContext(ctx) // nil is ok
-	if sctx, err := tracer.Extract(grpcutil.MDCarrier(md)); err == nil {
+	if sctx, err := tracer.Extract(opentracing.TextMap, grpcutil.MDCarrier(md)); err == nil {
 		opts = append(opts, tracer.ChildOf(sctx))
 	}
 	return tracer.StartSpanFromContext(ctx, "grpc.server", opts...)

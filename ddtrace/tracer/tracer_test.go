@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/stretchr/testify/assert"
@@ -255,7 +256,51 @@ func TestStartSpanOrigin(t *testing.T) {
 		DefaultParentIDHeader: "1",
 		originHeader:          "synthetics",
 	})
-	ctx, err := tracer.Extract(carrier)
+	ctx, err := tracer.Extract(opentracing.TextMap, carrier)
+	assert.Nil(err)
+
+	// first child contains tag
+	child := tracer.StartSpan("child", ChildOf(ctx))
+	assert.Equal("synthetics", child.(*span).Meta[keyOrigin])
+
+	// secondary child doesn't
+	child2 := tracer.StartSpan("child2", ChildOf(child.Context()))
+	assert.Empty(child2.(*span).Meta[keyOrigin])
+
+	// but injecting its context marks origin
+	carrier2 := TextMapCarrier(map[string]string{})
+	err = tracer.Inject(child2.Context(), carrier2)
+	assert.Nil(err)
+	assert.Equal("synthetics", carrier2[originHeader])
+}
+
+func TestSupportedPropagationFormat(t *testing.T) {
+	os.Setenv("DD_PROPAGATION_STYLE_INJECT", "Datadog")
+	os.Setenv("DD_PROPAGATION_STYLE_EXTRACT", "Datadog")
+	defer os.Unsetenv("DD_PROPAGATION_STYLE_INJECT")
+	defer os.Unsetenv("DD_PROPAGATION_STYLE_EXTRACT")
+	assert := assert.New(t)
+
+	tracer := newTracer()
+
+	carrier := TextMapCarrier(map[string]string{
+		DefaultTraceIDHeader:  "1",
+		DefaultParentIDHeader: "1",
+		originHeader:          "synthetics",
+	})
+	ctx, err := tracer.Extract(opentracing.HTTPHeaders, carrier)
+	assert.NotNil(err)
+	assert.EqualError(err, "Extract only supports opentracing.TextMap format at the moment")
+
+	ctx, err = tracer.Extract(opentracing.Binary, carrier)
+	assert.NotNil(err)
+	assert.EqualError(err, "Extract only supports opentracing.TextMap format at the moment")
+
+	ctx, err = tracer.Extract("invalid-format", carrier)
+	assert.NotNil(err)
+	assert.EqualError(err, "Extract only supports opentracing.TextMap format at the moment")
+
+	ctx, err = tracer.Extract(opentracing.TextMap, carrier)
 	assert.Nil(err)
 
 	// first child contains tag
@@ -297,7 +342,7 @@ func TestPropagationDefaults(t *testing.T) {
 	assert.Equal(headers.Get(b3SampledHeader), "0")
 
 	// retrieve the spanContext
-	propagated, err := tracer.Extract(carrier)
+	propagated, err := tracer.Extract(opentracing.TextMap, carrier)
 	assert.Nil(err)
 	pctx := propagated.(*spanContext)
 
@@ -858,12 +903,12 @@ func TestPushTrace(t *testing.T) {
 
 	tracer := newTracerChannels()
 	trace := []*span{
-		&span{
+		{
 			Name:     "pylons.request",
 			Service:  "pylons",
 			Resource: "/",
 		},
-		&span{
+		{
 			Name:     "pylons.request",
 			Service:  "pylons",
 			Resource: "/foo",
@@ -938,7 +983,7 @@ func TestTracerFlush(t *testing.T) {
 		if err := tracer.Inject(root.Context(), h); err != nil {
 			t.Fatal(err)
 		}
-		sctx, err := tracer.Extract(h)
+		sctx, err := tracer.Extract(opentracing.TextMap, h)
 		if err != nil {
 			t.Fatal(err)
 		}

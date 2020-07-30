@@ -2,6 +2,7 @@
 package sarama // import "github.com/signalfx/signalfx-go-tracing/contrib/Shopify/sarama"
 
 import (
+	"github.com/opentracing/opentracing-go"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
@@ -49,7 +50,7 @@ func WrapPartitionConsumer(pc sarama.PartitionConsumer, opts ...Option) sarama.P
 			}
 			// kafka supports headers, so try to extract a span context
 			carrier := NewConsumerMessageCarrier(msg)
-			if spanctx, err := tracer.Extract(carrier); err == nil {
+			if spanctx, err := tracer.Extract(opentracing.TextMap, carrier); err == nil {
 				opts = append(opts, tracer.ChildOf(spanctx))
 			}
 			next := tracer.StartSpan("kafka.consume", opts...)
@@ -246,7 +247,7 @@ func startProducerSpan(cfg *config, version sarama.KafkaVersion, msg *sarama.Pro
 		opts = append(opts, tracer.Tag(ext.EventSampleRate, cfg.analyticsRate))
 	}
 	// if there's a span context in the headers, use that as the parent
-	if spanctx, err := tracer.Extract(carrier); err == nil {
+	if spanctx, err := tracer.Extract(opentracing.TextMap, carrier); err == nil {
 		opts = append(opts, tracer.ChildOf(spanctx))
 	}
 	span := tracer.StartSpan("kafka.produce", opts...)

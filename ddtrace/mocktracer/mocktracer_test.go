@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
@@ -177,40 +178,40 @@ func TestTracerExtract(t *testing.T) {
 	t.Run("errors", func(t *testing.T) {
 		assert := assert.New(t)
 
-		_, err := mt.Extract(2)
+		_, err := mt.Extract(opentracing.TextMap, 2)
 		assert.Equal(tracer.ErrInvalidCarrier, err)
 
-		_, err = mt.Extract(carry(traceHeader, "a"))
+		_, err = mt.Extract(opentracing.TextMap, carry(traceHeader, "a"))
 		assert.Equal(tracer.ErrSpanContextCorrupted, err)
 
-		_, err = mt.Extract(carry(spanHeader, "a", traceHeader, "2", baggagePrefix+"x", "y"))
+		_, err = mt.Extract(opentracing.TextMap, carry(spanHeader, "a", traceHeader, "2", baggagePrefix+"x", "y"))
 		assert.Equal(tracer.ErrSpanContextCorrupted, err)
 
-		_, err = mt.Extract(carry(spanHeader, "1"))
+		_, err = mt.Extract(opentracing.TextMap, carry(spanHeader, "1"))
 		assert.Equal(tracer.ErrSpanContextNotFound, err)
 
-		_, err = mt.Extract(carry())
+		_, err = mt.Extract(opentracing.TextMap, carry())
 		assert.Equal(tracer.ErrSpanContextNotFound, err)
 	})
 
 	t.Run("ok", func(t *testing.T) {
 		assert := assert.New(t)
 
-		ctx, err := mt.Extract(carry(traceHeader, "1", spanHeader, "2"))
+		ctx, err := mt.Extract(opentracing.TextMap, carry(traceHeader, "1", spanHeader, "2"))
 		assert.Nil(err)
 		sc, ok := ctx.(*spanContext)
 		assert.True(ok)
 		assert.Equal(uint64(1), sc.traceID)
 		assert.Equal(uint64(2), sc.spanID)
 
-		ctx, err = mt.Extract(carry(traceHeader, "1", spanHeader, "2", baggagePrefix+"A", "B", baggagePrefix+"C", "D"))
+		ctx, err = mt.Extract(opentracing.TextMap, carry(traceHeader, "1", spanHeader, "2", baggagePrefix+"A", "B", baggagePrefix+"C", "D"))
 		assert.Nil(err)
 		sc, ok = ctx.(*spanContext)
 		assert.True(ok)
 		assert.Equal("B", sc.baggageItem("a"))
 		assert.Equal("D", sc.baggageItem("c"))
 
-		ctx, err = mt.Extract(carry(traceHeader, "1", spanHeader, "2", priorityHeader, "-1"))
+		ctx, err = mt.Extract(opentracing.TextMap, carry(traceHeader, "1", spanHeader, "2", priorityHeader, "-1"))
 		assert.Nil(err)
 		sc, ok = ctx.(*spanContext)
 		assert.True(ok)
@@ -224,7 +225,7 @@ func TestTracerExtract(t *testing.T) {
 		mc := tracer.TextMapCarrier(make(map[string]string))
 		err := mt.Inject(want, mc)
 		assert.Nil(err)
-		sc, err := mt.Extract(mc)
+		sc, err := mt.Extract(opentracing.TextMap, mc)
 		assert.Nil(err)
 		got, ok := sc.(*spanContext)
 		assert.True(ok)

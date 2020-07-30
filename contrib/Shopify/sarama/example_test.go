@@ -3,6 +3,7 @@ package sarama_test
 import (
 	"log"
 
+	"github.com/opentracing/opentracing-go"
 	saramatrace "github.com/signalfx/signalfx-go-tracing/contrib/Shopify/sarama"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	sarama "gopkg.in/Shopify/sarama.v1"
@@ -66,7 +67,7 @@ func Example_consumer() {
 	consumed := 0
 	for msg := range partitionConsumer.Messages() {
 		// if you want to use the kafka message as a parent span:
-		if spanctx, err := tracer.Extract(saramatrace.NewConsumerMessageCarrier(msg)); err == nil {
+		if spanctx, err := tracer.Extract(opentracing.TextMap, saramatrace.NewConsumerMessageCarrier(msg)); err == nil {
 			// you can create a span using ChildOf(spanctx)
 			_ = spanctx
 		}

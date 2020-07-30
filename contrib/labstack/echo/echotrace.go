@@ -4,6 +4,7 @@ package echo
 import (
 	"strconv"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
@@ -32,7 +33,7 @@ func Middleware(opts ...Option) echo.MiddlewareFunc {
 				tracer.Tag(ext.HTTPURL, utils.GetURL(request)),
 			}
 
-			if spanctx, err := tracer.Extract(tracer.HTTPHeadersCarrier(request.Header)); err == nil {
+			if spanctx, err := tracer.Extract(opentracing.TextMap, tracer.HTTPHeadersCarrier(request.Header)); err == nil {
 				opts = append(opts, tracer.ChildOf(spanctx))
 			}
 			span, ctx := tracer.StartSpanFromContext(request.Context(), operationName, opts...)
