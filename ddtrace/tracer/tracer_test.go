@@ -330,7 +330,7 @@ func TestPropagationDefaults(t *testing.T) {
 
 	// inject the spanContext
 	carrier := HTTPHeadersCarrier(headers)
-	err := tracer.Inject(ctx, carrier)
+	err := tracer.Inject(ctx, opentracing.TextMap, carrier)
 	assert.Nil(err)
 
 	tid := strconv.FormatUint(root.TraceID, 16)

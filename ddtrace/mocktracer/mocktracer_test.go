@@ -223,7 +223,7 @@ func TestTracerExtract(t *testing.T) {
 		assert := assert.New(t)
 		want := &spanContext{traceID: 1, spanID: 2, baggage: map[string]string{"a": "B", "C": "D"}}
 		mc := tracer.TextMapCarrier(make(map[string]string))
-		err := mt.Inject(want, opentracing.TextMap, opentracing.TextMap, mc)
+		err := mt.Inject(want, opentracing.TextMap, mc)
 		assert.Nil(err)
 		sc, err := mt.Extract(opentracing.TextMap, mc)
 		assert.Nil(err)
