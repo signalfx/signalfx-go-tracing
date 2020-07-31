@@ -103,6 +103,7 @@ func (c *Pipeliner) execWithContext(ctx context.Context) ([]redis.Cmder, error) 
 		tracer.ResourceName("redis"),
 		tracer.Tag(ext.TargetHost, p.host),
 		tracer.Tag(ext.TargetPort, p.port),
+		tracer.Tag(ext.SpanKind, ext.SpanKindClient),
 		tracer.Tag("out.db", p.db),
 	}
 	if rate := p.config.analyticsRate; rate > 0 {
@@ -166,6 +167,7 @@ func createWrapperFromClient(tc *Client) func(oldProcess func(cmd redis.Cmder) e
 				tracer.ResourceName(parts[0]),
 				tracer.Tag(ext.TargetHost, p.host),
 				tracer.Tag(ext.TargetPort, p.port),
+				tracer.Tag(ext.SpanKind, ext.SpanKindClient),
 				tracer.Tag("out.db", p.db),
 				tracer.Tag("redis.raw_command", raw),
 				tracer.Tag("redis.args_length", strconv.Itoa(length)),

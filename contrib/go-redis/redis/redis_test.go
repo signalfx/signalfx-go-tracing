@@ -47,6 +47,7 @@ func TestClientEvalSha(t *testing.T) {
 	span := spans[0]
 	assert.Equal("redis.command", span.OperationName())
 	assert.Equal(ext.SpanTypeRedis, span.Tag(ext.SpanType))
+	assert.Equal(ext.SpanKindClient, span.Tag(ext.SpanKind))
 	assert.Equal("my-redis", span.Tag(ext.ServiceName))
 	assert.Equal("127.0.0.1", span.Tag(ext.TargetHost))
 	assert.Equal("6379", span.Tag(ext.TargetPort))
@@ -89,6 +90,7 @@ func TestClient(t *testing.T) {
 	span := spans[0]
 	assert.Equal("redis.command", span.OperationName())
 	assert.Equal(ext.SpanTypeRedis, span.Tag(ext.SpanType))
+	assert.Equal(ext.SpanKindClient, span.Tag(ext.SpanKind))
 	assert.Equal("my-redis", span.Tag(ext.ServiceName))
 	assert.Equal("127.0.0.1", span.Tag(ext.TargetHost))
 	assert.Equal("6379", span.Tag(ext.TargetPort))
@@ -115,6 +117,7 @@ func TestPipeline(t *testing.T) {
 	span := spans[0]
 	assert.Equal("redis.command", span.OperationName())
 	assert.Equal(ext.SpanTypeRedis, span.Tag(ext.SpanType))
+	assert.Equal(ext.SpanKindClient, span.Tag(ext.SpanKind))
 	assert.Equal("my-redis", span.Tag(ext.ServiceName))
 	assert.Equal("expire pipeline_counter 3600: false\n", span.Tag(ext.ResourceName))
 	assert.Equal("127.0.0.1", span.Tag(ext.TargetHost))
@@ -134,6 +137,7 @@ func TestPipeline(t *testing.T) {
 	span = spans[0]
 	assert.Equal("redis.command", span.OperationName())
 	assert.Equal(ext.SpanTypeRedis, span.Tag(ext.SpanType))
+	assert.Equal(ext.SpanKindClient, span.Tag(ext.SpanKind))
 	assert.Equal("my-redis", span.Tag(ext.ServiceName))
 	assert.Equal("expire pipeline_counter 3600: false\nexpire pipeline_counter_1 60: false\n", span.Tag(ext.ResourceName))
 	assert.Equal("2", span.Tag("redis.pipeline_length"))
