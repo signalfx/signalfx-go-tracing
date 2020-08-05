@@ -1,4 +1,4 @@
 package sfxtracing
 
 const LibraryName = "go-tracing"
-const Version = "1.2.3"
+const Version = "1.3.0"
