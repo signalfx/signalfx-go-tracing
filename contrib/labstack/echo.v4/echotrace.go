@@ -1,4 +1,4 @@
-// Package echo provides functions to trace the labstack/echo package (https://github.com/labstack/echo).
+// Package echo provides functions to trace the labstack/echo/v4 package (https://github.com/labstack/echo).
 package echo
 
 import (
