@@ -6,7 +6,6 @@ import (
 	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
 	"io"
 	"net"
-	"strings"
 	"testing"
 	"time"
 
@@ -118,7 +117,6 @@ func TestWithZipkin(t *testing.T) {
 		assert.Equal(port, span.Tags[ext.PeerPort])
 		assert.Equal("test-database", span.Tags[ext.DBInstance])
 		assert.Equal("mongo", span.Tags[ext.DBType])
-		assert.Equal(strings.ToLower(ext.SpanKindClient), span.Tags[ext.SpanKind])
 		assert.Contains(span.Tags[ext.DBStatement], `"test-item":"test-value"`)
 
 		testutil.AssertSpanWithNoError(t, span)

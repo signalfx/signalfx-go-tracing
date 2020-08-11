@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/globalsign/mgo"
@@ -484,7 +483,6 @@ func TestWithZipkin(t *testing.T) {
 			"db.instance":   "my_db",
 			"db.type":       "mongo",
 			"db.statement":  "collection.insert my_db",
-			"span.kind":     strings.ToLower(ext.SpanKindClient),
 		})
 		testutil.AssertSpanWithNoError(t, span)
 	})
@@ -521,7 +519,6 @@ func TestWithZipkin(t *testing.T) {
 			"db.instance":   "my_db",
 			"db.type":       "mongo",
 			"db.statement":  "collection.insert my_db",
-			"span.kind":     strings.ToLower(ext.SpanKindClient),
 		})
 
 		testutil.AssertSpanWithError(t, span, testutil.ErrorAssertion{

@@ -31,8 +31,7 @@ func TestZipkinPayloadIntegrity(t *testing.T) {
 	require := require.New(t)
 	p := newZipkinPayload("test-service")
 	want := new(bytes.Buffer)
-	for _, n := range []int{10, 1 << 10, 1 << 15,
-	} {
+	for _, n := range []int{10, 1 << 10, 1 << 15} {
 		t.Run(strconv.Itoa(n), func(t *testing.T) {
 			p.reset()
 			lists := make(spanLists, n)
@@ -72,6 +71,23 @@ func TestEmptyZipkinPayload(t *testing.T) {
 	data, err := ioutil.ReadAll(p)
 	require.NoError(err)
 	require.Equal("[]", string(data))
+}
+
+func TestSpanKindRemovedFromTags(t *testing.T) {
+	require := require.New(t)
+	payload := newZipkinPayload("test-service")
+
+	spanList := []*span{
+		&span{Meta: map[string]string{"span.kind": "server"}},
+		&span{Meta: map[string]string{"span.kind": "client"}},
+	}
+
+	converted := payload.convertSpans(spanList)
+	require.Equal(map[string]string{}, converted[0].Tags)
+	require.Equal("SERVER", *(converted[0].Kind))
+
+	require.Equal(map[string]string{}, converted[1].Tags)
+	require.Equal("CLIENT", *(converted[1].Kind))
 }
 
 // TestZipkinPayloadDecode ensures that whatever we push into the payload can

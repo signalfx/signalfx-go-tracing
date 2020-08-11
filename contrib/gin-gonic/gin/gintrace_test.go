@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/signalfx/signalfx-go-tracing/contrib/internal/testutil"
@@ -305,7 +304,6 @@ func TestWithZipkin(t *testing.T) {
 			"http.method":      "GET",
 			"http.status_code": "200",
 			"http.url":         "http://example.com/successful",
-			"span.kind":        strings.ToLower(ext.SpanKindServer),
 		})
 		testutil.AssertSpanWithNoError(t, span)
 	})
@@ -333,7 +331,6 @@ func TestWithZipkin(t *testing.T) {
 			"http.method":      "POST",
 			"http.status_code": "400",
 			"http.url":         "http://example.com/unsuccessful",
-			"span.kind":        strings.ToLower(ext.SpanKindServer),
 		})
 		testutil.AssertSpanWithError(t, span, testutil.ErrorAssertion{
 			KindEquals:      "*gin.Error",
