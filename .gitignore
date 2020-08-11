@@ -1,5 +1,7 @@
 go.mod
 go.sum
+contrib/google.golang.org/grpc.v12/grpcv12_go.mod
+contrib/google.golang.org/grpc.v12/grpcv12_go.sum
 
 # go
 bin/
