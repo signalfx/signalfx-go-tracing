@@ -101,7 +101,6 @@ func testZipkin(cfg *Config) func(t *testing.T) {
 				"db.user":       cfg.DBUser,
 				"peer.hostname": "127.0.0.1",
 				"peer.port":     strconv.Itoa(cfg.DBPort),
-				"span.kind":     "client",
 			})
 
 			ea := testutil.ErrorAssertion{
@@ -148,7 +147,6 @@ func testZipkin(cfg *Config) func(t *testing.T) {
 				"db.user":       cfg.DBUser,
 				"peer.hostname": "127.0.0.1",
 				"peer.port":     strconv.Itoa(cfg.DBPort),
-				"span.kind":     "client",
 			}, span.Tags)
 		})
 	}

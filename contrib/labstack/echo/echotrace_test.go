@@ -170,7 +170,6 @@ func TestEchoTracer200Zipkin(t *testing.T) {
 		"http.url":         "http://example.com/mock200",
 		"http.method":      "GET",
 		"http.status_code": "200",
-		"span.kind":        "server",
 	})
 	testutil.AssertSpanWithNoError(t, span)
 }
@@ -201,7 +200,6 @@ func TestEchoTracer401Zipkin(t *testing.T) {
 		"http.url":         "http://example.com/mock401",
 		"http.method":      "POST",
 		"http.status_code": "401",
-		"span.kind":        "server",
 	})
 	testutil.AssertSpanWithNoError(t, span)
 }
@@ -233,7 +231,6 @@ func TestEchoTracer500Zipkin(t *testing.T) {
 		"http.url":         "http://example.com/mock500",
 		"http.method":      "POST",
 		"http.status_code": "500",
-		"span.kind":        "server",
 		ext.Error:            "true",
 		ext.ErrorKind: "*echo.HTTPError",
 	})

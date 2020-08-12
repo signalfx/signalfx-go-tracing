@@ -84,7 +84,6 @@ func TestRoundTripperZipkin(t *testing.T) {
 			"component":        "http",
 			"http.method":      "GET",
 			"http.url":         s.URL + "/query",
-			"span.kind":        "client",
 			"http.status_code": "200",
 		}, s1.Tags)
 		testutil.AssertSpanWithNoError(t, s1)
@@ -110,12 +109,12 @@ func TestRoundTripperZipkin(t *testing.T) {
 		tags := s1.Tags
 
 		assert.Equal("POST", *s1.Name)
+		assert.Equal("CLIENT", *s1.Kind)
 		assert.Equal(map[string]string{
 			"component":        "http",
 			"error":            "true",
 			"http.method":      "POST",
 			"http.url":         s.URL + "/?error=500",
-			"span.kind":        "client",
 			"http.status_code": "500",
 		}, tags)
 	})
@@ -139,11 +138,11 @@ func TestRoundTripperZipkin(t *testing.T) {
 		}
 
 		assert.Equal("GET", *s0.Name)
+		assert.Equal("CLIENT", *s0.Kind)
 		testutil.AssertSpanWithTags(t, s0, map[string]string{
 			"component":   "http",
 			"http.method": "GET",
 			"http.url":    "http://localhost:1/query",
-			"span.kind":   "client",
 		})
 		testutil.AssertSpanWithError(t, s0, testutil.ErrorAssertion{
 			KindEquals:      "*net.OpError",

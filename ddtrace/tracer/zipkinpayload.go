@@ -125,10 +125,6 @@ func (p *zipkinPayload) convertSpans(spans spanList) []*traceformat.Span {
 			tags["component"] = span.Type
 		}
 
-		if sfxSpan.Kind != nil && *sfxSpan.Kind != "" {
-			tags["span.kind"] = strings.ToLower(*sfxSpan.Kind)
-		}
-
 		formatTags(tags)
 		sfxSpan.Tags = tags
 
@@ -159,7 +155,7 @@ func convertLogs(logs []*logFields) []*sfxtrace.Annotation {
 
 func deriveKind(s *span) *string {
 	if kind, ok := s.Meta[spanKind]; ok {
-		return pointer.String(kind)
+		return pointer.String(strings.ToUpper(kind))
 	}
 
 	switch s.Type {
@@ -168,7 +164,7 @@ func deriveKind(s *span) *string {
 	case ext.SpanTypeWeb:
 		return pointer.String(spanKindServer)
 	case ext.SpanTypeMongoDB:
-    return pointer.String(spanKindClient)
+		return pointer.String(spanKindClient)
 	case ext.SpanTypeSQL:
 		return pointer.String(spanKindClient)
 	}

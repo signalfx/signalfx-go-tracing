@@ -45,7 +45,6 @@ func TestHttpTracer200Zipkin(t *testing.T) {
 		"http.url":         "http://example.com/200",
 		"http.method":      "GET",
 		"http.status_code": "200",
-		"span.kind":        "server",
 	})
 	testutil.AssertSpanWithNoError(t, span)
 }
@@ -80,7 +79,6 @@ func TestHttpTracer500Zipkin(t *testing.T) {
 		"http.url":         "http://example.com/500",
 		"http.method":      "GET",
 		"http.status_code": "500",
-		"span.kind":        "server",
 	})
 	testutil.AssertSpanWithError(t, span, testutil.ErrorAssertion{
 		KindEquals:      "*errors.errorString",
