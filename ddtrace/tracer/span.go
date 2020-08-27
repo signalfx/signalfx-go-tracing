@@ -68,8 +68,9 @@ type span struct {
 	Error    int32              `msg:"error"`             // error status of the span; 0 means no errors
 	Logs     []*logFields
 
-	finished bool         `msg:"-"` // true if the span has been submitted to a tracer.
-	context  *spanContext `msg:"-"` // span propagation context
+	recordedValueMaxLength *int
+	finished               bool         `msg:"-"` // true if the span has been submitted to a tracer.
+	context                *spanContext `msg:"-"` // span propagation context
 }
 
 // LogKV pairs
@@ -88,11 +89,29 @@ func (s *span) Tracer() opentracing.Tracer {
 	return opentracer.New()
 }
 
+func (s *span) truncate(val string) string {
+	if s.recordedValueMaxLength == nil {
+		return val
+	}
+	max := *s.recordedValueMaxLength
+	if max < 0 {
+		return val
+	}
+	if len(val) > max {
+		val = val[:max]
+	}
+	return val
+}
+
 // LogFields field to span
 func (s *span) LogFields(fields ...log.Field) {
 	m := map[string]interface{}{}
 	for _, field := range fields {
-		m[field.Key()] = field.Value()
+		val := field.Value()
+		if vStr, ok := val.(string); ok {
+			val = s.truncate(vStr)
+		}
+		m[field.Key()] = val
 	}
 	s.Logs = append(s.Logs, &logFields{m, time.Now()})
 }
@@ -245,7 +264,7 @@ func (s *span) setTagString(key, v string) {
 	case ext.SpanType:
 		s.Type = v
 	default:
-		s.Meta[key] = v
+		s.Meta[key] = s.truncate(v)
 	}
 }
 
@@ -382,6 +401,13 @@ func (s *span) String() string {
 	}
 	for key, val := range s.Metrics {
 		lines = append(lines, fmt.Sprintf("\t%s:%f", key, val))
+	}
+	lines = append(lines, "Logs:")
+	for _, lf := range s.Logs {
+		lines = append(lines, fmt.Sprintf("\t%s", lf.time))
+		for key, val := range lf.fields {
+			lines = append(lines, fmt.Sprintf("\t\t%s:%s", key, val))
+		}
 	}
 	s.RUnlock()
 	return strings.Join(lines, "\n")

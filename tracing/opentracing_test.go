@@ -2,11 +2,14 @@ package tracing
 
 import (
 	"context"
+	"encoding/json"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/log"
+	traceformat "github.com/signalfx/golib/trace"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -185,4 +188,114 @@ func TestEnvironmentVariables(t *testing.T) {
 	assert.Equal("b", tags["a"])
 	assert.Equal("d", tags["c"])
 	assert.Equal("", tags["bob"])
+}
+
+func TestWithRecordedValueMaxLength(t *testing.T) {
+	require := require.New(t)
+
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	maxLength := 5
+	Start(WithEndpointURL(zipkin.URL()),
+		WithRecordedValueMaxLength(maxLength),
+		WithoutLibraryTags())
+
+	span := tracer.StartSpan("test")
+	tagVal := "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
+	require.Len(tagVal, 31)
+
+	span.SetTag("k1", tagVal)
+	span.SetTag("k2", "v2")
+	span.LogFields(log.String("l1", tagVal), log.String("l2", "v2"))
+	span.Finish()
+
+	tracer.ForceFlush()
+	spans := zipkin.WaitForSpans(t, 1)
+
+	tags := spans[0].Tags
+	require.Equal(2, len(tags))
+	require.Equal("v2", tags["k2"])
+	require.Equal(tagVal[:maxLength], tags["k1"])
+
+	annotations := spans[0].Annotations
+	require.Equal(1, len(annotations))
+	logs := annotationToMap(t, annotations[0])
+	require.Equal("v2", logs["l2"])
+	require.Equal(tagVal[:maxLength], logs["l1"])
+}
+
+func TestWithRecordedValueMaxLengthSpanOverride(t *testing.T) {
+	require := require.New(t)
+
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	Start(WithEndpointURL(zipkin.URL()),
+		WithRecordedValueMaxLength(5),
+		WithoutLibraryTags())
+
+	span := tracer.StartSpan("test", tracer.WithRecordedValueMaxLength(10))
+	tagVal := "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
+	require.Len(tagVal, 31)
+
+	span.SetTag("k1", tagVal)
+	span.SetTag("k2", "v2")
+	span.LogFields(log.String("l1", tagVal), log.String("l2", "v2"))
+	span.Finish()
+
+	tracer.ForceFlush()
+	spans := zipkin.WaitForSpans(t, 1)
+
+	tags := spans[0].Tags
+	require.Equal(2, len(tags))
+	require.Equal("v2", tags["k2"])
+	require.Equal(tagVal[:10], tags["k1"])
+
+	annotations := spans[0].Annotations
+	require.Equal(1, len(annotations))
+	logs := annotationToMap(t, annotations[0])
+	require.Equal("v2", logs["l2"])
+	require.Equal(tagVal[:10], logs["l1"])
+}
+
+func TestWithRecordedValueMaxLengthDefault(t *testing.T) {
+	require := require.New(t)
+
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	Start(WithEndpointURL(zipkin.URL()), WithoutLibraryTags())
+
+	span := tracer.StartSpan("test")
+	v1 := strings.Repeat("v", 1300)
+	span.SetTag("k1", v1)
+
+	v2 := strings.Repeat("v", 1199)
+	span.SetTag("k2", v2)
+	span.LogFields(log.String("l1", v1), log.String("l2", v2))
+	span.Finish()
+
+	tracer.ForceFlush()
+	spans := zipkin.WaitForSpans(t, 1)
+
+	tags := spans[0].Tags
+	require.Equal(2, len(tags))
+	require.Equal(v1[:defaultRecordedValueMaxLength], tags["k1"])
+	require.Equal(v2, tags["k2"])
+
+	annotations := spans[0].Annotations
+	require.Equal(1, len(annotations))
+	logs := annotationToMap(t, annotations[0])
+	require.Equal(v1[:defaultRecordedValueMaxLength], logs["l1"])
+	require.Equal(v2, logs["l2"])
+}
+
+func annotationToMap(t *testing.T, annotation *traceformat.Annotation) map[string]string {
+	var m map[string]string
+
+	if err := json.Unmarshal([]byte(*annotation.Value), &m); err != nil {
+		t.Error(err)
+	}
+	return m
 }

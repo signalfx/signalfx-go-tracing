@@ -223,6 +223,7 @@ func (t *tracer) pushError(err error) {
 // StartSpan creates, starts, and returns a new Span with the given `operationName`.
 func (t *tracer) StartSpan(operationName string, options ...ddtrace.StartSpanOption) ddtrace.Span {
 	var opts ddtrace.StartSpanConfig
+	opts.RecordedValueMaxLength = t.recordedValueMaxLength
 	for _, fn := range options {
 		fn(&opts)
 	}
@@ -244,15 +245,16 @@ func (t *tracer) StartSpan(operationName string, options ...ddtrace.StartSpanOpt
 	}
 	// span defaults
 	span := &span{
-		Name:     operationName,
-		Service:  t.config.serviceName,
-		Resource: operationName,
-		Meta:     map[string]string{},
-		Metrics:  map[string]float64{},
-		SpanID:   id,
-		TraceID:  id,
-		ParentID: 0,
-		Start:    startTime,
+		Name:                   operationName,
+		Service:                t.config.serviceName,
+		Resource:               operationName,
+		Meta:                   map[string]string{},
+		Metrics:                map[string]float64{},
+		SpanID:                 id,
+		TraceID:                id,
+		ParentID:               0,
+		Start:                  startTime,
+		recordedValueMaxLength: opts.RecordedValueMaxLength,
 	}
 	if context != nil {
 		// this is a child span
