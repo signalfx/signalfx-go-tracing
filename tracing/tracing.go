@@ -16,6 +16,7 @@ const (
 	signalfxAccessToken            = "SIGNALFX_ACCESS_TOKEN"
 	signalfxSpanTags               = "SIGNALFX_SPAN_TAGS"
 	signalfxRecordedValueMaxLength = "SIGNALFX_RECORDED_VALUE_MAX_LENGTH"
+	signalfxDropTags               = "SIGNALFX_DROP_TAGS"
 )
 
 const defaultRecordedValueMaxLength int = 1200
@@ -39,6 +40,7 @@ type config struct {
 	disableLibraryTags bool
 
 	recordedValueMaxLength *int
+	tagsToDrop             []string
 }
 
 // StartOption is a function that configures an option for Start
@@ -51,7 +53,17 @@ func defaultConfig() *config {
 		url:                    envOrDefault(signalfxEndpointURL),
 		globalTags:             envGlobalTags(),
 		recordedValueMaxLength: envRecordedValueMaxLength(),
+		tagsToDrop:             envDropTags(),
 	}
+}
+
+func envDropTags() []string {
+	val := os.Getenv(signalfxDropTags)
+	tags := []string{}
+	for _, tag := range strings.Split(val, ",") {
+		tags = append(tags, strings.TrimSpace(tag))
+	}
+	return tags
 }
 
 func envRecordedValueMaxLength() *int {
@@ -152,6 +164,13 @@ func WithRecordedValueMaxLength(l int) StartOption {
 	}
 }
 
+// WithDropTags ...
+func WithDropTags(tags ...string) StartOption {
+	return func(c *config) {
+		c.tagsToDrop = tags
+	}
+}
+
 // Start tracing globally
 func Start(opts ...StartOption) {
 	c := defaultConfig()
@@ -160,7 +179,7 @@ func Start(opts ...StartOption) {
 	}
 
 	startOptions := append(c.globalTags, tracer.WithServiceName(c.serviceName))
-	startOptions = append(startOptions, tracer.WithZipkin(c.serviceName, c.url, c.accessToken))
+	startOptions = append(startOptions, tracer.WithZipkin(c.serviceName, c.url, c.accessToken, c.tagsToDrop))
 	if c.disableLibraryTags {
 		startOptions = append(startOptions, tracer.WithoutLibraryTags())
 	}

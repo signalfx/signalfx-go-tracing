@@ -51,6 +51,8 @@ type config struct {
 	disableLibraryTags bool
 
 	recordedValueMaxLength *int
+
+	tagsToDrop []string
 }
 
 // StartOption represents a function that can be provided as a parameter to Start.
@@ -73,9 +75,9 @@ func defaults(c *config) {
 }
 
 // WithZipkin uses Zipkin instead of DD encoding and transport.
-func WithZipkin(service string, url string, accessToken string) StartOption {
+func WithZipkin(service string, url string, accessToken string, tagsToDrop []string) StartOption {
 	return func(c *config) {
-		c.payload = newZipkinPayload(service)
+		c.payload = newZipkinPayload(service, tagsToDrop)
 		c.transport = newZipkinTransport(url, accessToken, defaultRoundTripper)
 	}
 }

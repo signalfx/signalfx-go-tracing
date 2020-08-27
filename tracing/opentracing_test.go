@@ -299,3 +299,62 @@ func annotationToMap(t *testing.T, annotation *traceformat.Annotation) map[strin
 	}
 	return m
 }
+
+func TestDropTagsFromEnv(t *testing.T) {
+	require := require.New(t)
+
+	err := os.Setenv(signalfxDropTags, "ttt, T2,")
+	require.Nil(err)
+
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	Start(WithEndpointURL(zipkin.URL()),
+		WithRecordedValueMaxLength(5),
+		WithoutLibraryTags(),
+	)
+
+	span := tracer.StartSpan("test", tracer.WithRecordedValueMaxLength(10))
+
+	span.SetTag("t1", "v1")
+	span.SetTag("t2", "v2")
+	span.SetTag("tt", "v3")
+	span.SetTag("ttt", "v4")
+	span.Finish()
+
+	tracer.ForceFlush()
+	spans := zipkin.WaitForSpans(t, 1)
+
+	tags := spans[0].Tags
+	require.Equal(2, len(tags))
+	require.Equal("v1", tags["t1"])
+	require.Equal("v3", tags["tt"])
+}
+
+func TestDropTagsFromOption(t *testing.T) {
+	require := require.New(t)
+
+	zipkin := zipkinserver.Start()
+	defer zipkin.Stop()
+
+	Start(WithEndpointURL(zipkin.URL()),
+		WithRecordedValueMaxLength(5),
+		WithoutLibraryTags(),
+		WithDropTags("t1", "t2", "TT"),
+	)
+
+	span := tracer.StartSpan("test", tracer.WithRecordedValueMaxLength(10))
+
+	span.SetTag("t1", "v1")
+	span.SetTag("t2", "v2")
+	span.SetTag("tt", "v3")
+	span.SetTag("ttt", "v4")
+	span.Finish()
+
+	tracer.ForceFlush()
+	spans := zipkin.WaitForSpans(t, 1)
+
+	tags := spans[0].Tags
+	require.Equal(1, len(tags))
+	require.Equal("v4", tags["ttt"])
+}

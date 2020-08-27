@@ -24,10 +24,11 @@ const (
 var _ encoder = (*zipkinPayload)(nil)
 
 type zipkinPayload struct {
-	service   string
-	buf       bytes.Buffer
-	spanCount int
-	reader    *bytes.Reader
+	service    string
+	buf        bytes.Buffer
+	spanCount  int
+	reader     *bytes.Reader
+	tagsToDrop map[string]struct{}
 }
 
 func (p *zipkinPayload) Read(b []byte) (n int, err error) {
@@ -38,8 +39,12 @@ func (p *zipkinPayload) Read(b []byte) (n int, err error) {
 	return p.reader.Read(b)
 }
 
-func newZipkinPayload(service string) *zipkinPayload {
-	payload := &zipkinPayload{service: service}
+func newZipkinPayload(service string, tagsToDrop []string) *zipkinPayload {
+	toDrop := map[string]struct{}{}
+	for _, t := range tagsToDrop {
+		toDrop[strings.ToLower(t)] = struct{}{}
+	}
+	payload := &zipkinPayload{service: service, tagsToDrop: toDrop}
 	payload.reset()
 	return payload
 }
@@ -102,6 +107,9 @@ func (p *zipkinPayload) convertSpans(spans spanList) []*traceformat.Span {
 
 		for key, val := range span.Meta {
 			if key == spanKind {
+				continue
+			}
+			if _, ok := p.tagsToDrop[strings.ToLower(key)]; ok {
 				continue
 			}
 			tags[key] = val
