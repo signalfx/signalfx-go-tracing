@@ -121,6 +121,10 @@ func (tc Conn) Do(commandName string, args ...interface{}) (reply interface{}, e
 		}
 	}
 
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
 	span := tc.newChildSpan(ctx)
 	defer func() {
 		span.FinishWithOptionsExt(tracer.WithError(err))

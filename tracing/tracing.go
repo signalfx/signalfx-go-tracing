@@ -2,6 +2,7 @@ package tracing
 
 import (
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/opentracing/opentracing-go"
@@ -10,11 +11,14 @@ import (
 )
 
 const (
-	signalfxServiceName = "SIGNALFX_SERVICE_NAME"
-	signalfxEndpointURL = "SIGNALFX_ENDPOINT_URL"
-	signalfxAccessToken = "SIGNALFX_ACCESS_TOKEN"
-	signalfxSpanTags    = "SIGNALFX_SPAN_TAGS"
+	signalfxServiceName            = "SIGNALFX_SERVICE_NAME"
+	signalfxEndpointURL            = "SIGNALFX_ENDPOINT_URL"
+	signalfxAccessToken            = "SIGNALFX_ACCESS_TOKEN"
+	signalfxSpanTags               = "SIGNALFX_SPAN_TAGS"
+	signalfxRecordedValueMaxLength = "SIGNALFX_RECORDED_VALUE_MAX_LENGTH"
 )
+
+const defaultRecordedValueMaxLength int = 1200
 
 var defaults = map[string]string{
 	signalfxServiceName: "unnamed-go-service",
@@ -33,6 +37,8 @@ type config struct {
 
 	// flag to disable injecting library tags
 	disableLibraryTags bool
+
+	recordedValueMaxLength *int
 }
 
 // StartOption is a function that configures an option for Start
@@ -40,11 +46,21 @@ type StartOption = func(*config)
 
 func defaultConfig() *config {
 	return &config{
-		serviceName: envOrDefault(signalfxServiceName),
-		accessToken: envOrDefault(signalfxAccessToken),
-		url:         envOrDefault(signalfxEndpointURL),
-		globalTags:  envGlobalTags(),
+		serviceName:            envOrDefault(signalfxServiceName),
+		accessToken:            envOrDefault(signalfxAccessToken),
+		url:                    envOrDefault(signalfxEndpointURL),
+		globalTags:             envGlobalTags(),
+		recordedValueMaxLength: envRecordedValueMaxLength(),
 	}
+}
+
+func envRecordedValueMaxLength() *int {
+	val := os.Getenv(signalfxRecordedValueMaxLength)
+	num, err := strconv.Atoi(val)
+	if err != nil {
+		num = defaultRecordedValueMaxLength
+	}
+	return &num
 }
 
 // envGlobalTags extract global tags from the environment variable and parses the value in the expected format
@@ -126,6 +142,16 @@ func WithGlobalTag(k string, v string) StartOption {
 	}
 }
 
+// WithRecordedValueMaxLength specifies the maximum length a tag/log value
+// can have.
+// Values are completely truncated when set to 0.
+// Ignored when set to -1.
+func WithRecordedValueMaxLength(l int) StartOption {
+	return func(c *config) {
+		c.recordedValueMaxLength = &l
+	}
+}
+
 // Start tracing globally
 func Start(opts ...StartOption) {
 	c := defaultConfig()
@@ -137,6 +163,9 @@ func Start(opts ...StartOption) {
 	startOptions = append(startOptions, tracer.WithZipkin(c.serviceName, c.url, c.accessToken))
 	if c.disableLibraryTags {
 		startOptions = append(startOptions, tracer.WithoutLibraryTags())
+	}
+	if c.recordedValueMaxLength != nil {
+		startOptions = append(startOptions, tracer.WithTracerRecordedValueMaxLength(*c.recordedValueMaxLength))
 	}
 	tracer.Start(
 		startOptions...,

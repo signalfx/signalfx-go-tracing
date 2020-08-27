@@ -49,6 +49,8 @@ type config struct {
 
 	// flag to disable injecting library tags
 	disableLibraryTags bool
+
+	recordedValueMaxLength *int
 }
 
 // StartOption represents a function that can be provided as a parameter to Start.
@@ -170,6 +172,16 @@ func WithoutLibraryTags() StartOption {
 	}
 }
 
+// WithTracerRecordedValueMaxLength specifies the maximum length a tag/log value
+// can have.
+// Values are completely truncated when set to 0.
+// Ignored when set to -1.
+func WithTracerRecordedValueMaxLength(l int) StartOption {
+	return func(c *config) {
+		c.recordedValueMaxLength = &l
+	}
+}
+
 // StartSpanOption is a configuration option for StartSpan. It is aliased in order
 // to help godoc group all the functions returning it together. It is considered
 // more correct to refer to it as the type as the origin, ddtrace.StartSpanOption.
@@ -203,6 +215,16 @@ func SpanType(name string) StartSpanOption {
 func WithSpanID(id uint64) StartSpanOption {
 	return func(cfg *ddtrace.StartSpanConfig) {
 		cfg.SpanID = id
+	}
+}
+
+// WithRecordedValueMaxLength specifies the maximum length a tag/log value
+// can have.
+// Values are completely truncated when set to 0.
+// Ignored when set to -1.
+func WithRecordedValueMaxLength(l int) StartSpanOption {
+	return func(cfg *ddtrace.StartSpanConfig) {
+		cfg.RecordedValueMaxLength = &l
 	}
 }
 

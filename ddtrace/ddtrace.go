@@ -9,8 +9,9 @@
 package ddtrace // import "github.com/signalfx/signalfx-go-tracing/ddtrace"
 
 import (
-	"github.com/opentracing/opentracing-go"
 	"time"
+
+	"github.com/opentracing/opentracing-go"
 )
 
 // Tracer specifies an implementation of the Datadog tracer which allows starting
@@ -94,4 +95,7 @@ type StartSpanConfig struct {
 	// Force-set the SpanID, rather than use a random number. If no Parent SpanContext is present,
 	// then this will also set the TraceID to the same value.
 	SpanID uint64
+
+	// RecordedValueMaxLength determines the maximum allowed length a tag/log can have.
+	RecordedValueMaxLength *int
 }

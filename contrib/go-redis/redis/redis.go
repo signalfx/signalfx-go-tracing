@@ -109,6 +109,9 @@ func (c *Pipeliner) execWithContext(ctx context.Context) ([]redis.Cmder, error) 
 	if rate := p.config.analyticsRate; rate > 0 {
 		opts = append(opts, tracer.Tag(ext.EventSampleRate, rate))
 	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	span, _ := tracer.StartSpanFromContext(ctx, "redis.command", opts...)
 	cmds, err := c.Pipeliner.Exec()
 	span.SetTag(ext.ResourceName, commandsToString(cmds))
@@ -174,6 +177,9 @@ func createWrapperFromClient(tc *Client) func(oldProcess func(cmd redis.Cmder) e
 			}
 			if rate := p.config.analyticsRate; rate > 0 {
 				opts = append(opts, tracer.Tag(ext.EventSampleRate, rate))
+			}
+			if ctx == nil {
+				ctx = context.Background()
 			}
 			span, _ := tracer.StartSpanFromContext(ctx, "redis.command", opts...)
 			err := oldProcess(cmd)
