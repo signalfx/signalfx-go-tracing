@@ -1,6 +1,7 @@
 [![CircleCI](https://circleci.com/gh/signalfx/signalfx-go-tracing/tree/master.svg?style=svg)](https://circleci.com/gh/signalfx/signalfx-go-tracing/tree/master)
 [![GoDoc](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing?status.svg)](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing)
 
+# TEST BRANCH
 # SignalFx Tracing Library for Go
 
 The SignalFx Tracing Library for Go helps you automatically instrument
