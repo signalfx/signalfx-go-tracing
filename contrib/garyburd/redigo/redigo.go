@@ -117,7 +117,7 @@ func (tc Conn) Do(commandName string, args ...interface{}) (reply interface{}, e
 	if n := len(args); n > 0 {
 		ctx, ok = args[n-1].(context.Context)
 		if ok {
-			args = args[:n-1]
+			// args = args[:n-1]
 		}
 	}
 
