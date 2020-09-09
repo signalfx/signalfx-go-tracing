@@ -20,7 +20,7 @@ import (
 
 const defaultCollation = "utf8_general_ci"
 
-// A blacklist of collations which is unsafe to interpolate parameters.
+// An exclude list of collations which is unsafe to interpolate parameters.
 // These multibyte encodings may contains 0x5c (`\`) in their trailing bytes.
 var unsafeCollations = map[string]bool{
 	"big5_chinese_ci":   true,
