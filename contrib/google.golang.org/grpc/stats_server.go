@@ -4,6 +4,7 @@ import (
 	context "golang.org/x/net/context"
 	"google.golang.org/grpc/stats"
 
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 )
 
@@ -25,13 +26,14 @@ type serverStatsHandler struct {
 
 // TagRPC starts a new span for the initiated RPC request.
 func (h *serverStatsHandler) TagRPC(ctx context.Context, rti *stats.RPCTagInfo) context.Context {
-	_, ctx = startSpanFromContext(
+	span, ctx := startSpanFromContext(
 		ctx,
 		rti.FullMethodName,
 		"grpc.server",
 		h.cfg.serverServiceName(),
 		h.cfg.analyticsRate,
 	)
+	span.SetTag(ext.SpanKind, ext.SpanKindServer)
 	return ctx
 }
 

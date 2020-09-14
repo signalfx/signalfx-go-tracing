@@ -43,6 +43,7 @@ func TestServerStatsHandler(t *testing.T) {
 		"span.type":     ext.AppTypeRPC,
 		"grpc.code":     codes.OK.String(),
 		"service.name":  serviceName,
+		"span.kind":     "SERVER",
 		"resource.name": "/grpc.Fixture/Ping",
 		"grpc.method":   "/grpc.Fixture/Ping",
 	}, span.Tags())

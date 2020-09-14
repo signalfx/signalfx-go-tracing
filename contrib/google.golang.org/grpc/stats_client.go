@@ -26,13 +26,14 @@ type clientStatsHandler struct{ cfg *config }
 
 // TagRPC starts a new span for the initiated RPC request.
 func (h *clientStatsHandler) TagRPC(ctx context.Context, rti *stats.RPCTagInfo) context.Context {
-	_, ctx = startSpanFromContext(
+	span, ctx := startSpanFromContext(
 		ctx,
 		rti.FullMethodName,
 		"grpc.client",
 		h.cfg.clientServiceName(),
 		h.cfg.analyticsRate,
 	)
+	span.SetTag(ext.SpanKind, ext.SpanKindClient)
 	ctx = injectSpanIntoContext(ctx)
 	return ctx
 }
