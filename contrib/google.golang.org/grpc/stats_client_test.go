@@ -49,6 +49,7 @@ func TestClientStatsHandler(t *testing.T) {
 		"service.name":  serviceName,
 		"resource.name": "/grpc.Fixture/Ping",
 		"grpc.method":   "/grpc.Fixture/Ping",
+		"span.kind":     "CLIENT",
 		ext.TargetHost:  "127.0.0.1",
 		ext.TargetPort:  server.port,
 	}, span.Tags())

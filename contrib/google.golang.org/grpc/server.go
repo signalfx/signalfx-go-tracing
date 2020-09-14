@@ -1,10 +1,10 @@
 package grpc
 
 import (
-	context "golang.org/x/net/context"
-	"google.golang.org/grpc"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
+	context "golang.org/x/net/context"
+	"google.golang.org/grpc"
 )
 
 type serverStream struct {
