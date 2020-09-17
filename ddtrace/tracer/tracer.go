@@ -107,6 +107,22 @@ func Inject(ctx ddtrace.SpanContext, carrier interface{}) error {
 	return ddtrace.GetGlobalTracer().Inject(ctx, carrier)
 }
 
+// SpanIDHex returns the span ID from ddtrace.SpanContext
+func SpanIDHex(ctx ddtrace.SpanContext) string {
+	if c, ok := ctx.(*spanContext); ok {
+		return idToHex(c.spanID)
+	}
+	return ""
+}
+
+// TraceIDHex returns the span ID from ddtrace.TraceContext
+func TraceIDHex(ctx ddtrace.SpanContext) string {
+	if c, ok := ctx.(*spanContext); ok {
+		return idToHex(c.traceID)
+	}
+	return ""
+}
+
 const (
 	// payloadQueueSize is the buffer size of the trace channel.
 	payloadQueueSize = 1000
