@@ -160,20 +160,18 @@ func createWrapperFromClient(tc *Client) func(oldProcess func(cmd redis.Cmder) e
 			tc.mu.RLock()
 			ctx := tc.ctx
 			tc.mu.RUnlock()
-			raw := cmderToString(cmd)
-			parts := strings.Split(raw, " ")
-			length := len(parts) - 1
+			raw, cmdName, argsLength := cmderToCmdStrAndLength(cmd)
 			p := tc.params
 			opts := []ddtrace.StartSpanOption{
 				tracer.SpanType(ext.SpanTypeRedis),
 				tracer.ServiceName(p.config.serviceName),
-				tracer.ResourceName(parts[0]),
+				tracer.ResourceName(cmdName),
 				tracer.Tag(ext.TargetHost, p.host),
 				tracer.Tag(ext.TargetPort, p.port),
 				tracer.Tag(ext.SpanKind, ext.SpanKindClient),
 				tracer.Tag("out.db", p.db),
 				tracer.Tag("redis.raw_command", raw),
-				tracer.Tag("redis.args_length", strconv.Itoa(length)),
+				tracer.Tag("redis.args_length", strconv.Itoa(argsLength)),
 			}
 			if rate := p.config.analyticsRate; rate > 0 {
 				opts = append(opts, tracer.Tag(ext.EventSampleRate, rate))
@@ -193,7 +191,40 @@ func createWrapperFromClient(tc *Client) func(oldProcess func(cmd redis.Cmder) e
 	}
 }
 
-func cmderToString(cmd redis.Cmder) string {
+func cmderToCmdStrAndLength(cmder redis.Cmder) (string, string, int) {
+	return cmdStrToTagStr(_cmderToString(cmder))
+}
+
+func cmderToString(cmder redis.Cmder) string {
+	raw, _, _ := cmdStrToTagStr(_cmderToString(cmder))
+	return raw
+}
+
+func cmdStrToTagStr(cmdStr string) (string, string, int) {
+	parts := strings.Split(strings.Trim(cmdStr, " "), " ")
+	if len(parts) == 0 {
+		return cmdStr, cmdStr, 0
+	}
+
+	cmd := parts[0]
+	argsLength := len(parts) - 1
+	numArgs, ok := cmdCaptureArguments[cmd]
+	if !ok {
+		return cmdStr, cmd, argsLength
+	}
+
+	keep := parts
+	if len(parts) > numArgs {
+		keep = parts[:numArgs]
+	}
+	remaining := len(parts) - numArgs
+	for i := 0; i < remaining; i++ {
+		keep = append(keep, "?")
+	}
+	return strings.Join(keep, " "), cmd, argsLength
+}
+
+func _cmderToString(cmd redis.Cmder) string {
 	// We want to support multiple versions of the go-redis library. In
 	// older versions Cmder implements the Stringer interface, while in
 	// newer versions that was removed, and this String method which
@@ -216,4 +247,25 @@ func cmderToString(cmd redis.Cmder) string {
 		return str
 	}
 	return ""
+}
+
+// cmdCaptureArguments specifies how many arguments should the instrumentation
+// capture into the raw_command or db.statement tag per redis command.
+var cmdCaptureArguments = map[string]int{
+	"append":    2,
+	"set":       2,
+	"setnx":     2,
+	"setrange":  3,
+	"mset":      2,
+	"msetnx":    2,
+	"rpush":     2,
+	"rpushx":    2,
+	"lpush":     2,
+	"lpushx":    2,
+	"linsert":   3,
+	"lset":      3,
+	"sismember": 2,
+	"hset":      3,
+	"hsetnx":    3,
+	"hmset":     2,
 }
