@@ -94,8 +94,8 @@ func TestClient(t *testing.T) {
 	assert.Equal("my-redis", span.Tag(ext.ServiceName))
 	assert.Equal("127.0.0.1", span.Tag(ext.TargetHost))
 	assert.Equal("6379", span.Tag(ext.TargetPort))
-	assert.Equal("set test_key test_value: ", span.Tag("redis.raw_command"))
-	assert.Equal("3", span.Tag("redis.args_length"))
+	assert.Equal("set test_key ?", span.Tag("redis.raw_command"))
+	assert.Equal("2", span.Tag("redis.args_length"))
 }
 
 func TestPipeline(t *testing.T) {
@@ -197,7 +197,7 @@ func TestMultipleCommands(t *testing.T) {
 	for i := 0; i < 4; i++ {
 		commands[i] = spans[i].Tag("redis.raw_command").(string)
 	}
-	assert.Contains(commands, "set test_key test_value: ")
+	assert.Contains(commands, "set test_key ?")
 	assert.Contains(commands, "get test_key: ")
 	assert.Contains(commands, "incr int_key: 0")
 	assert.Contains(commands, "client list: ")
@@ -300,4 +300,154 @@ func TestAnalyticsSettings(t *testing.T) {
 
 		assertRate(t, mt, 0.23, WithAnalyticsRate(0.23))
 	})
+}
+
+func TestCommandsToStr(t *testing.T) {
+	opts := &redis.Options{Addr: "127.0.0.1:6379"}
+	assert := assert.New(t)
+	mt := mocktracer.Start()
+	defer mt.Stop()
+
+	cases := []struct {
+		command func(*Client)
+		tag     string
+	}{
+		{
+			func(c *Client) { c.Get("test_key") },
+			"get test_key: ",
+		},
+		{
+			func(c *Client) { c.Do("append") },
+			"append",
+		},
+		{
+			func(c *Client) { c.Do("append test_list test_value") },
+			"append test_list ?",
+		},
+		{
+			func(c *Client) { c.Append("test_list", "test_value") },
+			"append test_list ? ?",
+		},
+		{
+			func(c *Client) { c.Set("test_key", "test_value", 0) },
+			"set test_key ?",
+		},
+		{
+			func(c *Client) { c.SetNX("test_key", "test_value", 0) },
+			"setnx test_key ? ?",
+		},
+		{
+			func(c *Client) { c.MSet("t1", "v1", "v2") },
+			"mset t1 ? ?",
+		},
+		{
+			func(c *Client) { c.MSet("t1", "v1", "v2", "v3", "v4", "v5") },
+			"mset t1 ? ? ? ? ?",
+		},
+		{
+			func(c *Client) { c.MSetNX("t1", "v1", "v2", "v3", "v4", "v5") },
+			"msetnx t1 ? ? ? ? ? ?",
+		},
+		{
+			func(c *Client) { c.RPush("t2", "v1", "v2") },
+			"rpush t2 ? ? ?",
+		},
+		{
+			func(c *Client) { c.RPushX("t2", "v1") },
+			"rpushx t2 ? ?",
+		},
+		{
+			func(c *Client) { c.LPush("t2", "v1", "v2") },
+			"lpush t2 ? ? ?",
+		},
+		{
+			func(c *Client) { c.LPushX("t2", "v1") },
+			"lpushx t2 ? ?",
+		},
+		{
+			func(c *Client) { c.LInsert("t1", "AFTER", "v2", "v9") },
+			"linsert t1 AFTER ? ? ?",
+		},
+		{
+			func(c *Client) { c.LSet("t1", 1, "v10") },
+			"lset t1 1 ?",
+		},
+		{
+			func(c *Client) { c.SIsMember("t1", "v10") },
+			"sismember t1 ? ?",
+		},
+		{
+			func(c *Client) { c.HSet("t1", "field", "value") },
+			"hset t1 field ? ?",
+		},
+		{
+			func(c *Client) { c.HSetNX("t1", "field", "value") },
+			"hsetnx t1 field ? ?",
+		},
+		{
+			func(c *Client) { c.HMSet("t1", map[string]interface{}{"k1": "v1", "k2": "v2"}) },
+			"hmset t1 ? ? ? ?",
+		},
+	}
+
+	client := NewClient(opts, WithServiceName("my-redis"))
+	for _, tc := range cases {
+		tc.command(client)
+		spans := mt.FinishedSpans()
+		assert.Len(spans, 1)
+		assert.Equal(tc.tag, spans[0].Tags()["redis.raw_command"])
+		mt.Reset()
+	}
+}
+
+func Test_cmdStrToTagStr(t *testing.T) {
+
+	cases := []struct {
+		in, raw, cmd string
+		args         int
+	}{
+		{
+			"get test_key: ",
+			"get test_key: ",
+			"get",
+			1,
+		},
+		{
+			"append",
+			"append",
+			"append",
+			0,
+		},
+		{
+			"append test_list tesakjsd",
+			"append test_list ?",
+			"append",
+			2,
+		},
+		{
+			"set test_key 33nkjkj",
+			"set test_key ?",
+			"set",
+			2,
+		},
+		{
+			"gibberish",
+			"gibberish",
+			"gibberish",
+			0,
+		},
+		{
+			"",
+			"",
+			"",
+			0,
+		},
+	}
+
+	for _, tc := range cases {
+		raw, cmd, args := cmdStrToTagStr(tc.in)
+		assert.Equal(t, tc.raw, raw)
+		assert.Equal(t, tc.cmd, cmd)
+		assert.Equal(t, tc.args, args)
+	}
 }
