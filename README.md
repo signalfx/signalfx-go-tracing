@@ -62,6 +62,78 @@ replace utilities with their traced equivalents.
 [tracing.Start()](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#Start).
 This creates a tracer and registers it as the OpenTracing global tracer. 
 
+## Inject trace context in HTTP requests
+
+Link individual log entries with trace IDs and span IDs associated with corresponding events by passing metadata in HTTP reqeusts.
+
+To inject trace context in HTTP requests, follow these steps:
+
+1. Replace the default HTTP multiplexer: 
+
+   ```go
+   import (
+     httptrace "github.com/signalfx/signalfx-go-tracing/contrib/net/http"
+     "github.com/signalfx/signalfx-go-tracing/ddtrace/tracer" // global tracer
+     "github.com/signalfx/signalfx-go-tracing/tracing" // helper
+   )
+   ```
+2. Create the new HTTP multiplexer and attach it to your HTTP instance:
+   ```go
+   mux := httptrace.NewServeMux()
+   mux.HandleFunc("/", handler) // handler to your function
+   // add all other routes
+   http.ListenAndServe(":8888", mux)
+   ```
+3. Use a helper for the tracer to get the span ID and trace ID from each request:
+   ```go
+   func TraceIdFromCtx(ctx context.Context) (result string) {
+     if span, ok := tracer.SpanFromContext(ctx); ok {
+       result = tracer.TraceIDHex(span.Context())
+     }
+     return
+   }
+   ```
+   It cooperates with the global tracer instance.
+
+### Example log injection configuration
+
+This is an example of what injecting span IDs and trace IDs can look like in your environment: 
+
+```go
+package main
+
+import (
+  httptrace "github.com/signalfx/signalfx-go-tracing/contrib/net/http"
+  "github.com/signalfx/signalfx-go-tracing/ddtrace/tracer" // global tracer
+  "github.com/signalfx/signalfx-go-tracing/tracing" // helper
+
+  "context"
+  "fmt"
+  "log"
+  "net/http"
+)
+
+func TraceIdFromCtx(ctx context.Context) (result string) {
+  if span, ok := tracer.SpanFromContext(ctx); ok {
+    result = tracer.TraceIDHex(span.Context())
+  }
+  return
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+  ctx := r.Context()
+  log.Print("Recevied request for ", r.URL.Path[1:], " ", TraceIdFromCtx(ctx))
+}
+
+func main() {
+  tracing.Start()
+  defer tracing.Stop()
+  mux.HandleFunc("/", handler)
+  http.ListenAndServe(":8888", mux)
+}
+
+```
+
 ## API
 
 See the SignalFx Tracing Library for Go API on
