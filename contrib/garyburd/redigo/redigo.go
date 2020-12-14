@@ -99,6 +99,7 @@ func (tc Conn) newChildSpan(ctx context.Context) ddtrace.Span {
 		opts = append(opts, tracer.Tag(ext.EventSampleRate, rate))
 	}
 	span, _ := tracer.StartSpanFromContext(ctx, "redis.command", opts...)
+	span.SetTag(ext.DBType, "redis")
 	span.SetTag("out.network", p.network)
 	span.SetTag(ext.TargetPort, p.port)
 	span.SetTag(ext.TargetHost, p.host)
