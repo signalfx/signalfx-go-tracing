@@ -4,7 +4,7 @@ version: 2.1
 
 references:
   goexecutor: &goexecutor
-    image: circleci/golang:latest
+    image: circleci/golang:1.15
 
   workdir: &workdir
     working_directory: /home/circleci/signalfx-go-tracing
