@@ -162,6 +162,7 @@ commands:
           command: |
             go mod download
             cd contrib/google.golang.org/grpc.v12; go mod download
+            go get github.com/tebeka/go2xunit
             go install github.com/tebeka/go2xunit
       - install_rdkafka:
           version: 4ffe54b4f59ee5ae3767f9f25dc14651a3384d62
