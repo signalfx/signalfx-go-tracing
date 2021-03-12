@@ -144,8 +144,7 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - v1-gomod-{{ checksum ".circleci/go.mod" }}-{{ checksum ".circleci/grpcv12_go.mod" }}
-            - v1-gomod-
+            - v1-gomod-{{ checksum "go.sum" }}-{{ checksum "contrib/google.golang.org/grpc.v12/go.sum }}
       - run:
           name: Download packages
           command: |
@@ -155,7 +154,7 @@ commands:
       - install_rdkafka:
           version: 4ffe54b4f59ee5ae3767f9f25dc14651a3384d62
       - save_cache:
-          key: v1-gomod-{{ checksum ".circleci/go.mod" }}-{{ checksum ".circleci/grpcv12_go.mod" }}
+          key: v1-gomod-{{ checksum "go.sum" }}-{{ checksum "contrib/google.golang.org/grpc.v12/go.sum" }}
           paths:
             - /go/pkg/
 
