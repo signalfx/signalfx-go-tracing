@@ -144,7 +144,7 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - v1-gomod-{{ checksum "go.sum" }}-{{ checksum "contrib/google.golang.org/grpc.v12/go.sum }}
+            - v1-gomod-{{ checksum "go.sum" }}-{{ checksum "contrib/google.golang.org/grpc.v12/go.sum" }}
       - run:
           name: Download packages
           command: |
