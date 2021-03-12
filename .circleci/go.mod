@@ -13,7 +13,7 @@ require (
 	github.com/gin-gonic/gin v1.6.2
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-chi/chi v4.1.1+incompatible
-	github.com/go-logfmt/logfmt v0.3.0
+	github.com/go-logfmt/logfmt v0.3.0 // indirect
 	github.com/go-redis/redis v6.15.7+incompatible
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/go-stack/stack v1.8.0
@@ -28,6 +28,7 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515
 	github.com/labstack/echo v3.3.10+incompatible
+	github.com/labstack/echo/v4 v4.2.1
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/lib/pq v1.2.0
 	github.com/mailru/easyjson v0.7.1
@@ -45,25 +46,20 @@ require (
 	github.com/tidwall/buntdb v1.1.2
 	github.com/tinylib/msgp v1.1.0
 	go.mongodb.org/mongo-driver v1.3.2
-	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
+	golang.org/x/net v0.0.0-20200822124328-c89045814202
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	golang.org/x/sys v0.0.0-20200116001909-b77594299b42
+	golang.org/x/sys v0.0.0-20200826173525-f9321e4c35a6
 	google.golang.org/api v0.21.0
 	google.golang.org/grpc v1.28.1
-	gopkg.in/Shopify/sarama.v1 v1.20.1
+	gopkg.in/Shopify/sarama.v1 v1.26.1
 	gopkg.in/olivere/elastic.v3 v3.0.75
 	gopkg.in/olivere/elastic.v5 v5.0.85
-	gopkg.in/yaml.v2 v2.2.8
+	gopkg.in/yaml.v2 v2.2.8 // indirect
 	gotest.tools v2.2.0+incompatible
-	k8s.io/api v0.0.0-20190819141258-3544db3b9e44
+	k8s.io/api v0.0.0-20190819141258-3544db3b9e44 // indirect
 	k8s.io/apimachinery v0.0.0-20190817020851-f2f3a405f61d
 	k8s.io/client-go v0.0.0-20190819141724-e14f31a72a77
 	k8s.io/utils v0.0.0-20200414100711-2df71ebbae66 // indirect
 )
 
-replace (
-    gopkg.in/Shopify/sarama.v1 => github.com/Shopify/sarama v1.26.1
-    github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.4.0
-    go.mongodb.org/mongo-driver => github.com/mongodb/mongo-go-driver v1.0.4
-)
-
+replace gopkg.in/Shopify/sarama.v1 => github.com/Shopify/sarama v1.26.1
