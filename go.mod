@@ -15,22 +15,17 @@ require (
 	github.com/go-chi/chi v4.1.1+incompatible
 	github.com/go-kit/kit v0.10.0 // indirect
 	github.com/go-redis/redis v6.15.7+incompatible
-	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gocql/gocql v0.0.0-20200410100145-b454769479c6
 	github.com/golang/protobuf v1.4.0
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/gorilla/mux v1.7.4
 	github.com/graph-gophers/graphql-go v0.0.0-20200309224638-dae41bde9ef9
 	github.com/imdario/mergo v0.3.9 // indirect
-	github.com/jinzhu/gorm v1.9.12
-	github.com/jmoiron/sqlx v1.2.0
 	github.com/juju/testing v0.0.0-20210302031854-2c7ee8570c07 // indirect
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/echo/v4 v4.2.1
-	github.com/lib/pq v1.2.0
 	github.com/mailru/easyjson v0.7.1
-	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/miekg/dns v1.1.29
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/philhofer/fwd v1.0.0 // indirect
@@ -49,7 +44,6 @@ require (
 	google.golang.org/grpc v1.28.1
 	gopkg.in/olivere/elastic.v3 v3.0.75
 	gopkg.in/olivere/elastic.v5 v5.0.85
-	gotest.tools v2.2.0+incompatible
 	k8s.io/apimachinery v0.0.0-20190817020851-f2f3a405f61d
 	k8s.io/client-go v0.0.0-20190819141724-e14f31a72a77
 	k8s.io/utils v0.0.0-20200414100711-2df71ebbae66 // indirect
