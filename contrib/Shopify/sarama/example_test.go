@@ -3,9 +3,10 @@ package sarama_test
 import (
 	"log"
 
+	"github.com/Shopify/sarama"
+
 	saramatrace "github.com/signalfx/signalfx-go-tracing/contrib/Shopify/sarama"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
-	sarama "gopkg.in/Shopify/sarama.v1"
 )
 
 func Example_asyncProducer() {

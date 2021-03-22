@@ -13,5 +13,4 @@ require (
 replace (
 	github.com/signalfx/signalfx-go-tracing => ../../../
 	google.golang.org/grpc => google.golang.org/grpc v1.2.1
-	gopkg.in/Shopify/sarama.v1 => github.com/Shopify/sarama v1.26.1
 )

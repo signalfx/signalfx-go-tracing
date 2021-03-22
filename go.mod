@@ -49,7 +49,7 @@ require (
 	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68
 	google.golang.org/api v0.21.0
 	google.golang.org/grpc v1.28.1
-	gopkg.in/Shopify/sarama.v1 v1.26.1
+	github.com/Shopify/sarama v1.26.1
 	gopkg.in/olivere/elastic.v3 v3.0.75
 	gopkg.in/olivere/elastic.v5 v5.0.85
 	gotest.tools v2.2.0+incompatible
@@ -57,5 +57,3 @@ require (
 	k8s.io/client-go v0.0.0-20190819141724-e14f31a72a77
 	k8s.io/utils v0.0.0-20200414100711-2df71ebbae66 // indirect
 )
-
-replace gopkg.in/Shopify/sarama.v1 => github.com/Shopify/sarama v1.26.1
