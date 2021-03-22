@@ -236,6 +236,7 @@ jobs:
                 echo "golangci-lint in ${dir}"
                 cd "${dir}"
                 GOGC=40 golangci-lint run --deadline 5m
+                cd - >/dev/null
             done            
 
 workflows:
