@@ -4,7 +4,6 @@ go 1.12
 
 require (
 	github.com/Shopify/sarama v1.26.1
-	github.com/aws/aws-sdk-go v1.30.9
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/confluentinc/confluent-kafka-go v1.4.0
 	github.com/davecgh/go-spew v1.1.1
