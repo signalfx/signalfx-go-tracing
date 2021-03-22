@@ -4,7 +4,7 @@ version: 2.1
 
 references:
   goexecutor: &goexecutor
-    image: circleci/golang:1.15
+    image: circleci/golang:1.16
 
   workdir: &workdir
     working_directory: /home/circleci/signalfx-go-tracing
@@ -85,16 +85,6 @@ executors:
           POSTGRES_DB: postgres
 
 commands:
-  prepare_go_mod:
-    description: Sets project to act as go module
-    steps:
-      - run:
-          name: Setup Go mod
-          command: |
-            cp .circleci/go.mod .
-            cp .circleci/go.sum .
-            cp .circleci/grpcv12_go.mod contrib/google.golang.org/grpc.v12/go.mod
-            cp .circleci/grpcv12_go.sum contrib/google.golang.org/grpc.v12/go.sum
 
   install_rdkafka:
     description: Install rdkafka
@@ -152,21 +142,19 @@ commands:
   get_deps:
     description: Get project dependencies
     steps:
-      - prepare_go_mod
       - restore_cache:
           keys:
-            - v1-gomod-{{ checksum ".circleci/go.mod" }}-{{ checksum ".circleci/grpcv12_go.mod" }}
-            - v1-gomod-
+            - v1-gomod-{{ checksum "go.sum" }}-{{ checksum "contrib/google.golang.org/grpc.v12/go.sum" }}
       - run:
           name: Download packages
           command: |
             go mod download
             cd contrib/google.golang.org/grpc.v12; go mod download
-            go install github.com/tebeka/go2xunit
+            go install github.com/tebeka/go2xunit@v1.4.10
       - install_rdkafka:
           version: 4ffe54b4f59ee5ae3767f9f25dc14651a3384d62
       - save_cache:
-          key: v1-gomod-{{ checksum ".circleci/go.mod" }}-{{ checksum ".circleci/grpcv12_go.mod" }}
+          key: v1-gomod-{{ checksum "go.sum" }}-{{ checksum "contrib/google.golang.org/grpc.v12/go.sum" }}
           paths:
             - /go/pkg/
 

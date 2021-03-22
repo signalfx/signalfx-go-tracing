@@ -6,7 +6,3 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-  - package-ecosystem: "gomod"
-    directory: "/.circleci"
-    schedule:
-      interval: "weekly"
