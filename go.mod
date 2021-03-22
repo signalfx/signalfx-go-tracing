@@ -3,6 +3,7 @@ module github.com/signalfx/signalfx-go-tracing
 go 1.12
 
 require (
+	github.com/Shopify/sarama v1.26.1
 	github.com/aws/aws-sdk-go v1.30.9
 	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b
 	github.com/confluentinc/confluent-kafka-go v1.4.0
@@ -49,7 +50,6 @@ require (
 	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68
 	google.golang.org/api v0.21.0
 	google.golang.org/grpc v1.28.1
-	github.com/Shopify/sarama v1.26.1
 	gopkg.in/olivere/elastic.v3 v3.0.75
 	gopkg.in/olivere/elastic.v5 v5.0.85
 	gotest.tools v2.2.0+incompatible
