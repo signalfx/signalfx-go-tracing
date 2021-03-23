@@ -359,6 +359,9 @@ workflows:
           name: test_julienschmidt-httprouter
           module: ./contrib/julienschmidt/httprouter
       - go_test:
+          name: test_kubernetes
+          module: ./contrib/k8s.io/client-go/kubernetes
+      - go_test:
           name: test_ddtrace
           packages: "./ddtrace/..."
       - go_test:
