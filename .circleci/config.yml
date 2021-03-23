@@ -391,3 +391,6 @@ workflows:
       - go_test:
           name: test_leveldb
           module: ./contrib/syndtr/goleveldb/leveldb
+      - go_test:
+          name: test_buntdb
+          module: ./contrib/tidwall/buntdb
