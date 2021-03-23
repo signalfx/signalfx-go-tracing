@@ -338,6 +338,27 @@ workflows:
           name: test_graphql-go
           module: ./contrib/graph-gophers/graphql-go
       - go_test:
+          name: test_gorm
+          executor: go_sql
+          module: ./contrib/jinzhu/gorm
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:3306
+            - dockerize_wait:
+                address: tcp://localhost:5432
+      - go_test:
+          name: test_sqlx
+          executor: go_sql
+          module: ./contrib/jmoiron/sqlx
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:3306
+            - dockerize_wait:
+                address: tcp://localhost:5432
+      - go_test:
+          name: test_julienschmidt-httprouter
+          module: ./contrib/julienschmidt/httprouter
+      - go_test:
           name: test_ddtrace
           packages: "./ddtrace/..."
       - go_test:
@@ -365,21 +386,3 @@ workflows:
           after_deps:
             - dockerize_wait:
                 address: tcp://localhost:27017
-      - go_test:
-          name: test_sqlx
-          executor: go_sql
-          module: ./contrib/jmoiron/sqlx
-          after_deps:
-            - dockerize_wait:
-                address: tcp://localhost:3306
-            - dockerize_wait:
-                address: tcp://localhost:5432
-      - go_test:
-          name: test_gorm
-          executor: go_sql
-          module: ./contrib/jinzhu/gorm
-          after_deps:
-            - dockerize_wait:
-                address: tcp://localhost:3306
-            - dockerize_wait:
-                address: tcp://localhost:5432
