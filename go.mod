@@ -6,7 +6,6 @@ require (
 	github.com/Shopify/sarama v1.26.1
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dropbox/godropbox v0.0.0-20200228041828-52ad444d3502 // indirect
-	github.com/emicklei/go-restful v2.12.0+incompatible
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
 	github.com/facebookgo/stackerr v0.0.0-20150612192056-c2fcf88613f4 // indirect
 	github.com/garyburd/redigo v1.6.0
