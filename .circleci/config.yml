@@ -293,7 +293,7 @@ workflows:
             - dockerize_wait:
                 address: tcp://localhost:27017
       - go_test:
-          name: test_redigo
+          name: test_redigo_old
           executor: go_redis
           module: ./contrib/garyburd/redigo
           after_deps:
@@ -303,6 +303,13 @@ workflows:
           name: test_redis
           executor: go_redis
           module: ./contrib/go-redis/redis
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:6379
+      - go_test:
+          name: test_redigo
+          executor: go_redis
+          module: ./contrib/gomodule/redigo
           after_deps:
             - dockerize_wait:
                 address: tcp://localhost:6379

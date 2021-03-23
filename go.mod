@@ -14,7 +14,6 @@ require (
 	github.com/go-kit/kit v0.10.0 // indirect
 	github.com/gocql/gocql v0.0.0-20200410100145-b454769479c6
 	github.com/golang/protobuf v1.4.0
-	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/gorilla/mux v1.7.4
 	github.com/graph-gophers/graphql-go v0.0.0-20200309224638-dae41bde9ef9
 	github.com/imdario/mergo v0.3.9 // indirect
