@@ -388,4 +388,6 @@ workflows:
       - go_test:
           name: test_sarama
           module: ./contrib/Shopify/sarama
-
+      - go_test:
+          name: test_leveldb
+          module: ./contrib/syndtr/goleveldb/leveldb
