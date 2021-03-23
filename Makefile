@@ -3,6 +3,15 @@ ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort 
 
 GO = go
 
+.PHONY: build
+build:
+	@EXIT=0 ;\
+	for dir in $(ALL_MODULES); do \
+	  echo "$(GO) build ./... in $${dir}"; \
+	  (cd "$${dir}" && $(GO) build ./...) || EXIT=$$?; \
+	done ;\
+	exit $$EXIT
+
 .PHONY: mod-tidy
 mod-tidy:
 	@set -e; for dir in $(ALL_MODULES); do \
