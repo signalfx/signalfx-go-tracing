@@ -371,6 +371,16 @@ workflows:
           name: test_miekg-dns
           module: ./contrib/miekg/dns
       - go_test:
+          name: test_mongo
+          executor: go_mongo
+          module: ./contrib/mongodb/mongo-go-driver/mongo
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:27017
+      - go_test:
+          name: test_http
+          module: ./contrib/net/http
+      - go_test:
           name: test_ddtrace
           packages: "./ddtrace/..."
       - go_test:
@@ -391,10 +401,3 @@ workflows:
                 address: tcp://localhost:2181
             - dockerize_wait:
                 address: tcp://localhost:9092
-      - go_test:
-          name: test_mongo
-          executor: go_mongo
-          module: ./contrib/mongodb/mongo-go-driver/mongo
-          after_deps:
-            - dockerize_wait:
-                address: tcp://localhost:27017
