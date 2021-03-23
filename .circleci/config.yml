@@ -335,6 +335,9 @@ workflows:
           name: test_gorilla-mux
           module: ./contrib/gorilla/mux
       - go_test:
+          name: test_graphql-go
+          module: ./contrib/graph-gophers/graphql-go
+      - go_test:
           name: test_ddtrace
           packages: "./ddtrace/..."
       - go_test:

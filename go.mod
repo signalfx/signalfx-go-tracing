@@ -10,7 +10,6 @@ require (
 	github.com/facebookgo/stackerr v0.0.0-20150612192056-c2fcf88613f4 // indirect
 	github.com/go-kit/kit v0.10.0 // indirect
 	github.com/golang/protobuf v1.4.0 // indirect
-	github.com/graph-gophers/graphql-go v0.0.0-20200309224638-dae41bde9ef9
 	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/juju/testing v0.0.0-20210302031854-2c7ee8570c07 // indirect
