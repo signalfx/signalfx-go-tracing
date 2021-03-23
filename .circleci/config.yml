@@ -386,11 +386,6 @@ workflows:
             - dockerize_wait:
                 address: http://localhost:9201
       - go_test:
-          name: test_kafka_zookeeper
-          executor: go_kafka_zookeeper
-          packages: "`go list ./contrib/... | grep -P 'Shopify|kafka' | xargs`"
-          after_deps:
-            - dockerize_wait:
-                address: tcp://localhost:2181
-            - dockerize_wait:
-                address: tcp://localhost:9092
+          name: test_sarama
+          module: ./contrib/Shopify/sarama
+
