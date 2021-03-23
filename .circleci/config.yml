@@ -368,6 +368,9 @@ workflows:
           name: test_echo.v4
           module: ./contrib/labstack/echo.v4
       - go_test:
+          name: test_miekg-dns
+          module: ./contrib/miekg/dns
+      - go_test:
           name: test_ddtrace
           packages: "./ddtrace/..."
       - go_test:

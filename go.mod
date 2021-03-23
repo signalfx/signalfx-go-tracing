@@ -12,7 +12,6 @@ require (
 	github.com/golang/protobuf v1.4.0 // indirect
 	github.com/juju/testing v0.0.0-20210302031854-2c7ee8570c07 // indirect
 	github.com/mailru/easyjson v0.7.1
-	github.com/miekg/dns v1.1.29
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.5.1+incompatible // indirect
