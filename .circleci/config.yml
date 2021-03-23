@@ -286,8 +286,8 @@ workflows:
             - dockerize_wait:
                 address: tcp://localhost:11211
       - go_test:
-          name: test_mongo
-          executor: go_mongo_globalsign
+          name: test_mongo_globalsign
+          executor: go_mongo
           module: ./contrib/globalsign/mgo
           after_deps:
             - dockerize_wait:
