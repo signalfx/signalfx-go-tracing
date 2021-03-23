@@ -4,7 +4,7 @@ version: 2.1
 
 references:
   goexecutor: &goexecutor
-    image: circleci/golang:1.15
+    image: circleci/golang:1.16
 
   workdir: &workdir
     working_directory: /home/circleci/signalfx-go-tracing
@@ -85,16 +85,6 @@ executors:
           POSTGRES_DB: postgres
 
 commands:
-  prepare_go_mod:
-    description: Sets project to act as go module
-    steps:
-      - run:
-          name: Setup Go mod
-          command: |
-            cp .circleci/go.mod .
-            cp .circleci/go.sum .
-            cp .circleci/grpcv12_go.mod contrib/google.golang.org/grpc.v12/go.mod
-            cp .circleci/grpcv12_go.sum contrib/google.golang.org/grpc.v12/go.sum
 
   install_rdkafka:
     description: Install rdkafka
@@ -152,21 +142,19 @@ commands:
   get_deps:
     description: Get project dependencies
     steps:
-      - prepare_go_mod
       - restore_cache:
           keys:
-            - v1-gomod-{{ checksum ".circleci/go.mod" }}-{{ checksum ".circleci/grpcv12_go.mod" }}
-            - v1-gomod-
+            - v1-gomod-{{ checksum "go.sum" }}-{{ checksum "contrib/google.golang.org/grpc.v12/go.sum" }}
       - run:
           name: Download packages
           command: |
             go mod download
             cd contrib/google.golang.org/grpc.v12; go mod download
-            go install github.com/tebeka/go2xunit
+            go install github.com/tebeka/go2xunit@v1.4.10
       - install_rdkafka:
           version: 4ffe54b4f59ee5ae3767f9f25dc14651a3384d62
       - save_cache:
-          key: v1-gomod-{{ checksum ".circleci/go.mod" }}-{{ checksum ".circleci/grpcv12_go.mod" }}
+          key: v1-gomod-{{ checksum "go.sum" }}-{{ checksum "contrib/google.golang.org/grpc.v12/go.sum" }}
           paths:
             - /go/pkg/
 
@@ -210,6 +198,9 @@ jobs:
       options:
         type: string
         default: -v -race
+      module:
+        type: string
+        default: .
       packages:
         type: string
         default: ./...
@@ -227,6 +218,7 @@ jobs:
           command: |
             mkdir ~/testresults
             export INTEGRATION=<< parameters.integration >>
+            cd << parameters.module >>
             bash -euo pipefail -c "go test << parameters.options >> << parameters.packages >> | tee /dev/stderr | grep -v '\[no test files\]' | go2xunit" > ~/testresults/unit.xml
       - save_test_results
 
@@ -239,74 +231,166 @@ jobs:
           name: Run linter
           command: |
             curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sudo sh -s -- -b $(go env GOPATH)/bin v1.24.0
-            GOGC=40 golangci-lint run --deadline 5m
+            ALL_MODULES=`find . -type f -name "go.mod" -exec dirname {} \; | sort`
+            for dir in ${ALL_MODULES}; do
+                echo "golangci-lint in ${dir}"
+                cd "${dir}"
+                GOGC=40 golangci-lint run --deadline 5m
+                cd - >/dev/null
+            done            
 
 workflows:
   build_test:
     jobs:
       - lint_vet
-      # - go_test:
-      #    name: test_cassandra
-      #    executor: go_cassandra
-      #    packages: "`go list ./contrib/... | grep 'gocql' | xargs`"
-      #    after_deps:
-      #      - dockerize_wait:
-      #          address: tcp://localhost:9042
-      #          timeout: 2m
       - go_test:
-          # test all remaining contrib tests not included in the other jobs
-          name: test_contrib
-          # disable checkptr until this issue gets resolved: https://github.com/tidwall/buntdb/issues/62
-          options: -v -race -gcflags=all=-d=checkptr=0
-          packages: "`go list ./contrib/... | grep -v -P 'gocql|elastic|kafka|memcache|globalsign|mongo|redis|redigo|sql|gorm' | sed 's|github.com/signalfx/signalfx-go-tracing|.|g' | xargs`"
+          name: test
       - go_test:
-          name: test_ddtrace
-          packages: "./ddtrace/..."
+          name: test_aws
+          module: ./contrib/aws/aws-sdk-go/aws
       - go_test:
-          name: test_elasticsearch
-          executor: go_elasticsearch
-          packages: "`go list ./contrib/... | grep 'elastic' | xargs`"
+          name: test_memcached
+          executor: go_memcached
+          module: ./contrib/bradfitz/gomemcache/memcache
           after_deps:
             - dockerize_wait:
-                address: http://localhost:9200
-            - dockerize_wait:
-                address: http://localhost:9201
+                address: tcp://localhost:11211
       - go_test:
-          name: test_kafka_zookeeper
+          name: test_confluent-kafka-go
           executor: go_kafka_zookeeper
-          packages: "`go list ./contrib/... | grep -P 'Shopify|kafka' | xargs`"
+          module: ./contrib/confluentinc/confluent-kafka-go/kafka
           after_deps:
             - dockerize_wait:
                 address: tcp://localhost:2181
             - dockerize_wait:
                 address: tcp://localhost:9092
       - go_test:
-          name: test_memcached
-          executor: go_memcached
-          packages: "`go list ./contrib/... | grep 'memcache' | xargs`"
-          after_deps:
-            - dockerize_wait:
-                address: tcp://localhost:11211
-      - go_test:
-          name: test_mongo
-          executor: go_mongo
-          packages: "`go list ./contrib/... | grep -P 'globalsign|mongo' | xargs`"
-          after_deps:
-            - dockerize_wait:
-                address: tcp://localhost:27017
-      - go_test:
-          name: test_redis
-          executor: go_redis
-          packages: "`go list ./contrib/... | grep -P 'redis|redigo' | xargs`"
-          after_deps:
-            - dockerize_wait:
-                address: tcp://localhost:6379
-      - go_test:
           name: test_sql
           executor: go_sql
-          packages: "`go list ./contrib/... | grep -P 'sql|gorm' | xargs`"
+          module: ./contrib/database/sql
           after_deps:
             - dockerize_wait:
                 address: tcp://localhost:3306
             - dockerize_wait:
                 address: tcp://localhost:5432
+      - go_test:
+          name: test_go-restful
+          module: ./contrib/emicklei/go-restful
+      - go_test:
+          name: test_redigo_old
+          executor: go_redis
+          module: ./contrib/garyburd/redigo
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:6379
+      - go_test:
+          name: test_gin
+          module: ./contrib/gin-gonic/gin
+      - go_test:
+          name: test_mongo_globalsign
+          executor: go_mongo
+          module: ./contrib/globalsign/mgo
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:27017
+      - go_test:
+          name: test_chi
+          module: ./contrib/go-chi/chi
+      - go_test:
+          name: test_redis
+          executor: go_redis
+          module: ./contrib/go-redis/redis
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:6379
+      # - go_test:
+      #    name: test_cassandra
+      #    executor: go_cassandra
+      #    module: ./contrib/gocql/gocql
+      #    after_deps:
+      #      - dockerize_wait:
+      #          address: tcp://localhost:9042
+      #          timeout: 2m
+      - go_test:
+          name: test_redigo
+          executor: go_redis
+          module: ./contrib/gomodule/redigo
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:6379
+      - go_test:
+          name: test_google-api
+          module: ./contrib/google.golang.org/api
+      - go_test:
+          name: test_google-grpc
+          module: ./contrib/google.golang.org/grpc
+      - go_test:
+          name: test_google-grpc.v12
+          module: ./contrib/google.golang.org/grpc.v12
+      - go_test:
+          name: test_gorilla-mux
+          module: ./contrib/gorilla/mux
+      - go_test:
+          name: test_graphql-go
+          module: ./contrib/graph-gophers/graphql-go
+      - go_test:
+          name: test_gorm
+          executor: go_sql
+          module: ./contrib/jinzhu/gorm
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:3306
+            - dockerize_wait:
+                address: tcp://localhost:5432
+      - go_test:
+          name: test_sqlx
+          executor: go_sql
+          module: ./contrib/jmoiron/sqlx
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:3306
+            - dockerize_wait:
+                address: tcp://localhost:5432
+      - go_test:
+          name: test_julienschmidt-httprouter
+          module: ./contrib/julienschmidt/httprouter
+      - go_test:
+          name: test_kubernetes
+          module: ./contrib/k8s.io/client-go/kubernetes
+      - go_test:
+          name: test_echo
+          module: ./contrib/labstack/echo
+      - go_test:
+          name: test_echo.v4
+          module: ./contrib/labstack/echo.v4
+      - go_test:
+          name: test_miekg-dns
+          module: ./contrib/miekg/dns
+      - go_test:
+          name: test_mongo
+          executor: go_mongo
+          module: ./contrib/mongodb/mongo-go-driver/mongo
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:27017
+      - go_test:
+          name: test_http
+          module: ./contrib/net/http
+      - go_test:
+          name: test_elasticsearch
+          executor: go_elasticsearch
+          module: ./contrib/olivere/elastic
+          after_deps:
+            - dockerize_wait:
+                address: http://localhost:9200
+            - dockerize_wait:
+                address: http://localhost:9201
+      - go_test:
+          name: test_sarama
+          module: ./contrib/Shopify/sarama
+      - go_test:
+          name: test_leveldb
+          module: ./contrib/syndtr/goleveldb/leveldb
+      - go_test:
+          name: test_buntdb
+          module: ./contrib/tidwall/buntdb

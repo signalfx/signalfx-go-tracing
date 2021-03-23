@@ -6,7 +6,7 @@ package grpc // import "github.com/signalfx/signalfx-go-tracing/contrib/google.g
 import (
 	"net"
 
-	"github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/internal/grpcutil"
+	"github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/grpc.v12/internal/grpcutil"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"

@@ -2,11 +2,11 @@
 package sarama // import "github.com/signalfx/signalfx-go-tracing/contrib/Shopify/sarama"
 
 import (
+	"github.com/Shopify/sarama"
+
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
-
-	sarama "gopkg.in/Shopify/sarama.v1"
 )
 
 type partitionConsumer struct {

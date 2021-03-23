@@ -7,6 +7,122 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "gomod"
-    directory: "/.circleci"
+    directory: "/contrib/aws/aws-sdk-go/aws"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/bradfitz/gomemcache/memcache"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/confluentinc/confluent-kafka-go/kafka"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/database/sql"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/emicklei/go-restful"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/garyburd/redigo"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/gin-gonic/gin"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/globalsign/mgo"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/go-chi/chi"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/gocql/gocql"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/gomodule/redigo"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/google.golang.org/api"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/google.golang.org/grpc"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/google.golang.org/grpc.v12"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/go-redis/redis"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/gorilla/mux"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/graph-gophers/graphql-go"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/jinzhu/gorm"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/jmoiron/sqlx"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/julienschmidt/httprouter"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/k8s.io/client-go/kubernetes"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/labstack/echo"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/labstack/echo.v4"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/miekg/dns"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/mongodb/mongo-go-driver/mongo"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/net/http"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/olivere/elastic"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/Shopify/sarama"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/syndtr/goleveldb/leveldb"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/contrib/tidwall/buntdb"
     schedule:
       interval: "weekly"
