@@ -1,26 +1,59 @@
-# ALL_MODULES includes ./* dirs (excludes . dir)
-ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort )
+.DEFAULT_GOAL := build
 
 GO = go
 
+# ALL_MODULES includes ./* dirs (excludes . dir)
+ALL_MODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort )
+SUBMODULES = $(filter-out ., $(ALL_MODULES))
+
+.PHONY: all-modules
+all-modules:
+	@echo $(ALL_MODULES) | tr ' ' '\n'
+
+.PHONY: submodules
+submodules:
+	@echo $(SUBMODULES) | tr ' ' '\n' 
+
 .PHONY: build
 build:
-	@EXIT=0 ;\
-	for dir in $(ALL_MODULES); do \
-	  echo "$(GO) build ./... in $${dir}"; \
-	  (cd "$${dir}" && $(GO) build ./...) || EXIT=$$?; \
-	done ;\
-	exit $$EXIT
+	${call for-all-modules,$(GO) build ./...}
 
 .PHONY: mod-tidy
 mod-tidy:
-	@set -e; for dir in $(ALL_MODULES); do \
-	  echo "$(GO) mod tidy in $${dir}"; \
-	  (cd "$${dir}" && $(GO) mod tidy); \
+	${call for-all-modules,$(GO) mod tidy}
+
+.PHONY: add-tag
+add-tag: # example usage: make add-tag tag=v1.100.1
+	@[ "$(tag)" ] || ( echo ">> 'tag' is not set"; exit 1 )
+	@echo "Adding tag $(tag)"
+	@git tag -a $(tag) -m "Version $(tag)"
+	@set -e; for dir in $(SUBMODULES); do \
+	  (echo Adding tag "$${dir:2}/$(tag)" && \
+	 	git tag -a "$${dir:2}/$(tag)" -m "Version ${dir:2}/$(tag)" ); \
 	done
 
-DEPENDABOT_PATH=./.github/dependabot.yml
-DEPENDABOT_MODULES=$(filter-out ".", $(ALL_MODULES))
+.PHONY: delete-tag
+delete-tag: # example usage: make delete-tag tag=v1.100.1
+	@[ "$(tag)" ] || ( echo ">> 'tag' is not set"; exit 1 )
+	@echo "Deleting tag $(tag)"
+	@git tag -d $(tag)
+	@set -e; for dir in $(SUBMODULES); do \
+	  (echo Deleting tag "$${dir:2}/$(tag)" && \
+	 	git tag -d "$${dir:2}/$(tag)" ); \
+	done
+
+.PHONY: push-tag
+push-tag: # example usage: make push-tag tag=v1.100.1 remote=origin
+	@[ "$(tag)" ] || ( echo ">> 'tag' is not set"; exit 1 )
+	@[ "$(remote)" ] || ( echo ">> 'remote' is not set"; exit 1 )
+	@echo "Pushing tag $(tag) to $(remote)"
+	@git push $(remote) $(tag)
+	@set -e; for dir in $(SUBMODULES); do \
+	  (echo Pushing tag "$${dir:2}/$(tag) to $(remote)" && \
+	 	git push $(remote) "$${dir:2}/$(tag)"); \
+	done
+
+DEPENDABOT_PATH = /.github/dependabot.yml
 .PHONY: gendependabot
 gendependabot:
 	@echo "Recreate dependabot.yml file"
@@ -29,8 +62,21 @@ gendependabot:
 	@echo "updates:" >> ${DEPENDABOT_PATH}
 	@echo "Add entry for \"/\""
 	@echo "  - package-ecosystem: \"gomod\"\n    directory: \"/\"\n    schedule:\n      interval: \"weekly\"" >> ${DEPENDABOT_PATH}
-	@set -e; for dir in $(DEPENDABOT_MODULES); do \
+	@set -e; for dir in $(SUBMODULES); do \
 		(echo "Add entry for \"$${dir:1}\"" && \
 		  echo "  - package-ecosystem: \"gomod\"\n    directory: \"$${dir:1}\"\n    schedule:\n      interval: \"weekly\"" >> ${DEPENDABOT_PATH} ); \
 	done
 
+.PHONY: for-all
+for-all: # run a command in all modules, example: make for-all cmd="go mod tidy"
+	@[ "$(cmd)" ] || ( echo ">> 'cmd' is not set"; exit 1 )
+	${call for-all-modules, $(cmd)}
+
+define for-all-modules # run provided command for each module
+    @EXIT=0 ;\
+	for dir in $(ALL_MODULES); do \
+	  echo "${1} in $${dir}"; \
+	  (cd "$${dir}" && ${1}) || EXIT=$$?; \
+	done ;\
+	exit $$EXIT
+endef
