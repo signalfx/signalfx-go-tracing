@@ -9,7 +9,6 @@ require (
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
 	github.com/facebookgo/stackerr v0.0.0-20150612192056-c2fcf88613f4 // indirect
 	github.com/go-kit/kit v0.10.0 // indirect
-	github.com/gocql/gocql v0.0.0-20200410100145-b454769479c6
 	github.com/golang/protobuf v1.4.0
 	github.com/gorilla/mux v1.7.4
 	github.com/graph-gophers/graphql-go v0.0.0-20200309224638-dae41bde9ef9
@@ -36,6 +35,7 @@ require (
 	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68
 	google.golang.org/api v0.21.0
 	google.golang.org/grpc v1.28.1
+	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/olivere/elastic.v3 v3.0.75
 	gopkg.in/olivere/elastic.v5 v5.0.85
 	k8s.io/apimachinery v0.0.0-20190817020851-f2f3a405f61d
