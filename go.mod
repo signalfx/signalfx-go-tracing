@@ -17,11 +17,10 @@ require (
 	github.com/pierrec/lz4 v2.5.1+incompatible // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
 	github.com/signalfx/golib v2.4.0+incompatible
+	github.com/smartystreets/assertions v1.0.1 // indirect
 	github.com/stretchr/testify v1.5.1
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/tidwall/buntdb v1.1.2
 	github.com/tinylib/msgp v1.1.0
 	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68
-	gopkg.in/olivere/elastic.v3 v3.0.75
-	gopkg.in/olivere/elastic.v5 v5.0.85
 )
