@@ -8,7 +8,6 @@ require (
 	github.com/dropbox/godropbox v0.0.0-20200228041828-52ad444d3502 // indirect
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
 	github.com/facebookgo/stackerr v0.0.0-20150612192056-c2fcf88613f4 // indirect
-	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-chi/chi v4.1.1+incompatible
 	github.com/go-kit/kit v0.10.0 // indirect
 	github.com/gocql/gocql v0.0.0-20200410100145-b454769479c6
@@ -28,11 +27,11 @@ require (
 	github.com/pierrec/lz4 v2.5.1+incompatible // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
 	github.com/signalfx/golib v2.4.0+incompatible
+	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/stretchr/testify v1.5.1
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/tidwall/buntdb v1.1.2
 	github.com/tinylib/msgp v1.1.0
-	go.mongodb.org/mongo-driver v1.3.2
 	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68
