@@ -243,6 +243,70 @@ workflows:
   build_test:
     jobs:
       - lint_vet
+      - go_test:
+          # test all remaining contrib tests not included in the other jobs
+          name: test_contrib
+          # disable checkptr until this issue gets resolved: https://github.com/tidwall/buntdb/issues/62
+          options: -v -race -gcflags=all=-d=checkptr=0
+          packages: "`go list ./contrib/... | grep -v -P 'elastic|kafka' | sed 's|github.com/signalfx/signalfx-go-tracing|.|g' | xargs`"
+      - go_test:
+          name: test_aws
+          module: ./contrib/aws/aws-sdk-go/aws
+      - go_test:
+          name: test_memcached
+          executor: go_memcached
+          module: ./contrib/bradfitz/gomemcache/memcache
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:11211
+      - go_test:
+          name: test_confluent-kafka-go
+          executor: go_kafka_zookeeper
+          module: ./contrib/confluentinc/confluent-kafka-go/kafka
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:2181
+            - dockerize_wait:
+                address: tcp://localhost:9092
+      - go_test:
+          name: test_sql
+          executor: go_sql
+          module: ./contrib/database/sql
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:3306
+            - dockerize_wait:
+                address: tcp://localhost:5432
+      - go_test:
+          name: test_go-restful
+          module: ./contrib/emicklei/go-restful
+      - go_test:
+          name: test_redigo_old
+          executor: go_redis
+          module: ./contrib/garyburd/redigo
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:6379
+      - go_test:
+          name: test_gin
+          module: ./contrib/gin-gonic/gin
+      - go_test:
+          name: test_mongo_globalsign
+          executor: go_mongo
+          module: ./contrib/globalsign/mgo
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:27017
+      - go_test:
+          name: test_chi
+          module: ./contrib/go-chi/chi
+      - go_test:
+          name: test_redis
+          executor: go_redis
+          module: ./contrib/go-redis/redis
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:6379
       # - go_test:
       #    name: test_cassandra
       #    executor: go_cassandra
@@ -252,11 +316,21 @@ workflows:
       #          address: tcp://localhost:9042
       #          timeout: 2m
       - go_test:
-          # test all remaining contrib tests not included in the other jobs
-          name: test_contrib
-          # disable checkptr until this issue gets resolved: https://github.com/tidwall/buntdb/issues/62
-          options: -v -race -gcflags=all=-d=checkptr=0
-          packages: "`go list ./contrib/... | grep -v -P 'elastic|kafka' | sed 's|github.com/signalfx/signalfx-go-tracing|.|g' | xargs`"
+          name: test_redigo
+          executor: go_redis
+          module: ./contrib/gomodule/redigo
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:6379
+      - go_test:
+          name: test_google-api
+          module: ./contrib/google.golang.org/api
+      - go_test:
+          name: test_google-grpc
+          module: ./contrib/google.golang.org/grpc
+      - go_test:
+          name: test_google-grpc.v12
+          module: ./contrib/google.golang.org/grpc.v12
       - go_test:
           name: test_ddtrace
           packages: "./ddtrace/..."
@@ -279,56 +353,12 @@ workflows:
             - dockerize_wait:
                 address: tcp://localhost:9092
       - go_test:
-          name: test_memcached
-          executor: go_memcached
-          module: ./contrib/bradfitz/gomemcache/memcache
-          after_deps:
-            - dockerize_wait:
-                address: tcp://localhost:11211
-      - go_test:
-          name: test_mongo_globalsign
-          executor: go_mongo
-          module: ./contrib/globalsign/mgo
-          after_deps:
-            - dockerize_wait:
-                address: tcp://localhost:27017
-      - go_test:
           name: test_mongo
           executor: go_mongo
           module: ./contrib/mongodb/mongo-go-driver/mongo
           after_deps:
             - dockerize_wait:
                 address: tcp://localhost:27017
-      - go_test:
-          name: test_redigo_old
-          executor: go_redis
-          module: ./contrib/garyburd/redigo
-          after_deps:
-            - dockerize_wait:
-                address: tcp://localhost:6379
-      - go_test:
-          name: test_redis
-          executor: go_redis
-          module: ./contrib/go-redis/redis
-          after_deps:
-            - dockerize_wait:
-                address: tcp://localhost:6379
-      - go_test:
-          name: test_redigo
-          executor: go_redis
-          module: ./contrib/gomodule/redigo
-          after_deps:
-            - dockerize_wait:
-                address: tcp://localhost:6379
-      - go_test:
-          name: test_sql
-          executor: go_sql
-          module: ./contrib/database/sql
-          after_deps:
-            - dockerize_wait:
-                address: tcp://localhost:3306
-            - dockerize_wait:
-                address: tcp://localhost:5432
       - go_test:
           name: test_sqlx
           executor: go_sql
