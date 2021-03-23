@@ -362,6 +362,12 @@ workflows:
           name: test_kubernetes
           module: ./contrib/k8s.io/client-go/kubernetes
       - go_test:
+          name: test_echo
+          module: ./contrib/labstack/echo
+      - go_test:
+          name: test_echo.v4
+          module: ./contrib/labstack/echo.v4
+      - go_test:
           name: test_ddtrace
           packages: "./ddtrace/..."
       - go_test:

@@ -11,8 +11,6 @@ require (
 	github.com/go-kit/kit v0.10.0 // indirect
 	github.com/golang/protobuf v1.4.0 // indirect
 	github.com/juju/testing v0.0.0-20210302031854-2c7ee8570c07 // indirect
-	github.com/labstack/echo v3.3.10+incompatible
-	github.com/labstack/echo/v4 v4.2.1
 	github.com/mailru/easyjson v0.7.1
 	github.com/miekg/dns v1.1.29
 	github.com/opentracing/opentracing-go v1.1.0
