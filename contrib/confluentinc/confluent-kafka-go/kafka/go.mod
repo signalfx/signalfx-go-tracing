@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/confluentinc/confluent-kafka-go v1.4.0
 	github.com/signalfx/signalfx-go-tracing v1.7.0
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.7.0
 )
 
 replace github.com/signalfx/signalfx-go-tracing => ../../../../

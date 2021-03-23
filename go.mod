@@ -14,7 +14,7 @@ require (
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/signalfx/golib v2.4.0+incompatible
 	github.com/smartystreets/assertions v1.0.1 // indirect
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.7.0
 	github.com/tinylib/msgp v1.1.0
 	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68
 )
