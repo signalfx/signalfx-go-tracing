@@ -256,7 +256,7 @@ workflows:
           name: test_contrib
           # disable checkptr until this issue gets resolved: https://github.com/tidwall/buntdb/issues/62
           options: -v -race -gcflags=all=-d=checkptr=0
-          packages: "`go list ./contrib/... | grep -v -P 'gocql|elastic|kafka|globalsign|mongo|redis|redigo' | sed 's|github.com/signalfx/signalfx-go-tracing|.|g' | xargs`"
+          packages: "`go list ./contrib/... | grep -v -P 'gocql|elastic|kafka|globalsign|mongo' | sed 's|github.com/signalfx/signalfx-go-tracing|.|g' | xargs`"
       - go_test:
           name: test_ddtrace
           packages: "./ddtrace/..."
@@ -293,9 +293,16 @@ workflows:
             - dockerize_wait:
                 address: tcp://localhost:27017
       - go_test:
+          name: test_redigo
+          executor: go_redis
+          module: ./contrib/garyburd/redigo
+          after_deps:
+            - dockerize_wait:
+                address: tcp://localhost:6379
+      - go_test:
           name: test_redis
           executor: go_redis
-          packages: "`go list ./contrib/... | grep -P 'redis|redigo' | xargs`"
+          module: ./contrib/go-redis/redis
           after_deps:
             - dockerize_wait:
                 address: tcp://localhost:6379
