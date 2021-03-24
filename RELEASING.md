@@ -37,8 +37,7 @@ It is critical you make sure the version you push upstream is correct.
     make add-tag tag=<new tag>
     ```
 
-2. Push tags to the upstream remote (not your fork: `github.com/open-telemetry/opentelemetry-go.git`).
-    Make sure you push all sub-modules as well.
+2. Push tags to the upstream remote (not your fork): `github.com/signalfx/signalfx-go-tracing.git`.
 
     ```sh
     make push-tag tag=<new tag> remote=upstream
@@ -46,5 +45,5 @@ It is critical you make sure the version you push upstream is correct.
 
 ## Release
 
-Finally create a Release for the new `<new tag>` on GitHub.
-The release body should include all the release notes for this release.
+1. Create a Release for the new `<new tag>` on GitHub. The release body should include all the release notes for this release taken from [CHANGELOG.md](CHANGELOG.md#Unreleased).
+2. Update [CHANGELOG.md](CHANGELOG.md) with new the new release.
