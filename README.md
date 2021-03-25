@@ -1,7 +1,9 @@
 # SignalFx Tracing Library for Go
 
+[![GitHub Release](https://img.shields.io/github/v/release/golang-templates/seed)](https://github.com/signalfx/signalfx-go-tracing/releases)
+[![Go Reference](https://pkg.go.dev/badge/github.com/golang-templates/seed.svg)](https://pkg.go.dev/github.com/signalfx/signalfx-go-tracing)
+[![go.mod](https://img.shields.io/github/go-mod/go-version/golang-templates/seed)](go.mod)
 [![CircleCI](https://circleci.com/gh/signalfx/signalfx-go-tracing/tree/master.svg?style=svg)](https://circleci.com/gh/signalfx/signalfx-go-tracing/tree/master)
-[![GoDoc](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing?status.svg)](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing)
 
 The SignalFx Tracing Library for Go helps you automatically instrument
 Go applications with instrumented library helpers and a tracer to capture
@@ -137,19 +139,7 @@ func main() {
 
 ```
 
-## API
-
-See the SignalFx Tracing Library for Go API on
-[godoc](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing).
-
 ## Testing
-
-Test locally using the Go toolset. The grpc.v12 integration will fail because
-it covers for deprecated methods. This is expected. In the CI environment we
-vendor this version of the library inside the integration. Under normal
-circumstances this is not something that we want to do, because users using
-this integration might be running versions different from the vendored one,
-creating hard to debug conflicts.
 
 To run integration tests locally, you should set the `INTEGRATION` environment
 variable. The dependencies of the integration tests are best run via Docker.
