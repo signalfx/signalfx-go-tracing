@@ -8,12 +8,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.7.0] - 2021-03-25
+
 ### Changed
 
 - Migrate from dep to Go Modules. ([#67](https://github.com/signalfx/signalfx-go-tracing/pull/67))
 - Instrument `github.com/Shopify/sarama` instead of deprecated `gopkg.in/Shopify/sarama.v1`. ([#67](https://github.com/signalfx/signalfx-go-tracing/pull/67))
 
-## [1.6.2] - 2021-02-12
+## [1.6.2] - 2021-03-12
 
 ### Fixed
 
@@ -169,7 +171,8 @@ created by testing.(*T).Run
 
 - Add SpanKind for gRPC Server and Client. ([#25](https://github.com/signalfx/signalfx-go-tracing/pull/25))
 
-[Unreleased]: https://github.com/signalfx/signalfx-go-tracing/compare/v1.6.2...HEAD
+[Unreleased]: https://github.com/signalfx/signalfx-go-tracing/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.7.0
 [1.6.2]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.6.2
 [1.6.1]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.6.1
 [1.6.0]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.6.0
