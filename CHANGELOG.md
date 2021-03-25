@@ -17,27 +17,31 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
-- Fix MongoDB instrumentation. ([#49](https://github.com/signalfx/signalfx-go-tracing/issues/49))
+- Fix MongoDB instrumentation. ([#65](https://github.com/signalfx/signalfx-go-tracing/pull/65))
 
 ## [1.6.1] - 2020-12-14
 
-TODO
+### Added
+
+- Add `db.type` tag to Redis instrumentations. ([#53](https://github.com/signalfx/signalfx-go-tracing/pull/53))
 
 ## [1.6.0] - 2020-09-29
 
 ### Changed
 
-- go-redis instrumentation will try to substitute any values from commands with `?`.
+- go-redis instrumentation will try to substitute any values from commands with `?`. ([#50](https://github.com/signalfx/signalfx-go-tracing/pull/50))
 
 ## [1.5.0] - 2020-09-17
 
-TODO
+### Added
+
+- Add `TraceIDHex` and `SpanIDHex` functions that return IDs from `ddtrace.SpanContext`. ([#48](https://github.com/signalfx/signalfx-go-tracing/pull/48))
 
 ## [1.4.2] - 2020-09-14
 
 ### Fixed
 
-- Fix grpc instrumentation to correctly add span.kind tags.
+- Fix grpc instrumentation to correctly add span.kind tags. ([#47](https://github.com/signalfx/signalfx-go-tracing/pull/47))
 
 ## [1.4.1] - 2020-09-02
 
@@ -55,13 +59,13 @@ Limiting the size of span tags/attributesThis can be done in the following ways:
 
 ### Added
 
-- Add support for SIGNALFX_RECORDED_VALUE_MAX_LENGTH.
+- Add support for SIGNALFX_RECORDED_VALUE_MAX_LENGTH. ([#42](https://github.com/signalfx/signalfx-go-tracing/pull/42))
 
 ## [1.3.1] - 2020-08-12
 
 ### Fixed
 
-- Ensure that redundant span.kind tag is not set for Zipkin and that its kind field is always uppercase.
+- Ensure that redundant span.kind tag is not set for Zipkin and that its kind field is always uppercase. ([#41](https://github.com/signalfx/signalfx-go-tracing/pull/41))
 
 ## [1.3.0] - 2020-08-05
 
@@ -84,33 +88,39 @@ instead of:
 
 ### Added
 
-- Add support for echo/v4.
+- Add support for echo/v4. ([#40](https://github.com/signalfx/signalfx-go-tracing/pull/40))
 
 ## [1.2.3] - 2020-07-31
 
-TODO
+### Fixed
+
+- Fix version number returned in code.
 
 ## [1.2.2] - 2020-07-31
 
 ### Fixed
 
-- Redis instrumentation correctly adds span.kind=client tag to database operation spans.
+- Redis instrumentation correctly adds span.kind=client tag to database operation spans. ([#39](https://github.com/signalfx/signalfx-go-tracing/pull/39))
 
 ## [1.2.1] - 2020-07-30
 
+### Added
+
+- If `SIGNALFX_SERVER_TIMING_CONTEXT` environemntal variable is `true`, pass trace context in [traceparent form](https://www.w3.org/TR/trace-context/#traceparent-header) over a [Server-Timing header](https://www.w3.org/TR/server-timing/). ([#38](https://github.com/signalfx/signalfx-go-tracing/pull/38))
+
 ### Fixed
 
-- Fix an issue with opentracing-go 1.2 where span.Tracer would not return a compatible opentracing instance.
+- Fix an issue with opentracing-go 1.2 where span.Tracer would not return a compatible opentracing instance. ([#37](https://github.com/signalfx/signalfx-go-tracing/pull/37))
 
 ## [1.2.0] - 2020-05-20
 
 ### Added
 
-- Add `signalfx.tracing.library` and `signalfx.tracing.version` tags to local root span for each trace.
+- Add `signalfx.tracing.library` and `signalfx.tracing.version` tags to local root span for each trace. ([#33](https://github.com/signalfx/signalfx-go-tracing/pull/33))
 
 ### Changed
 
-- Change default service name to unnamed-go-service.
+- Change default service name to unnamed-go-service. ([#33](https://github.com/signalfx/signalfx-go-tracing/pull/33))
 
 ## [1.1.0] - 2020-04-21
 
@@ -145,20 +155,19 @@ created by testing.(*T).Run
 
 ### Changed
 
-- Use SignalFx semantic conventions to represent errors in spans as attributes.
+- Use SignalFx semantic conventions to represent errors in spans as attributes. ([#29](https://github.com/signalfx/signalfx-go-tracing/pull/29))
 
 ## [1.0.2] - 2020-04-02
 
 ### Added
 
-- Set B3 propagation as default http codec.
-- Documentation improvements.
+- Set B3 propagation as default http codec. ([#28](https://github.com/signalfx/signalfx-go-tracing/pull/28))
 
 ## [1.0.1] - 2019-10-21
 
 ### Added
 
-- Add SpanKind for gRPC Server and Client.
+- Add SpanKind for gRPC Server and Client. ([#25](https://github.com/signalfx/signalfx-go-tracing/pull/25))
 
 [Unreleased]: https://github.com/signalfx/signalfx-go-tracing/compare/v1.6.2...HEAD
 [1.6.2]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.6.2
