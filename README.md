@@ -22,10 +22,10 @@ These are the supported libraries you can instrument:
 | Library | Version |
 | ------- | ------- |
 | [database/sql](contrib/database/sql) | Standard Library |
-| [github.com/gin-gonic/gin](contrib/gin-gonic/gin) | v1.6.2+ |
-| [github.com/gorilla/mux](contrib/gorilla/mux) | v1.7.4+ |
-| [github.com/labstack/echo](contrib/labstack/echo.v4) | v4.2.1+ |
-| [go.mongodb.org/mongo-driver](contrib/mongodb/mongo-go-driver) | 1.3.2+ |
+| [github.com/gin-gonic/gin](contrib/gin-gonic/gin) | v1.6.2 |
+| [github.com/gorilla/mux](contrib/gorilla/mux) | v1.7.4 |
+| [github.com/labstack/echo](contrib/labstack/echo.v4) | v4.2.1 |
+| [go.mongodb.org/mongo-driver](contrib/mongodb/mongo-go-driver) | v1.3.2 |
 | [net/http](contrib/net/http) | Standard Library |
 
 Other libraries are available to instrument, but are in beta and aren't
