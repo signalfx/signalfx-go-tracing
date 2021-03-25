@@ -1,8 +1,8 @@
 # SignalFx Tracing Library for Go
 
-[![GitHub Release](https://img.shields.io/github/v/release/golang-templates/seed)](https://github.com/signalfx/signalfx-go-tracing/releases)
-[![Go Reference](https://pkg.go.dev/badge/github.com/golang-templates/seed.svg)](https://pkg.go.dev/github.com/signalfx/signalfx-go-tracing)
-[![go.mod](https://img.shields.io/github/go-mod/go-version/golang-templates/seed)](go.mod)
+[![GitHub Release](https://img.shields.io/github/v/release/signalfx/signalfx-go-tracing)](https://github.com/signalfx/signalfx-go-tracing/releases)
+[![Go Reference](https://pkg.go.dev/badge/github.com/signalfx/signalfx-go-tracing.svg)](https://pkg.go.dev/github.com/signalfx/signalfx-go-tracing)
+[![go.mod](https://img.shields.io/github/go-mod/go-version/signalfx/signalfx-go-tracing)](go.mod)
 [![CircleCI](https://circleci.com/gh/signalfx/signalfx-go-tracing/tree/master.svg?style=svg)](https://circleci.com/gh/signalfx/signalfx-go-tracing/tree/master)
 
 The SignalFx Tracing Library for Go helps you automatically instrument
