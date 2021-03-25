@@ -1,7 +1,7 @@
+# SignalFx Tracing Library for Go
+
 [![CircleCI](https://circleci.com/gh/signalfx/signalfx-go-tracing/tree/master.svg?style=svg)](https://circleci.com/gh/signalfx/signalfx-go-tracing/tree/master)
 [![GoDoc](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing?status.svg)](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing)
-
-# SignalFx Tracing Library for Go
 
 The SignalFx Tracing Library for Go helps you automatically instrument
 Go applications with instrumented library helpers and a tracer to capture
@@ -13,18 +13,17 @@ manually instrument Go applications with the OpenTracing API.
 These are the requirements to use the SignalFx Tracing Library for Go:
 
 * Go 1.12+
-* `mod` or `dep` dependency management tool
+* [Go Modules](https://golang.org/ref/mod) as dependency management
 
 These are the supported libraries you can instrument:
 
 | Library | Version |
 | ------- | ------- |
 | [database/sql](contrib/database/sql) | Standard Library |
-| [gin-gonic/gin](contrib/gin-gonic/gin) | 1.5.0 |
-| [globalsign/mgo](contrib/globalsign/mgo) | r2018.06.15+ |
-| [gorilla/mux](contrib/gorilla/mux) | 1.7+ |
-| [labstack/echo](contrib/labstack/echo) | 4.0+ |
-| [mongodb/mongo-go-driver](contrib/mongodb/mongo-go-driver) | 1.0+ |
+| [github.com/gin-gonic/gin](contrib/gin-gonic/gin) | v1.6.2+ |
+| [github.com/gorilla/mux](contrib/gorilla/mux) | v1.7.4+ |
+| [github.com/labstack/echo](contrib/labstack/echo.v4) | v4.2.1+ |
+| [go.mongodb.org/mongo-driver](contrib/mongodb/mongo-go-driver) | 1.3.2+ |
 | [net/http](contrib/net/http) | Standard Library |
 
 Other libraries are available to instrument, but are in beta and aren't
@@ -45,22 +44,21 @@ If the default configuration values don't apply for your environment, override t
 
 ## Instrument a Go application
 
-Follow these steps to instrument target libraries with provided instrumentors. 
+Follow these steps to instrument target libraries with provided instrumentors.
 
 For more information about how to instrument a Go application, see the
 [examples](https://github.com/signalfx/tracing-examples/tree/master/signalfx-tracing/signalfx-go-tracing).
 
-1. Import `github.com/signalfx/signalfx-go-tracing` to your `go mod` or `dep`
-dependencies.
+1. Import `github.com/signalfx/signalfx-go-tracing` to your `go mod`.
 2. Import the instrumentor for the target library you want to instrument and
-replace utilities with their traced equivalents. 
+replace utilities with their traced equivalents.
 
    Find an instrumentor for each supported target library in the [contrib](contrib)
    directory. Each instrumentor has an `example_test.go` file that demonstrates
    how to instrument a target library. Don't import examples directly in your application.
 3. Enable tracing globally with
 [tracing.Start()](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#Start).
-This creates a tracer and registers it as the OpenTracing global tracer. 
+This creates a tracer and registers it as the OpenTracing global tracer.
 
 ## Inject trace context in HTTP requests
 
@@ -68,7 +66,7 @@ Link individual log entries with trace IDs and span IDs associated with correspo
 
 To inject trace context in HTTP requests, follow these steps:
 
-1. Replace the default HTTP multiplexer: 
+1. Replace the default HTTP multiplexer:
 
    ```go
    import (
@@ -77,14 +75,18 @@ To inject trace context in HTTP requests, follow these steps:
      "github.com/signalfx/signalfx-go-tracing/tracing" // helper
    )
    ```
+
 2. Create the new HTTP multiplexer and attach it to your HTTP instance:
+
    ```go
    mux := httptrace.NewServeMux()
    mux.HandleFunc("/", handler) // handler to your function
    // add all other routes
    http.ListenAndServe(":8888", mux)
    ```
+
 3. Use a helper for the tracer to get the span ID and trace ID from each request:
+
    ```go
    func TraceIdFromCtx(ctx context.Context) (result string) {
      if span, ok := tracer.SpanFromContext(ctx); ok {
@@ -93,11 +95,12 @@ To inject trace context in HTTP requests, follow these steps:
      return
    }
    ```
+
    It cooperates with the global tracer instance.
 
 ### Example log injection configuration
 
-This is an example of what injecting span IDs and trace IDs can look like in your environment: 
+This is an example of what injecting span IDs and trace IDs can look like in your environment:
 
 ```go
 package main
