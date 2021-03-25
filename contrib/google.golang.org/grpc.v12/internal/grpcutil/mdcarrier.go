@@ -1,4 +1,4 @@
-package grpcutil // import "github.com/signalfx/signalfx-go-tracing/contrib/google.golang.org/internal/grpcutil"
+package grpcutil
 
 import (
 	"strings"
