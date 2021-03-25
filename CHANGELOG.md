@@ -106,7 +106,7 @@ instead of:
 
 ### Added
 
-- If `SIGNALFX_SERVER_TIMING_CONTEXT` environemntal variable is `true`, pass trace context in [traceparent form](https://www.w3.org/TR/trace-context/#traceparent-header) over a [Server-Timing header](https://www.w3.org/TR/server-timing/). ([#38](https://github.com/signalfx/signalfx-go-tracing/pull/38))
+- If `SIGNALFX_SERVER_TIMING_CONTEXT` environemntal variable is `true`, pass trace context in [traceparent form](https://www.w3.org/TR/trace-context/#traceparent-header) over a [Server-Timing header](https://www.w3.org/TR/server-timing/). ([#34](https://github.com/signalfx/signalfx-go-tracing/pull/34))
 
 ### Fixed
 
