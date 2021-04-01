@@ -6,7 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased] 1.8.0
+
+### Changed
+
+- Enable `SIGNALFX_SERVER_TIMING_CONTEXT` by default. ([#96](https://github.com/signalfx/signalfx-go-tracing/pull/96))
 
 ## [1.7.0] - 2021-03-25
 
