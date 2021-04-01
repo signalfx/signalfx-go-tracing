@@ -42,8 +42,8 @@ If the default configuration values don't apply for your environment, override t
 | [WithEndpointURL](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#WithEndpointURL) | `SIGNALFX_ENDPOINT_URL` | `http://localhost:9080/v1/trace` | The URL to send traces to. Send spans to a Smart Agent, OpenTelemetry Collector, or a SignalFx ingest endpoint.  |
 | [WithAccessToken](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#WithAccessToken) | `SIGNALFX_ACCESS_TOKEN` | none | The access token for your SignalFx organization. |
 | [WithGlobalTag](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#WithGlobalTag) | `SIGNALFX_SPAN_TAGS` | none | Comma-separated list of tags included in every reported span. For example, "key1:val1,key2:val2". Use only string values for tags.|
-| [WithRecordedValueMaxLength](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#WithRecordedValueMaxLength) | `SIGNALFX_RECORDED_VALUE_MAX_LENGTH` | 1200 | The maximum number of characters for any Zipkin-encoded tagged or logged value. Behaviour disabled when set to -1. |
-| - | `SIGNALFX_SERVER_TIMING_CONTEXT` | none | When set to `true`, adds `Server-Timing` header to HTTP responses for [net/http](contrib/net/http) and [github.com/gorilla/mux](contrib/gorilla/mux) instrumentations. |
+| [WithRecordedValueMaxLength](https://godoc.org/github.com/signalfx/signalfx-go-tracing/tracing/#WithRecordedValueMaxLength) | `SIGNALFX_RECORDED_VALUE_MAX_LENGTH` | `1200` | The maximum number of characters for any Zipkin-encoded tagged or logged value. Behaviour disabled when set to -1. |
+| - | `SIGNALFX_SERVER_TIMING_CONTEXT` | `true` | Adds `Server-Timing` header to HTTP responses for [net/http](contrib/net/http) and [github.com/gorilla/mux](contrib/gorilla/mux) instrumentations. |
 
 ## Instrument a Go application
 

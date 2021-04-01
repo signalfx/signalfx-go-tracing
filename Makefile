@@ -68,7 +68,7 @@ gendependabot:
 	done
 
 .PHONY: for-all
-for-all: # run a command in all modules, example: make for-all cmd="go mod tidy"
+for-all: # run a command in all modules, example: make for-all cmd="go test ./..."
 	@[ "$(cmd)" ] || ( echo ">> 'cmd' is not set"; exit 1 )
 	${call for-all-modules, $(cmd)}
 
