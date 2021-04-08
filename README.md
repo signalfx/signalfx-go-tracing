@@ -3,7 +3,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/signalfx/signalfx-go-tracing)](https://github.com/signalfx/signalfx-go-tracing/releases)
 [![Go Reference](https://pkg.go.dev/badge/github.com/signalfx/signalfx-go-tracing.svg)](https://pkg.go.dev/github.com/signalfx/signalfx-go-tracing)
 [![go.mod](https://img.shields.io/github/go-mod/go-version/signalfx/signalfx-go-tracing)](go.mod)
-[![CircleCI](https://circleci.com/gh/signalfx/signalfx-go-tracing/tree/master.svg?style=svg)](https://circleci.com/gh/signalfx/signalfx-go-tracing/tree/master)
+[![CircleCI](https://circleci.com/gh/signalfx/signalfx-go-tracing/tree/main.svg?style=svg)](https://circleci.com/gh/signalfx/signalfx-go-tracing/tree/main)
 
 The SignalFx Tracing Library for Go helps you automatically instrument
 Go applications with instrumented library helpers and a tracer to capture
@@ -50,7 +50,7 @@ If the default configuration values don't apply for your environment, override t
 Follow these steps to instrument target libraries with provided instrumentors.
 
 For more information about how to instrument a Go application, see the
-[examples](https://github.com/signalfx/tracing-examples/tree/master/signalfx-tracing/signalfx-go-tracing).
+[examples](https://github.com/signalfx/tracing-examples/tree/main/signalfx-tracing/signalfx-go-tracing).
 
 1. Import `github.com/signalfx/signalfx-go-tracing` to your `go mod`.
 2. Import the instrumentor for the target library you want to instrument and
@@ -145,7 +145,7 @@ func main() {
 To run integration tests locally, you should set the `INTEGRATION` environment
 variable. The dependencies of the integration tests are best run via Docker.
 To get an idea about the versions and the set-up take a look at our
-[CI config](https://github.com/signalfx/signalfx-go-tracing/blob/master/.circleci/config.yml).
+[CI config](https://github.com/signalfx/signalfx-go-tracing/blob/main/.circleci/config.yml).
 
 The best way to run the entire test suite is using the
 [CircleCI CLI](https://circleci.com/docs/2.0/local-jobs/). Simply run
