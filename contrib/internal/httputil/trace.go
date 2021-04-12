@@ -43,7 +43,7 @@ func TraceAndServe(h http.Handler, w http.ResponseWriter, r *http.Request, servi
 
 	w = wrapResponseWriter(w, span)
 
-	if v := os.Getenv("SIGNALFX_TRACE_RESPONSE_HEADER_ENABLED"); v == "" || v != "0" && !strings.EqualFold(v, "false") {
+	if v := os.Getenv("SIGNALFX_TRACE_RESPONSE_HEADER_ENABLED"); !strings.EqualFold(v, "false") {
 		if traceParent, ok := tracer.FormatAsTraceParent(span.Context()); ok {
 			w.Header().Add("Access-Control-Expose-Headers", "Server-Timing")
 			w.Header().Add("Server-Timing", traceParent)
