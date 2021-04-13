@@ -10,7 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
-- Enable `SIGNALFX_SERVER_TIMING_CONTEXT` by default. ([#96](https://github.com/signalfx/signalfx-go-tracing/pull/96))
+- Rename `SIGNALFX_SERVER_TIMING_CONTEXT` environmental variable to `SIGNALFX_TRACE_RESPONSE_HEADER_ENABLED` and enable it by default. ([#96](https://github.com/signalfx/signalfx-go-tracing/pull/96)) ([#117](https://github.com/signalfx/signalfx-go-tracing/pull/117))
 
 ## [1.7.0] - 2021-03-25
 
