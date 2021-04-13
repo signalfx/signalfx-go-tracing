@@ -10,13 +10,7 @@ Update go.mod for submodules to depend on the new release which will happen in t
     ./pre_release.sh -t <new tag>
     ```
 
-2. Verify the changes.
-
-    ```sh
-    git diff
-    ```
-
-    This should have changed the version for all modules to be `<new tag>`.
+2. Update [CHANGELOG.md](CHANGELOG.md) with new the new release.
 
 3. Push the changes to upstream and create a Pull Request on GitHub.
 
@@ -45,5 +39,4 @@ It is critical you make sure the version you push upstream is correct.
 
 ## Release
 
-1. Create a Release for the new `<new tag>` on GitHub. The release body should include all the release notes for this release taken from [CHANGELOG.md](CHANGELOG.md#Unreleased).
-2. Update [CHANGELOG.md](CHANGELOG.md) with new the new release.
+Create a Release for the new `<new tag>` on GitHub. The release body should include all the release notes for this release taken from [CHANGELOG.md](CHANGELOG.md#Unreleased).
