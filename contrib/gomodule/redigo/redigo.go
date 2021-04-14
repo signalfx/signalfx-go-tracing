@@ -93,6 +93,8 @@ func (tc Conn) newChildSpan(ctx context.Context) ddtrace.Span {
 	opts := []ddtrace.StartSpanOption{
 		tracer.SpanType(ext.SpanTypeRedis),
 		tracer.ServiceName(p.config.serviceName),
+		tracer.Tag(ext.DBType, "redis"),
+		tracer.Tag(ext.SpanKind, ext.SpanKindClient),
 	}
 	if rate := p.config.analyticsRate; rate > 0 {
 		opts = append(opts, tracer.Tag(ext.EventSampleRate, rate))

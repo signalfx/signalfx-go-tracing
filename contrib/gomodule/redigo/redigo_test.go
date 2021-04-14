@@ -7,11 +7,11 @@ import (
 	"testing"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/stretchr/testify/assert"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/mocktracer"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	"github.com/signalfx/signalfx-go-tracing/internal/globalconfig"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
@@ -42,6 +42,8 @@ func TestClient(t *testing.T) {
 	assert.Equal("SET", span.Tag(ext.ResourceName))
 	assert.Equal("127.0.0.1", span.Tag(ext.TargetHost))
 	assert.Equal("6379", span.Tag(ext.TargetPort))
+	assert.Equal("CLIENT", span.Tag(ext.SpanKind))
+	assert.Equal("redis", span.Tag(ext.DBType))
 	assert.Equal("SET 1 truck", span.Tag("redis.raw_command"))
 	assert.Equal("2", span.Tag("redis.args_length"))
 }

@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- Redigo instrumentation now adds `span.kind` and `db.type` attributes. ([#121](https://github.com/signalfx/signalfx-go-tracing/pull/121))
 - Sarama instrumentation now supports a `WithPeerServiceName` option. ([#119](https://github.com/signalfx/signalfx-go-tracing/pull/119))
 - Zipkin translator now correctly maps `consumer` and `producer` span kind values. ([#119](https://github.com/signalfx/signalfx-go-tracing/pull/119))
 
