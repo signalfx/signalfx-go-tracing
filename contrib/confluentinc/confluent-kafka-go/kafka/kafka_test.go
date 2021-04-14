@@ -71,7 +71,7 @@ func TestConsumerChannel(t *testing.T) {
 		assert.Equal(t, "kafka.consume", s.OperationName())
 		assert.Equal(t, "kafka", s.Tag(ext.ServiceName))
 		assert.Equal(t, "Consume Topic gotest", s.Tag(ext.ResourceName))
-		assert.Equal(t, "queue", s.Tag(ext.SpanType))
+		assert.Equal(t, "consumer", s.Tag(ext.SpanType))
 		assert.Equal(t, int32(1), s.Tag("partition"))
 		assert.Equal(t, 0.3, s.Tag(ext.EventSampleRate))
 		assert.Equal(t, kafka.Offset(i+1), s.Tag("offset"))
@@ -163,7 +163,7 @@ func TestConsumerPoll(t *testing.T) {
 	assert.Equal(t, "kafka", s0.Tag(ext.ServiceName))
 	assert.Equal(t, "Produce Topic gotest", s0.Tag(ext.ResourceName))
 	assert.Equal(t, 0.1, s0.Tag(ext.EventSampleRate))
-	assert.Equal(t, "queue", s0.Tag(ext.SpanType))
+	assert.Equal(t, "producer", s0.Tag(ext.SpanType))
 	assert.Equal(t, int32(0), s0.Tag("partition"))
 
 	s1 := spans[1] // consume
@@ -171,6 +171,6 @@ func TestConsumerPoll(t *testing.T) {
 	assert.Equal(t, "kafka", s1.Tag(ext.ServiceName))
 	assert.Equal(t, "Consume Topic gotest", s1.Tag(ext.ResourceName))
 	assert.Equal(t, nil, s1.Tag(ext.EventSampleRate))
-	assert.Equal(t, "queue", s1.Tag(ext.SpanType))
+	assert.Equal(t, "consumer", s1.Tag(ext.SpanType))
 	assert.Equal(t, int32(0), s1.Tag("partition"))
 }

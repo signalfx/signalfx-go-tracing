@@ -16,9 +16,11 @@ import (
 )
 
 const (
-	spanKind       = "span.kind"
-	spanKindServer = "SERVER"
-	spanKindClient = "CLIENT"
+	spanKind         = "span.kind"
+	spanKindServer   = "SERVER"
+	spanKindClient   = "CLIENT"
+	spanKindProducer = "PRODUCER"
+	spanKindConsumer = "CONSUMER"
 )
 
 var _ encoder = (*zipkinPayload)(nil)
@@ -167,6 +169,10 @@ func deriveKind(s *span) *string {
 		return pointer.String(spanKindClient)
 	case ext.SpanTypeSQL:
 		return pointer.String(spanKindClient)
+	case ext.SpanTypeMessageConsumer:
+		return pointer.String(spanKindConsumer)
+	case ext.SpanTypeMessageProducer:
+		return pointer.String(spanKindProducer)
 	}
 
 	return nil

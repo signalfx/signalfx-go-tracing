@@ -65,11 +65,11 @@ const (
 	// SpanTypeDNS marks a span as a DNS operation.
 	SpanTypeDNS = "dns"
 
-	// SpanTypeMessageConsumer marks a span as a queue operation
-	SpanTypeMessageConsumer = "queue"
+	// SpanTypeMessageConsumer marks a span as a consumer operation
+	SpanTypeMessageConsumer = "consumer"
 
-	// SpanTypeMessageProducer marks a span as a queue operation.
-	SpanTypeMessageProducer = "queue"
+	// SpanTypeMessageProducer marks a span as a producer operation.
+	SpanTypeMessageProducer = "producer"
 
 	// SpanTypeEcho marks a span as a echo request
 	SpanTypeEcho = "echo"

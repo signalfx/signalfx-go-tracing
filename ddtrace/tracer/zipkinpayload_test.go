@@ -2,13 +2,14 @@ package tracer
 
 import (
 	"bytes"
-	"github.com/mailru/easyjson"
-	sfxtrace "github.com/signalfx/golib/trace"
-	traceformat "github.com/signalfx/golib/trace/format"
 	"io/ioutil"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/mailru/easyjson"
+	sfxtrace "github.com/signalfx/golib/trace"
+	traceformat "github.com/signalfx/golib/trace/format"
 
 	"github.com/stretchr/testify/require"
 )
@@ -80,6 +81,8 @@ func TestSpanKindRemovedFromTags(t *testing.T) {
 	spanList := []*span{
 		&span{Meta: map[string]string{"span.kind": "server"}},
 		&span{Meta: map[string]string{"span.kind": "client"}},
+		&span{Meta: map[string]string{"span.kind": "producer"}},
+		&span{Meta: map[string]string{"span.kind": "consumer"}},
 	}
 
 	converted := payload.convertSpans(spanList)
@@ -88,6 +91,12 @@ func TestSpanKindRemovedFromTags(t *testing.T) {
 
 	require.Equal(map[string]string{}, converted[1].Tags)
 	require.Equal("CLIENT", *(converted[1].Kind))
+
+	require.Equal(map[string]string{}, converted[2].Tags)
+	require.Equal("PRODUCER", *(converted[2].Kind))
+
+	require.Equal(map[string]string{}, converted[3].Tags)
+	require.Equal("CONSUMER", *(converted[3].Kind))
 }
 
 // TestZipkinPayloadDecode ensures that whatever we push into the payload can
