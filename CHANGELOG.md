@@ -21,7 +21,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
-- Sarama instrumentation correctly identifies and finishes spans. ([#120](https://github.com/signalfx/signalfx-go-tracing/pull/120))
+- Sarama instrumentation correctly identifies spans. ([#120](https://github.com/signalfx/signalfx-go-tracing/pull/120))
 
 ## [1.8.0] - 2021-04-13
 
