@@ -17,6 +17,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - `ext.SpanTypeMessageConsumer` and `ext.SpanTypeMessageProducer` now evaluate to `consumer` and `producer` respectively instead of `queue`. ([#119](https://github.com/signalfx/signalfx-go-tracing/pull/119))
+- Sarama instrumentation requires Kafka version 0.11.0 or newer to work correctly. ([#120](https://github.com/signalfx/signalfx-go-tracing/pull/120))
+
+### Fixed
+
+- Sarama instrumentation correctly identifies and finishes spans. ([#120](https://github.com/signalfx/signalfx-go-tracing/pull/120))
 
 ## [1.8.0] - 2021-04-13
 

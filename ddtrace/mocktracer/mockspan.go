@@ -2,11 +2,12 @@ package mocktracer // import "github.com/signalfx/signalfx-go-tracing/ddtrace/mo
 
 import (
 	"fmt"
+	"sync"
+	"time"
+
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/log"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
-	"sync"
-	"time"
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
@@ -92,14 +93,13 @@ func newSpan(t *mocktracer, operationName string, cfg *ddtrace.StartSpanConfig) 
 
 type mockspan struct {
 	sync.RWMutex // guards below fields
-	name       string
-	tags       map[string]interface{}
-	finishTime time.Time
-
-	startTime time.Time
-	parentID  uint64
-	context   *spanContext
-	tracer    *mocktracer
+	name         string
+	tags         map[string]interface{}
+	finishTime   time.Time
+	startTime    time.Time
+	parentID     uint64
+	context      *spanContext
+	tracer       *mocktracer
 }
 
 func (s *mockspan) Finish() {
