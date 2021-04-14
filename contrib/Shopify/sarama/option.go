@@ -1,12 +1,14 @@
 package sarama
 
 type config struct {
-	serviceName   string
-	analyticsRate float64
+	serviceName     string
+	peerServiceName string
+	analyticsRate   float64
 }
 
 func defaults(cfg *config) {
 	cfg.serviceName = "kafka"
+	cfg.peerServiceName = "kafka"
 	// cfg.analyticsRate = globalconfig.AnalyticsRate()
 }
 
@@ -33,5 +35,12 @@ func WithAnalytics(on bool) Option {
 func WithAnalyticsRate(rate float64) Option {
 	return func(cfg *config) {
 		cfg.analyticsRate = rate
+	}
+}
+
+// WithPeerServiceName sets the given value as "peer.service" tag on all spans for intercepted client.
+func WithPeerServiceName(name string) Option {
+	return func(cfg *config) {
+		cfg.peerServiceName = name
 	}
 }

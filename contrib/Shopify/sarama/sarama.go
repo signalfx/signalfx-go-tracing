@@ -43,6 +43,7 @@ func WrapPartitionConsumer(pc sarama.PartitionConsumer, opts ...Option) sarama.P
 				tracer.SpanType(ext.SpanTypeMessageConsumer),
 				tracer.Tag("partition", msg.Partition),
 				tracer.Tag("offset", msg.Offset),
+				tracer.Tag("peer.service", cfg.peerServiceName),
 			}
 			if cfg.analyticsRate > 0 {
 				opts = append(opts, tracer.Tag(ext.EventSampleRate, cfg.analyticsRate))
@@ -241,6 +242,7 @@ func startProducerSpan(cfg *config, version sarama.KafkaVersion, msg *sarama.Pro
 		tracer.ServiceName(cfg.serviceName),
 		tracer.ResourceName("Produce Topic " + msg.Topic),
 		tracer.SpanType(ext.SpanTypeMessageProducer),
+		tracer.Tag("peer.service", cfg.peerServiceName),
 	}
 	if cfg.analyticsRate > 0 {
 		opts = append(opts, tracer.Tag(ext.EventSampleRate, cfg.analyticsRate))

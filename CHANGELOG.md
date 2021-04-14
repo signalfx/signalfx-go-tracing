@@ -8,6 +8,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Sarama instrumentation now supports a `WithPeerServiceName` option. ([#119](https://github.com/signalfx/signalfx-go-tracing/pull/119))
+- Zipkin translator now correctly maps `consumer` and `producer` span kind values. ([#119](https://github.com/signalfx/signalfx-go-tracing/pull/119))
+
+### Changed
+
+- `ext.SpanTypeMessageConsumer` and `ext.SpanTypeMessageProducer` now evaluate to `consumer` and `producer` respectively instead of `queue`. ([#119](https://github.com/signalfx/signalfx-go-tracing/pull/119))
+
 ## [1.8.0] - 2021-04-13
 
 ### Changed
