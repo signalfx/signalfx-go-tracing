@@ -26,10 +26,10 @@ mod-tidy:
 add-tag: # example usage: make add-tag tag=v1.100.1
 	@[ "$(tag)" ] || ( echo ">> 'tag' is not set"; exit 1 )
 	@echo "Adding tag $(tag)"
-	@git tag -a $(tag) -m "Version $(tag)"
+	@git tag -a $(tag) -s -m "Version $(tag)"
 	@set -e; for dir in $(SUBMODULES); do \
 	  (echo Adding tag "$${dir:2}/$(tag)" && \
-	 	git tag -a "$${dir:2}/$(tag)" -m "Version ${dir:2}/$(tag)" ); \
+	 	git tag -a "$${dir:2}/$(tag)" -s -m "Version ${dir:2}/$(tag)" ); \
 	done
 
 .PHONY: delete-tag
