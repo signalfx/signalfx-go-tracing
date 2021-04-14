@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
+	"github.com/stretchr/testify/assert"
 )
 
 func setupteardown(start, max int) func() {
@@ -246,8 +246,8 @@ func TestSpanFinishPriority(t *testing.T) {
 func TestTracePriorityLocked(t *testing.T) {
 	assert := assert.New(t)
 	b3Headers := TextMapCarrier(map[string]string{
-		b3TraceIDHeader:  "2",
-		b3SpanIDHeader: "2",
+		b3TraceIDHeader: "2",
+		b3SpanIDHeader:  "2",
 		b3SampledHeader: "2",
 	})
 
@@ -298,8 +298,8 @@ func TestNewSpanContext(t *testing.T) {
 		defer stop()
 		assert := assert.New(t)
 		ctx, err := NewPropagator(nil).Extract(TextMapCarrier(map[string]string{
-			b3TraceIDHeader:  "1",
-			b3SpanIDHeader: "2",
+			b3TraceIDHeader: "1",
+			b3SpanIDHeader:  "2",
 			b3SampledHeader: "3",
 		}))
 		assert.Nil(err)

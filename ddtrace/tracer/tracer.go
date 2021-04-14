@@ -123,6 +123,22 @@ func TraceIDHex(ctx ddtrace.SpanContext) string {
 	return ""
 }
 
+// SpanID returns the span ID from ddtrace.SpanContext
+func SpanID(ctx ddtrace.SpanContext) uint64 {
+	if c, ok := ctx.(*spanContext); ok {
+		return c.spanID
+	}
+	return 0
+}
+
+// TraceID returns the span ID from ddtrace.SpanContext
+func TraceID(ctx ddtrace.SpanContext) uint64 {
+	if c, ok := ctx.(*spanContext); ok {
+		return c.traceID
+	}
+	return 0
+}
+
 const (
 	// payloadQueueSize is the buffer size of the trace channel.
 	payloadQueueSize = 1000

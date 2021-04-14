@@ -1160,3 +1160,23 @@ func BenchmarkTracerStackFrames(b *testing.B) {
 		span.FinishWithOptionsExt(StackFrames(64, 0))
 	}
 }
+
+type externalSpanContext struct{}
+
+func (e externalSpanContext) ForeachBaggageItem(handler func(k, v string) bool) {
+}
+
+func TestSpanAndTraceID(t *testing.T) {
+	c1 := &spanContext{}
+	assert.Equal(t, SpanID(c1), uint64(0))
+	assert.Equal(t, TraceID(c1), uint64(0))
+
+	c2 := &spanContext{spanID: 1, traceID: 2}
+	assert.Equal(t, SpanID(c2), uint64(1))
+	assert.Equal(t, TraceID(c2), uint64(2))
+
+	c3 := &externalSpanContext{}
+	assert.Equal(t, SpanID(c3), uint64(0))
+	assert.Equal(t, TraceID(c3), uint64(0))
+
+}

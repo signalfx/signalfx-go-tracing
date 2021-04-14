@@ -1,14 +1,15 @@
 package ddtrace // import "github.com/signalfx/signalfx-go-tracing/ddtrace"
 
 import (
+	"sync"
+
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/log"
-	"sync"
 )
 
 var (
 	mu           sync.RWMutex // guards globalTracer
-	globalTracer Tracer = &NoopTracer{}
+	globalTracer Tracer       = &NoopTracer{}
 )
 
 // SetGlobalTracer sets the global tracer to t.
