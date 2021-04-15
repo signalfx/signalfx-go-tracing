@@ -219,6 +219,8 @@ func TestAsyncProducer(t *testing.T) {
 			assert.Equal(t, "producer", s.Tag(ext.SpanType))
 			assert.Equal(t, "Produce Topic my_topic", s.Tag(ext.ResourceName))
 			assert.Equal(t, "kafka.produce", s.OperationName())
+			assert.Equal(t, "my_topic", s.Tag(ext.MessageBusDestination))
+			assert.Equal(t, "kafka", s.Tag(ext.PeerService))
 			assert.Equal(t, int32(0), s.Tag("partition"))
 			assert.Equal(t, int64(0), s.Tag("offset"))
 		}
@@ -257,6 +259,8 @@ func TestAsyncProducer(t *testing.T) {
 			assert.Equal(t, "producer", s.Tag(ext.SpanType))
 			assert.Equal(t, "Produce Topic my_topic", s.Tag(ext.ResourceName))
 			assert.Equal(t, "kafka.produce", s.OperationName())
+			assert.Equal(t, "my_topic", s.Tag(ext.MessageBusDestination))
+			assert.Equal(t, "kafka", s.Tag(ext.PeerService))
 			assert.Equal(t, int32(0), s.Tag("partition"))
 			assert.Equal(t, int64(0), s.Tag("offset"))
 		}

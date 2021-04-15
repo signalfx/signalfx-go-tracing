@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Sarama instrumentation now adds `message_bug.destination` attribute. ([#124](https://github.com/signalfx/signalfx-go-tracing/pull/124))
+
 ## [1.9.0] - 2021-04-14
 
 ### Added
