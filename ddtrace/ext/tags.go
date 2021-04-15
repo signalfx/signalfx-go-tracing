@@ -100,6 +100,10 @@ const (
 	// Stack is a stack trace
 	Stack = "stack"
 
+	// MessageBusDestination is an address at which messages can be exchanged in a messaging
+	// system such as kafka.
+	MessageBusDestination = "message_bus.destination"
+
 	// SFXTracingLibrary specifies the SignalFx tracing library that generated the span.
 	SFXTracingLibrary = "signalfx.tracing.library"
 
