@@ -50,7 +50,7 @@ If the default configuration values don't apply for your environment, override t
 Follow these steps to instrument target libraries with provided instrumentors.
 
 For more information about how to instrument a Go application, see the
-[examples](https://github.com/signalfx/tracing-examples/tree/main/signalfx-tracing/signalfx-go-tracing).
+[examples](https://github.com/signalfx/tracing-examples/tree/master/signalfx-tracing/signalfx-go-tracing).
 
 1. Import `github.com/signalfx/signalfx-go-tracing` to your `go mod`.
 2. Import the instrumentor for the target library you want to instrument and
