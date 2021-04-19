@@ -8,6 +8,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.9.2] - 2021-04-19
+
 ### Fixed
 
 - Fix deadlock and race condition in sarama instrumentation. ([#128](https://github.com/signalfx/signalfx-go-tracing/pull/128))
@@ -204,7 +206,8 @@ created by testing.(*T).Run
 
 - Add SpanKind for gRPC Server and Client. ([#25](https://github.com/signalfx/signalfx-go-tracing/pull/25))
 
-[Unreleased]: https://github.com/signalfx/signalfx-go-tracing/compare/v1.9.1...HEAD
+[Unreleased]: https://github.com/signalfx/signalfx-go-tracing/compare/v1.9.2...HEAD
+[1.9.2]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.9.2
 [1.9.1]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.9.1
 [1.9.0]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.9.0
 [1.8.0]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.8.0
