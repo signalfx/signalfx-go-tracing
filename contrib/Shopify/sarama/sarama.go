@@ -211,7 +211,7 @@ func WrapAsyncProducer(saramaConfig *sarama.Config, p sarama.AsyncProducer, opts
 					// if returning successes isn't enabled, we just finish the
 					// span right away because there's no way to know when it will
 					// be done
-					finishProducerSpan(span, msg.Partition, msg.Offset, nil)
+					span.FinishWithOptionsExt()
 				}
 			case msg, ok := <-p.Successes():
 				if !ok {
