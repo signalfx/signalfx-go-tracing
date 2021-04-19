@@ -208,9 +208,11 @@ func WrapAsyncProducer(saramaConfig *sarama.Config, p sarama.AsyncProducer, opts
 				if headersSupported && saramaConfig.Producer.Return.Successes {
 					spans[tracer.SpanID(span.Context())] = span
 				} else {
-					// if returning successes isn't enabled, we just finish the
-					// span right away because there's no way to know when it will
-					// be done
+					// If returning successes isn't enabled, we just finish the span right away,
+					// because there's no way to know when it will be done.
+					// Note: Partition and Offset fields should not be accessed
+					// until the message is successfully published
+					// as this can result in data races.
 					span.FinishWithOptionsExt()
 				}
 			case msg, ok := <-p.Successes():
