@@ -172,6 +172,9 @@ func (p *asyncProducer) Errors() <-chan *sarama.ProducerError {
 // WrapAsyncProducer wraps a sarama.AsyncProducer so that all produced messages
 // are traced. It requires the underlying sarama Config so we can know whether
 // or not sucesses will be returned.
+//
+// Remarks: Do not access Offset, Partition, Timestampsarama.ProducerMessage fields
+// before the message is processed by the producer as this can result in data races.
 func WrapAsyncProducer(saramaConfig *sarama.Config, p sarama.AsyncProducer, opts ...Option) sarama.AsyncProducer {
 	cfg := new(config)
 	defaults(cfg)
@@ -197,6 +200,7 @@ func WrapAsyncProducer(saramaConfig *sarama.Config, p sarama.AsyncProducer, opts
 	}
 	go func() {
 		spans := make(map[uint64]ddtrace.Span)
+		defer close(wrapped.input)
 		defer close(wrapped.successes)
 		defer close(wrapped.errors)
 		for {
@@ -207,10 +211,12 @@ func WrapAsyncProducer(saramaConfig *sarama.Config, p sarama.AsyncProducer, opts
 				if headersSupported && saramaConfig.Producer.Return.Successes {
 					spans[tracer.SpanID(span.Context())] = span
 				} else {
-					// if returning successes isn't enabled, we just finish the
-					// span right away because there's no way to know when it will
-					// be done
-					finishProducerSpan(span, msg.Partition, msg.Offset, nil)
+					// If returning successes isn't enabled, we just finish the span right away,
+					// because there's no way to know when it will be done.
+					// Note: Partition and Offset fields should not be accessed
+					// until the message is successfully published
+					// as this can result in data races.
+					span.FinishWithOptionsExt()
 				}
 			case msg, ok := <-p.Successes():
 				if !ok {

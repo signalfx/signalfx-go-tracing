@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix deadlock and race condition in sarama instrumentation. ([#128](https://github.com/signalfx/signalfx-go-tracing/pull/128))
+
 ## [1.9.1] - 2021-04-15
 
 ### Added
