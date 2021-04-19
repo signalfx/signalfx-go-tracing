@@ -3,8 +3,8 @@ module github.com/signalfx/signalfx-go-tracing/contrib/k8s.io/client-go/kubernet
 go 1.12
 
 require (
-	github.com/signalfx/signalfx-go-tracing v1.9.1
-	github.com/signalfx/signalfx-go-tracing/contrib/net/http v1.9.1
+	github.com/signalfx/signalfx-go-tracing v1.9.2
+	github.com/signalfx/signalfx-go-tracing/contrib/net/http v1.9.2
 	github.com/stretchr/testify v1.7.0
 	k8s.io/apimachinery v0.0.0-20190817020851-f2f3a405f61d
 	k8s.io/client-go v0.0.0-20190819141724-e14f31a72a77
