@@ -10,7 +10,7 @@ require (
 	github.com/go-kit/kit v0.10.0 // indirect
 	github.com/juju/testing v0.0.0-20210302031854-2c7ee8570c07 // indirect
 	github.com/mailru/easyjson v0.7.7
-	github.com/opentracing/opentracing-go v1.1.0
+	github.com/opentracing/opentracing-go v1.2.0
 	github.com/signalfx/golib v2.5.1+incompatible
 	github.com/smartystreets/assertions v1.0.1 // indirect
 	github.com/stretchr/testify v1.7.0
