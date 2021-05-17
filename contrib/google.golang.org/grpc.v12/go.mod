@@ -7,7 +7,7 @@ require (
 	github.com/signalfx/signalfx-go-tracing v1.9.2
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110
-	google.golang.org/grpc v1.28.1
+	google.golang.org/grpc v1.37.1
 )
 
 replace (
