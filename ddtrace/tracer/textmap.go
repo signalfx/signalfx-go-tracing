@@ -301,8 +301,8 @@ func (*propagatorB3) injectTextMap(spanCtx ddtrace.SpanContext, writer TextMapWr
 	if !ok || ctx.traceID == 0 || ctx.spanID == 0 {
 		return ErrInvalidSpanContext
 	}
-	writer.Set(b3TraceIDHeader, strconv.FormatUint(ctx.traceID, 16))
-	writer.Set(b3SpanIDHeader, strconv.FormatUint(ctx.spanID, 16))
+	writer.Set(b3TraceIDHeader, toHex(ctx.traceID))
+	writer.Set(b3SpanIDHeader, toHex(ctx.spanID))
 	if ctx.hasSamplingPriority() {
 		if ctx.samplingPriority() >= ext.PriorityAutoKeep {
 			writer.Set(b3SampledHeader, "1")

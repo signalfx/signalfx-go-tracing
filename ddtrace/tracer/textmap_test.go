@@ -3,11 +3,13 @@ package tracer
 
 import (
 	"errors"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace"
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
 	"testing"
+
+	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 
 	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
 	"github.com/stretchr/testify/assert"
@@ -223,8 +225,8 @@ func TestB3(t *testing.T) {
 		assert := assert.New(t)
 		assert.Nil(err)
 
-		assert.Equal(headers[b3TraceIDHeader], strconv.FormatUint(root.TraceID, 16))
-		assert.Equal(headers[b3SpanIDHeader], strconv.FormatUint(root.SpanID, 16))
+		assert.Equal(headers[b3TraceIDHeader], fmt.Sprintf("%016x", root.TraceID))
+		assert.Equal(headers[b3SpanIDHeader], fmt.Sprintf("%016x", root.SpanID))
 		assert.Equal(headers[b3SampledHeader], "0")
 	})
 

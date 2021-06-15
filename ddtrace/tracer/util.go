@@ -1,6 +1,8 @@
 package tracer
 
 import (
+	"encoding/binary"
+	"encoding/hex"
 	"strconv"
 	"strings"
 )
@@ -47,4 +49,11 @@ func parseUint64(str string) (uint64, error) {
 		return uint64(id), nil
 	}
 	return strconv.ParseUint(str, 10, 64)
+}
+
+// toHex converts the uint64 to a 16 lower-hex characters representation.
+func toHex(value uint64) string {
+	b := make([]byte, 8)
+	binary.BigEndian.PutUint64(b, value)
+	return hex.EncodeToString(b)
 }
