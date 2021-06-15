@@ -288,8 +288,8 @@ func TestPropagationDefaults(t *testing.T) {
 	err := tracer.Inject(ctx, carrier)
 	assert.Nil(err)
 
-	tid := strconv.FormatUint(root.TraceID, 16)
-	pid := strconv.FormatUint(root.SpanID, 16)
+	tid := fmt.Sprintf("%016x", root.TraceID)
+	pid := fmt.Sprintf("%016x", root.SpanID)
 
 	assert.Equal(headers.Get(b3TraceIDHeader), tid)
 	assert.Equal(headers.Get(b3SpanIDHeader), pid)

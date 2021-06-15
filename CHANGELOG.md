@@ -8,6 +8,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.9.3] - 2021-06-15
+
 ### Fixed
 
 - Add leading zeros to the B3 propagation `x-b3-traceid` and `x-b3-spanid` headers so that they are always 16 characters long. ([#149](https://github.com/signalfx/signalfx-go-tracing/pull/149))
@@ -210,7 +212,8 @@ created by testing.(*T).Run
 
 - Add SpanKind for gRPC Server and Client. ([#25](https://github.com/signalfx/signalfx-go-tracing/pull/25))
 
-[Unreleased]: https://github.com/signalfx/signalfx-go-tracing/compare/v1.9.2...HEAD
+[Unreleased]: https://github.com/signalfx/signalfx-go-tracing/compare/v1.9.3...HEAD
+[1.9.2]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.9.3
 [1.9.2]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.9.2
 [1.9.1]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.9.1
 [1.9.0]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.9.0

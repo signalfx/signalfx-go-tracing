@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
-	github.com/signalfx/signalfx-go-tracing v1.9.2
+	github.com/signalfx/signalfx-go-tracing v1.9.3
 	github.com/stretchr/testify v1.7.0
 )
 

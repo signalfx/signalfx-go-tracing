@@ -6,8 +6,8 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/jinzhu/gorm v1.9.12
 	github.com/lib/pq v1.2.0
-	github.com/signalfx/signalfx-go-tracing v1.9.2
-	github.com/signalfx/signalfx-go-tracing/contrib/database/sql v1.9.2
+	github.com/signalfx/signalfx-go-tracing v1.9.3
+	github.com/signalfx/signalfx-go-tracing/contrib/database/sql v1.9.3
 )
 
 replace (
