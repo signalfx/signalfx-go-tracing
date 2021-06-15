@@ -1,4 +1,5 @@
 .DEFAULT_GOAL := build
+SHELL := /bin/bash
 
 GO = go
 
