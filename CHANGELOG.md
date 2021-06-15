@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- Add leading zeros to the B3 propagation `x-b3-traceid` and `x-b3-spanid` headers so that they are always 16 characters long. ([#149](https://github.com/signalfx/signalfx-go-tracing/pull/149))
+
 ## [1.9.2] - 2021-04-19
 
 ### Fixed

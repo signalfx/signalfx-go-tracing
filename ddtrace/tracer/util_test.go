@@ -3,6 +3,7 @@ package tracer
 import (
 	"fmt"
 	"math"
+	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -57,4 +58,26 @@ func TestParseUint64(t *testing.T) {
 		_, err := parseUint64("abcd")
 		assert.Error(t, err)
 	})
+}
+
+func TestToHex(t *testing.T) {
+	testCases := []struct {
+		in   uint64
+		want string
+	}{
+		{0, "0000000000000000"},
+		{1, "0000000000000001"},
+		{255, "00000000000000ff"},
+		{123456, "000000000001e240"},
+	}
+	for _, tc := range testCases {
+		got := toHex(tc.in)
+		assert.Equal(t, tc.want, got)
+	}
+}
+
+func BenchmarkToHex(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		toHex(rand.Uint64())
+	}
 }
