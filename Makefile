@@ -54,6 +54,17 @@ push-tag: # example usage: make push-tag tag=v1.100.1 remote=origin
 	 	git push $(remote) "$${dir:2}/$(tag)"); \
 	done
 
+.PHONY: publish-godoc
+publish-godoc: # example usage: make publish-godoc tag=v1.100.1
+	@[ "$(tag)" ] || ( echo ">> 'tag' is not set"; exit 1 )
+	@echo "godoc for root"
+	@cd ; go get -u github.com/signalfx/signalfx-go-tracing@$(tag)
+	@set -e; cd; \
+	for dir in $(SUBMODULES); do \
+	  (echo godoc for "$${dir:2}" && \
+	  	go get -u github.com/signalfx/signalfx-go-tracing/$${dir:2}@$(tag) ); \
+	done
+
 DEPENDABOT_PATH = /.github/dependabot.yml
 .PHONY: gendependabot
 gendependabot:

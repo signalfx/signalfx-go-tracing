@@ -14,7 +14,7 @@ Update go.mod for submodules to depend on the new release which will happen in t
 
 3. Push the changes to upstream and create a Pull Request on GitHub.
 
-## Tag
+## Release
 
 Once the Pull Request with all the version changes has been approved and merged it is time to tag the merged commit.
 
@@ -37,6 +37,10 @@ It is critical you make sure the version you push upstream is correct.
     make push-tag tag=<new tag> remote=upstream
     ```
 
-## Release
+3. Create a Release for the new `<new tag>` on GitHub. The release body should include all the release notes for this release taken from [CHANGELOG.md](CHANGELOG.md#Unreleased).
 
-Create a Release for the new `<new tag>` on GitHub. The release body should include all the release notes for this release taken from [CHANGELOG.md](CHANGELOG.md#Unreleased).
+4. Publish the new version to `pkg.go.dev`.
+
+    ```sh
+    make publish-godoc tag=<new tag>
+    ```
