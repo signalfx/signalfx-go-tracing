@@ -8,9 +8,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-### Addded
+### Added
 
-- Add `redigo.WithSpanOptions` to the `github.com/gomodule/redigo` instrumentation.
+- Add `redigo.WithSpanOptions` to the `github.com/gomodule/redigo` instrumentation. ([#157](https://github.com/signalfx/signalfx-go-tracing/pull/157))
 
 ## [1.9.3] - 2021-06-15
 
