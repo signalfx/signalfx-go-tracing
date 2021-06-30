@@ -28,7 +28,7 @@ func TestClient(t *testing.T) {
 	mt := mocktracer.Start()
 	defer mt.Stop()
 
-	c, err := Dial("tcp", "127.0.0.1:6379", WithServiceName("my-service"))
+	c, err := Dial("tcp", "127.0.0.1:6379", WithServiceName("my-service"), WithSpanOptions(tracer.Tag("foo", "bar")))
 	assert.Nil(err)
 	c.Do("SET", 1, "truck")
 
@@ -46,6 +46,7 @@ func TestClient(t *testing.T) {
 	assert.Equal("redis", span.Tag(ext.DBType))
 	assert.Equal("SET 1 truck", span.Tag("redis.raw_command"))
 	assert.Equal("2", span.Tag("redis.args_length"))
+	assert.Equal("bar", span.Tag("foo"))
 }
 
 func TestCommandError(t *testing.T) {
