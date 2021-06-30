@@ -1,8 +1,11 @@
 package redigo // import "github.com/signalfx/signalfx-go-tracing/contrib/gomodule/redigo"
 
+import "github.com/signalfx/signalfx-go-tracing/ddtrace"
+
 type dialConfig struct {
 	serviceName   string
 	analyticsRate float64
+	spanOpts      []ddtrace.StartSpanOption
 }
 
 // DialOption represents an option that can be passed to Dial.
@@ -33,5 +36,13 @@ func WithAnalytics(on bool) DialOption {
 func WithAnalyticsRate(rate float64) DialOption {
 	return func(cfg *dialConfig) {
 		cfg.analyticsRate = rate
+	}
+}
+
+// WithSpanOptions defines a set of additional ddtrace.StartSpanOption to be added
+// to spans started by the integration.
+func WithSpanOptions(opts ...ddtrace.StartSpanOption) DialOption {
+	return func(cfg *dialConfig) {
+		cfg.spanOpts = append(cfg.spanOpts, opts...)
 	}
 }

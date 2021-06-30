@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Add `redigo.WithSpanOptions` to the `github.com/gomodule/redigo` instrumentation. ([#157](https://github.com/signalfx/signalfx-go-tracing/pull/157))
+
 ## [1.9.3] - 2021-06-15
 
 ### Fixed
@@ -213,7 +217,7 @@ created by testing.(*T).Run
 - Add SpanKind for gRPC Server and Client. ([#25](https://github.com/signalfx/signalfx-go-tracing/pull/25))
 
 [Unreleased]: https://github.com/signalfx/signalfx-go-tracing/compare/v1.9.3...HEAD
-[1.9.2]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.9.3
+[1.9.3]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.9.3
 [1.9.2]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.9.2
 [1.9.1]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.9.1
 [1.9.0]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.9.0
