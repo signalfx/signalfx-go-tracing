@@ -1,4 +1,4 @@
-module github.com/signalfx/signalfx-go-tracing/confluentinc/confluent-kafka-go/kafka
+module github.com/signalfx/signalfx-go-tracing/contrib/confluentinc/confluent-kafka-go/kafka
 
 go 1.12
 
