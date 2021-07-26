@@ -29,7 +29,7 @@ add-tag: # example usage: make add-tag tag=v1.100.1
 	@echo "Adding tag $(tag)"
 	@git tag -a $(tag) -s -m "Version $(tag)"
 	@set -e; for dir in $(SUBMODULES); do \
-	  (echo Adding tag "$${dir:2}/$(tag)" && \
+	  (echo "Adding tag $${dir:2}/$(tag)" && \
 	 	git tag -a "$${dir:2}/$(tag)" -s -m "Version ${dir:2}/$(tag)" ); \
 	done
 
@@ -39,7 +39,7 @@ delete-tag: # example usage: make delete-tag tag=v1.100.1
 	@echo "Deleting tag $(tag)"
 	@git tag -d $(tag)
 	@set -e; for dir in $(SUBMODULES); do \
-	  (echo Deleting tag "$${dir:2}/$(tag)" && \
+	  (echo "Deleting tag $${dir:2}/$(tag)" && \
 	 	git tag -d "$${dir:2}/$(tag)" ); \
 	done
 
@@ -50,8 +50,19 @@ push-tag: # example usage: make push-tag tag=v1.100.1 remote=origin
 	@echo "Pushing tag $(tag) to $(remote)"
 	@git push $(remote) $(tag)
 	@set -e; for dir in $(SUBMODULES); do \
-	  (echo Pushing tag "$${dir:2}/$(tag) to $(remote)" && \
+	  (echo "Pushing tag $${dir:2}/$(tag) to $(remote)" && \
 	 	git push $(remote) "$${dir:2}/$(tag)"); \
+	done
+
+.PHONY: publish-godoc
+publish-godoc: # example usage: make publish-godoc tag=v1.100.1
+	@[ "$(tag)" ] || ( echo ">> 'tag' is not set"; exit 1 )
+	@echo "godoc for root"
+	@tmpdir=$(mktemp -d 2>/dev/null || mktemp -d -t 'goget') && cd ${tmpdir} && go get -u github.com/signalfx/signalfx-go-tracing@$(tag)
+	@set -e; tmpdir=$(mktemp -d 2>/dev/null || mktemp -d -t 'goget') && cd ${tmpdir}; \
+	for dir in $(SUBMODULES); do \
+	  (echo "godoc for $${dir:2}" && \
+	  	go get -u github.com/signalfx/signalfx-go-tracing/$${dir:2}@$(tag) ); \
 	done
 
 DEPENDABOT_PATH = /.github/dependabot.yml
