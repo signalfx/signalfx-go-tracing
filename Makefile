@@ -58,8 +58,8 @@ push-tag: # example usage: make push-tag tag=v1.100.1 remote=origin
 publish-godoc: # example usage: make publish-godoc tag=v1.100.1
 	@[ "$(tag)" ] || ( echo ">> 'tag' is not set"; exit 1 )
 	@echo "godoc for root"
-	@cd ; go get -u github.com/signalfx/signalfx-go-tracing@$(tag)
-	@set -e; cd; \
+	@tmpdir=$(mktemp -d 2>/dev/null || mktemp -d -t 'goget') && cd ${tmpdir} && go get -u github.com/signalfx/signalfx-go-tracing@$(tag)
+	@set -e; tmpdir=$(mktemp -d 2>/dev/null || mktemp -d -t 'goget') && cd ${tmpdir}; \
 	for dir in $(SUBMODULES); do \
 	  (echo "godoc for $${dir:2}" && \
 	  	go get -u github.com/signalfx/signalfx-go-tracing/$${dir:2}@$(tag) ); \
