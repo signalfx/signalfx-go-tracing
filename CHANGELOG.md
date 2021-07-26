@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+- Fix Confluent Kafka Client instrumentation module path. ([#163](https://github.com/signalfx/signalfx-go-tracing/pull/163))
 - Bump [github.com/tinylib/msgp](https://github.com/tinylib/msgp) from 1.1.5 to [1.1.6](https://github.com/tinylib/msgp/releases/tag/v1.1.6). ([#153](https://github.com/signalfx/signalfx-go-tracing/pull/153))
 
 ## [1.10.0] - 2021-06-30
