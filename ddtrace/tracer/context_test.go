@@ -2,9 +2,10 @@ package tracer
 
 import (
 	"context"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"testing"
 
+	"github.com/opentracing/opentracing-go"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,6 +37,15 @@ func TestSpanFromContext(t *testing.T) {
 		span, ok = SpanFromContext(nil)
 		assert.False(ok)
 		_, ok = span.(*ddtrace.NoopSpan)
+		assert.True(ok)
+	})
+	t.Run("no-op opentracing.noopSpan", func(t *testing.T) {
+		assert := assert.New(t)
+		span := opentracing.NoopTracer{}.StartSpan("test")
+		ctx := opentracing.ContextWithSpan(context.Background(), span)
+		got, ok := SpanFromContext(ctx)
+		assert.False(ok)
+		_, ok = got.(*ddtrace.NoopSpan)
 		assert.True(ok)
 	})
 }
