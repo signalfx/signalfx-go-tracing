@@ -67,6 +67,7 @@ type roundTripperConfig struct {
 	before        RoundTripperBeforeFunc
 	after         RoundTripperAfterFunc
 	analyticsRate float64
+	noDebugStack  bool
 }
 
 func newRoundTripperConfig() *roundTripperConfig {
@@ -108,5 +109,14 @@ func RTWithAnalytics(on bool) RoundTripperOption {
 func RTWithAnalyticsRate(rate float64) RoundTripperOption {
 	return func(cfg *roundTripperConfig) {
 		cfg.analyticsRate = rate
+	}
+}
+
+// RTWithNoDebugStack prevents stack traces from being attached to spans finishing
+// with an error. This is useful in situations where errors are frequent and
+// performance is critical.
+func RTWithNoDebugStack() RoundTripperOption {
+	return func(cfg *roundTripperConfig) {
+		cfg.noDebugStack = true
 	}
 }
