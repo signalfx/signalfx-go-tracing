@@ -2,12 +2,13 @@ package http
 
 import (
 	"fmt"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
-	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/signalfx/signalfx-go-tracing/ddtrace"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/ext"
+	"github.com/signalfx/signalfx-go-tracing/ddtrace/tracer"
 )
 
 const defaultResourceName = "http.request"
@@ -32,7 +33,7 @@ func (rt *roundTripper) RoundTrip(req *http.Request) (res *http.Response, err er
 		if rt.cfg.after != nil {
 			rt.cfg.after(res, span)
 		}
-		span.FinishWithOptionsExt(tracer.WithError(err))
+		rt.finishSpan(span, err)
 	}()
 	if rt.cfg.before != nil {
 		rt.cfg.before(req, span)
@@ -52,6 +53,14 @@ func (rt *roundTripper) RoundTrip(req *http.Request) (res *http.Response, err er
 		}
 	}
 	return
+}
+
+func (rt *roundTripper) finishSpan(span ddtrace.Span, err error) {
+	if rt.cfg.noDebugStack {
+		span.FinishWithOptionsExt(tracer.WithError(err), tracer.NoDebugStack())
+	} else {
+		span.FinishWithOptionsExt(tracer.WithError(err))
+	}
 }
 
 // WrapRoundTripper returns a new RoundTripper which traces all requests sent

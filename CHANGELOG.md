@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Add `http.RTWithNoDebugStack` to the `net/http.RoundTripper` instrumentation. ([#177](https://github.com/signalfx/signalfx-go-tracing/pull/177))
+
 ## [1.11.0] - 2021-09-08
 
 ### Fixed
