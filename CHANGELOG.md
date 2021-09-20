@@ -8,6 +8,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.12.0] - 2021-09-20
+
 ### Added
 
 - Add `http.RTWithNoDebugStack` to the `net/http.RoundTripper` instrumentation. ([#177](https://github.com/signalfx/signalfx-go-tracing/pull/177))
@@ -230,7 +232,8 @@ created by testing.(*T).Run
 
 - Add SpanKind for gRPC Server and Client. ([#25](https://github.com/signalfx/signalfx-go-tracing/pull/25))
 
-[Unreleased]: https://github.com/signalfx/signalfx-go-tracing/compare/v1.11.0...HEAD
+[Unreleased]: https://github.com/signalfx/signalfx-go-tracing/compare/v1.12.0...HEAD
+[1.12.0]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.12.0
 [1.11.0]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.11.0
 [1.10.0]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.10.0
 [1.9.3]: https://github.com/signalfx/signalfx-go-tracing/releases/tag/v1.9.3
