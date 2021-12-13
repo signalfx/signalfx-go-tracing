@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/signalfx/signalfx-go-tracing v1.12.0
 	github.com/stretchr/testify v1.7.0
-	github.com/tidwall/buntdb v1.2.7
+	github.com/tidwall/buntdb v1.2.8
 )
 
 replace github.com/signalfx/signalfx-go-tracing => ../../../
