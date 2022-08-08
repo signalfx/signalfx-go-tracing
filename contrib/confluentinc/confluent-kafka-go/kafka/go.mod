@@ -3,9 +3,9 @@ module github.com/signalfx/signalfx-go-tracing/contrib/confluentinc/confluent-ka
 go 1.12
 
 require (
-	github.com/confluentinc/confluent-kafka-go v1.4.0
+	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/signalfx/signalfx-go-tracing v1.12.0
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 )
 
 replace github.com/signalfx/signalfx-go-tracing => ../../../../
