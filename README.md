@@ -1,5 +1,8 @@
 >ℹ️&nbsp;&nbsp;SignalFx was acquired by Splunk in October 2019. See [Splunk SignalFx](https://www.splunk.com/en_us/investor-relations/acquisitions/signalfx.html) for more information.
 
+> # :warning: Deprecation Notice
+> **The SignalFx Tracing Library for Node.js is deprecated and will reach End of Support on June 8, 2023. After that date, this repository will be archived and no longer receive updates. Until then, only critical security fixes and bug fixes will be provided.**
+
 # SignalFx Tracing Library for Go
 
 [![GitHub Release](https://img.shields.io/github/v/release/signalfx/signalfx-go-tracing)](https://github.com/signalfx/signalfx-go-tracing/releases)
