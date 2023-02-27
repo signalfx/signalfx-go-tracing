@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/go-redis/redis v6.15.7+incompatible
 	github.com/signalfx/signalfx-go-tracing v1.12.0
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.8.2
 )
 
 replace github.com/signalfx/signalfx-go-tracing => ../../../
